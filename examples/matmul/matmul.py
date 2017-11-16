@@ -1,4 +1,4 @@
-#!/usr/bin/python                                                                                                                                                                                                                                                              
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # Initializes a matrix with size (n x m) with blocks (bSize x bSize) randomly or not
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         import time
 
         # Parse arguments
-        mSize = 5 
+        mSize = 5
         nSize = 2
         kSize = 3
         bSize = 1
