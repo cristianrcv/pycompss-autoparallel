@@ -30,7 +30,8 @@ PyCOMPSs and PLUTO integration using OpenSCOP.
 
 ## Table of Contents
 
-[TOC]
+* [Dependencies](#dependencies)
+* [Disclaimer](#disclaimer)
 
 
 ## Dependencies
