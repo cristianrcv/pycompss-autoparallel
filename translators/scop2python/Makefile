@@ -20,9 +20,9 @@ compile: converter.c
 
 exec: compile
 	@echo "Executing Converter for src.c to out.scop"
-	-./converter src.scop out.c
+	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(OPENSCOP_LIB):$(CLOOG_LIB); ./converter src.scop out.c
 
 clean:
 	@echo "Cleaning folder"
-	-rm -f converter core out.scop
+	-rm -f converter core out.c
 
