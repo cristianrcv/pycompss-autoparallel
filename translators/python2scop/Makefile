@@ -13,15 +13,16 @@ LDLIBS= -losl -lclan
 CFLAGS= -I $(OPENSCOP_INC) -L $(OPENSCOP_LIB) \
         -I $(CLAN_INC)     -L $(CLAN_LIB)
 
-compile: converter.c
+compile: converter_c2scop.c
 	@echo "Compiling Converter"
-	$(CC) converter.c -o converter $(CFLAGS) $(LDLIBS)
+	$(CC) converter_c2scop.c -o converter_c2scop $(CFLAGS) $(LDLIBS)
 
 exec: compile
 	@echo "Executing Converter for src.c to out.scop"
-	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(OPENSCOP_LIB):$(CLAN_LIB); ./converter src.c out.scop
+	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(OPENSCOP_LIB):$(CLAN_LIB); ./converter_c2scop example1_src_seidel.c out1_seidel.scop
+	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(OPENSCOP_LIB):$(CLAN_LIB); ./converter_c2scop example2_src_matmul.cc out2_matmul.scop
 
 clean:
 	@echo "Cleaning folder"
-	-rm -f converter core out.scop
+	-rm -f converter_c2scop core out1_seidel.scop out2_matmul.scop
 
