@@ -3,7 +3,6 @@
 #include <math.h>
 #include <unistd.h>
 #include <sys/time.h>
-
 #include <assert.h>
 
 #define N 2000
@@ -89,15 +88,10 @@ int main()
     PERF_EXIT; 
 #endif
 
-  if (fopen(".test", "r")) {
-#ifdef MPI
-    if (my_rank == 0) {
-        print_array();
-    }
-#else
     print_array();
-#endif
-  }
+
+    free(a)
 
     return 0;
 }
+
