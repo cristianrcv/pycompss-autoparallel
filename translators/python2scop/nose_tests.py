@@ -6,27 +6,31 @@ import nose
 import sys
 
 from nose.plugins.base import Plugin
+
 class ExtensionPlugin(Plugin):
-    name = "ExtensionPlugin"
+        name = "ExtensionPlugin"
 
-    def options(self, parser, env):
-        Plugin.options(self,parser,env)
+        def options(self, parser, env):
+                Plugin.options(self,parser,env)
 
-    def configure(self, options, config):
-        Plugin.configure(self, options, config)
-        self.enabled = True
+        def configure(self, options, config):
+                Plugin.configure(self, options, config)
+                self.enabled = True
 
-    def wantFile(self, file):
-        return file.endswith('.py')
+        @classmethod
+        def wantFile(cls, file):
+                return file.endswith('.py')
 
-    def wantDirectory(self, directory):
-        return True
+        @classmethod
+        def wantDirectory(cls, directory):
+                return True
 
-    def wantModule(self, file):
-        return True
+        @classmethod
+        def wantModule(cls, file):
+                return True
 
 
 if __name__ == '__main__':
-    includeDirs = ["-w", "."]
-    nose.main(addplugins=[ExtensionPlugin()], argv=sys.argv.extend(includeDirs))
+        includeDirs = ["-w", "."]
+        nose.main(addplugins=[ExtensionPlugin()], argv=sys.argv.extend(includeDirs))
 
