@@ -1,0 +1,11 @@
+# Tests require:
+        - Unittest
+        - Nose test
+
+# Run all class tests with
+$ python nose_tests.py
+
+# Run single class test with
+$ cd ${class_folder}
+$ python ${class_name}_class.py
+
