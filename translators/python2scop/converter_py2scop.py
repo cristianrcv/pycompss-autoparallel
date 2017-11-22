@@ -30,7 +30,7 @@ def generateDummyScop():
         context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
         params = Parameters([Parameter("strings", "mSize kSize nSize")])
         g = Global("C", context, params)
-               
+
         # Generate statements
         from scop_types.scop.statement import Relation, RelationType, StatementExtension
         s1_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])

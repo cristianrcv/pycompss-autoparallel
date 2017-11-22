@@ -91,7 +91,7 @@ class testGlobal(unittest.TestCase):
                 params = Parameters([p1])
 
                 g = Global(lang, context, params)
- 
+
                 # Generate file
                 fileName = "global_test.out"
                 with open(fileName, 'w') as f:

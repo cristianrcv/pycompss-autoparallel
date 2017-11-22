@@ -62,7 +62,7 @@ class testScop(unittest.TestCase):
 
         def test_empty(self):
                 scop = Scop()
-                
+
                 self.assertEqual(scop.get_global(), None)
                 self.assertEqual(scop.get_statements(), [])
                 self.assertEqual(scop.get_extensions(), None)
