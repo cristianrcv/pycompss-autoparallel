@@ -83,7 +83,7 @@ class testScop(unittest.TestCase):
                 self.assertEqual(scop.get_global(), g)
                 self.assertEqual(scop.get_statements(), statements)
                 self.assertEqual(scop.get_extensions(), e)
-                
+
         def test_empty_print(self):
                 from scop import Global, Statement, Extensions
                 g = Global()

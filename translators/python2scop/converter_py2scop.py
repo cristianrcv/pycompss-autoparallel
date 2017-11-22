@@ -75,7 +75,7 @@ class testConverter(unittest.TestCase):
 
         def test_empty(self):
                 outFile = "converter_test_empty.out"
-                
+
                 # Generate scops from source file
                 scops = []
 

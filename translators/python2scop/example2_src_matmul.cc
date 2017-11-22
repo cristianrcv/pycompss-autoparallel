@@ -83,6 +83,11 @@ void matmul(const int mSize, const int nSize, const int kSize, const int bSize, 
                 cout << "Matrix C:" << endl;
                 printMatrix(c, mSize, kSize);
         }
+
+        // Free
+        free(a);
+        free(b);
+        free(c);
 }
 
 
