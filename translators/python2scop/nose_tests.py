@@ -3,7 +3,6 @@
 # -*- coding: utf-8 -*-
 
 import nose
-import re
 import sys
 
 from nose.plugins.base import Plugin

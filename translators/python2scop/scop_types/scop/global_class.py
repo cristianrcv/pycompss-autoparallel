@@ -53,7 +53,7 @@ class testGlobal(unittest.TestCase):
 
         def test_empty(self):
                 g = Global()
-                
+
                 self.assertEqual(g.get_language(), None)
                 self.assertEqual(g.get_context(), None)
                 self.assertEqual(g.get_parameters(), None)

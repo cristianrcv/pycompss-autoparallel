@@ -100,17 +100,17 @@ class testRelation(unittest.TestCase):
                 rows = 9
                 cols = 8
                 od = 3
-                id = 0
+                ind = 0
                 ld = 0
                 params = 3
                 matrix = [[1, -1], [1, -1]]
-                relation = Relation(relType, rows, cols, od, id, ld, params, matrix)
+                relation = Relation(relType, rows, cols, od, ind, ld, params, matrix)
 
                 self.assertEqual(relation.get_relation_type().name, relType.name)
                 self.assertEqual(relation.get_rows(), rows)
                 self.assertEqual(relation.get_columns(), cols)
                 self.assertEqual(relation.get_output_dims(), od)
-                self.assertEqual(relation.get_input_dims(), id)
+                self.assertEqual(relation.get_input_dims(), ind)
                 self.assertEqual(relation.get_local_dims(), ld)
                 self.assertEqual(relation.get_params(), params)
                 self.assertEqual(relation.get_constraint_matrix(), matrix)
@@ -120,11 +120,11 @@ class testRelation(unittest.TestCase):
                 rows = 9
                 cols = 8
                 od = 3
-                id = 0
+                ind = 0
                 ld = 0
                 params = 3
                 matrix = [[1, -1], [1, -1]]
-                relation = Relation(relType, rows, cols, od, id, ld, params, matrix)
+                relation = Relation(relType, rows, cols, od, ind, ld, params, matrix)
 
                 # Generate file
                 fileName = "relation_test.out"

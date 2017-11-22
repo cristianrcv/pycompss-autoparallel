@@ -72,7 +72,7 @@ class testContext(unittest.TestCase):
                 context = Context()
 
                 self.assertEqual(context.get_context_type().name, ContextType.UNDEFINED.name)
-                self.assertEqual(context.get_rows(), -1) 
+                self.assertEqual(context.get_rows(), -1)
                 self.assertEqual(context.get_columns(), -1)
                 self.assertEqual(context.get_output_dims(), -1)
                 self.assertEqual(context.get_input_dims(), -1)

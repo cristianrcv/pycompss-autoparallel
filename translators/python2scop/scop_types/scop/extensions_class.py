@@ -50,7 +50,7 @@ class testExtensions(unittest.TestCase):
 
         def test_empty(self):
                 ext = Extensions()
-                
+
                 self.assertEqual(ext.get_scatnames(), None)
                 self.assertEqual(ext.get_arrays(), None)
                 self.assertEqual(ext.get_coordinates(), None)
