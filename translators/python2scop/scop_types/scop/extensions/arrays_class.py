@@ -12,7 +12,7 @@ class Arrays(object):
                 - values : array values
         """
 
-        def __init__(self, values = []):
+        def __init__(self, values = None):
                 self.values = values
 
         def get_values(self):
@@ -22,16 +22,17 @@ class Arrays(object):
                 # Print header
                 print("<arrays>", file = f)
 
-                # Print number of arrays
-                print("# Number of arrays", file = f)
-                print(str(len(self.values)), file = f)
+                if self.values != None:
+                        # Print number of arrays
+                        print("# Number of arrays", file = f)
+                        print(str(len(self.values)), file = f)
 
-                # Print arrays
-                print("# Mapping array-identifiers/array-names", file = f)
-                index = 1
-                for value in self.values:
-                        print(str(index) + " " + str(value), file = f)
-                        index = index + 1
+                        # Print arrays
+                        print("# Mapping array-identifiers/array-names", file = f)
+                        index = 1
+                        for value in self.values:
+                                print(str(index) + " " + str(value), file = f)
+                                index = index + 1
 
                 # Print footer
                 print("</arrays>", file = f)
@@ -43,7 +44,7 @@ class testArrays(unittest.TestCase):
         def test_empty(self):
                 a = Arrays()
 
-                self.assertEqual(a.get_values(), [])
+                self.assertEqual(a.get_values(), None)
 
         def test_full(self):
                 values = ["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"]

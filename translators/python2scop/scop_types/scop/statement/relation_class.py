@@ -30,7 +30,7 @@ class Relation(object):
                 - constraintMatrix : Matrix of contraints
         """
 
-        def __init__(self, relationType = RelationType.UNDEFINED, rows = -1, columns = -1, outputDims = -1, inputDims = -1, localDims = -1, params = -1, constraintMatrix = []):
+        def __init__(self, relationType = RelationType.UNDEFINED, rows = -1, columns = -1, outputDims = -1, inputDims = -1, localDims = -1, params = -1, constraintMatrix = None):
                 self.relationType = relationType
                 self.rows = rows
                 self.columns = columns
@@ -72,11 +72,12 @@ class Relation(object):
                 print(str(self.rows) + " " + str(self.columns) + " " + str(self.outputDims) + " " + str(self.inputDims) + " " + str(self.localDims) + " " + str(self.params), file = f)
 
                 # Print constraint matrix
-                for constraintRow in self.constraintMatrix:
-                        line = ""
-                        for value in constraintRow:
-                                line = line + str(value) + "\t"
-                        print(line, file = f)
+                if self.constraintMatrix != None:
+                        for constraintRow in self.constraintMatrix:
+                                line = ""
+                                for value in constraintRow:
+                                        line = line + str(value) + "\t"
+                                print(line, file = f)
                 print("", file = f)
 
 
@@ -93,7 +94,7 @@ class testRelation(unittest.TestCase):
                 self.assertEqual(relation.get_input_dims(), -1)
                 self.assertEqual(relation.get_local_dims(), -1)
                 self.assertEqual(relation.get_params(), -1)
-                self.assertEqual(relation.get_constraint_matrix(), [])
+                self.assertEqual(relation.get_constraint_matrix(), None)
 
         def test_full(self):
                 relType = RelationType.DOMAIN

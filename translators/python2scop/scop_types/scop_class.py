@@ -14,7 +14,7 @@ class Scop(object):
                 - extensions : Extensions properties
         """
 
-        def __init__(self, globl = None, statements = [], extensions = None):
+        def __init__(self, globl = None, statements = None, extensions = None):
                 self.globl = globl
                 self.statements = statements
                 self.extensions = extensions
@@ -37,16 +37,17 @@ class Scop(object):
                 if self.globl != None:
                         self.globl.write(f)
 
-                # Print number of statements
-                print("# Number of statements", file = f)
-                print(str(len(self.statements)), file = f)
-                print("", file = f)
+                if self.statements != None:
+                        # Print number of statements
+                        print("# Number of statements", file = f)
+                        print(str(len(self.statements)), file = f)
+                        print("", file = f)
 
-                # Print all statements
-                index = 1
-                for s in self.statements:
-                        s.write(f, index)
-                        index = index + 1
+                        # Print all statements
+                        index = 1
+                        for s in self.statements:
+                                s.write(f, index)
+                                index = index + 1
 
                 # Print extensions
                 if self.extensions != None:
@@ -64,7 +65,7 @@ class testScop(unittest.TestCase):
                 scop = Scop()
 
                 self.assertEqual(scop.get_global(), None)
-                self.assertEqual(scop.get_statements(), [])
+                self.assertEqual(scop.get_statements(), None)
                 self.assertEqual(scop.get_extensions(), None)
 
         def test_full(self):
@@ -98,7 +99,7 @@ class testScop(unittest.TestCase):
                         scop.write(f)
 
                 # Check file content
-                expected = "<OpenScop>\n\n# =============================================== Global\n# Language\nNone\n\n# Context\n# Parameters are provided\n# Number of statements\n1\n\n# =============================================== Statement 1\n# Number of relations describing the statement:\n0\n\n# ----------------------------------------------  1.1 Domain\n# ----------------------------------------------  1.2 Scattering\n# ----------------------------------------------  1.3 Access\n# ----------------------------------------------  1.4 Statement Extensions\n# Number of Statement Extensions\n0\n\n# =============================================== Extensions\n</OpenScop>\n\n"
+                expected = "<OpenScop>\n\n# =============================================== Global\n# Language\nNone\n\n# Context\n# Parameters are provided\n# Number of statements\n1\n\n# =============================================== Statement 1\n# Number of relations describing the statement:\n0\n\n# ----------------------------------------------  1.1 Domain\n# ----------------------------------------------  1.2 Scattering\n# ----------------------------------------------  1.3 Access\n\n# =============================================== Extensions\n</OpenScop>\n\n"
                 with open(fileName, 'r') as f:
                         content = f.read()
                 self.assertEqual(content, expected)

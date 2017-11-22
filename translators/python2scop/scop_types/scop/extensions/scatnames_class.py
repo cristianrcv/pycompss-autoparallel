@@ -12,7 +12,7 @@ class Scatnames(object):
                 - names : Array of scatnames
         """
 
-        def __init__(self, names = []):
+        def __init__(self, names = None):
                 self.names = names
 
         def get_names(self):
@@ -23,10 +23,11 @@ class Scatnames(object):
                 print("<scatnames>", file = f)
 
                 # Print arrays
-                line = ""
-                for val in self.names:
-                        line = line + str(val) + " "
-                print(line, file = f)
+                if self.names != None:
+                        line = ""
+                        for val in self.names:
+                                line = line + str(val) + " "
+                        print(line, file = f)
 
                 # Print footer
                 print("</scatnames>", file = f)
@@ -38,7 +39,7 @@ class testScatnames(unittest.TestCase):
         def test_empty(self):
                 s = Scatnames()
 
-                self.assertEqual(s.get_names(), [])
+                self.assertEqual(s.get_names(), None)
 
         def test_full(self):
                 names = ["b0", "i", "b1", "j", "b2", "k", "b3"]

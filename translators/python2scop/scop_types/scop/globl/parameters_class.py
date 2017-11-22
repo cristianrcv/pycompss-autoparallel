@@ -12,17 +12,21 @@ class Parameters(object):
                 - parameters : List of global Parameter
         """
 
-        def __init__(self, parameters = []):
+        def __init__(self, parameters = None):
                 self.parameters = parameters
 
         def get_parameters(self):
                 return self.parameters
 
         def write(self, f):
-                # Print header
-                print(str(len(self.parameters)), file = f)
-                for param in self.parameters:
-                        param.write(f)
+                if self.parameters != None:
+                        # Print number of parameter
+                        print(str(len(self.parameters)), file = f)
+
+                        # Print parameters
+                        for param in self.parameters:
+                                param.write(f)
+
                 print("", file = f)
 
 import unittest
@@ -30,7 +34,7 @@ class testParameters(unittest.TestCase):
 
         def test_empty(self):
                 params = Parameters()
-                self.assertEqual(params.get_parameters(), [])
+                self.assertEqual(params.get_parameters(), None)
 
         def test_full(self):
                 from parameters import Parameter

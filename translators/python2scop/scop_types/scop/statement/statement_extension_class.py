@@ -13,12 +13,15 @@ class StatementExtension(object):
                 - expr : Statement body expression
         """
 
-        def __init__(self, originalIterators = [], expr = None):
+        def __init__(self, originalIterators = None, expr = None):
                 self.originalIterators = originalIterators
                 self.expr = expr
 
         def get_number_original_iterators(self):
-                return len(self.originalIterators)
+                if self.originalIterators != None:
+                        return len(self.originalIterators)
+                else:
+                        return -1
 
         def get_original_iterators(self):
                 return self.originalIterators
@@ -32,13 +35,17 @@ class StatementExtension(object):
 
                 # Print number of original iterators
                 print("# Number of original iterators", file = f)
-                print(str(len(self.originalIterators)), file = f)
+                if self.originalIterators != None:
+                        print(str(len(self.originalIterators)), file = f)
+                else:
+                        print("0", file = f)
 
                 # Print original iterators
                 print("# List of original iterators", file = f)
                 line = ""
-                for elem in self.originalIterators:
-                        line = line + str(elem) + " "
+                if self.originalIterators != None:
+                        for elem in self.originalIterators:
+                                line = line + str(elem) + " "
                 print(line, file = f)
 
                 # Print statement expression
@@ -53,8 +60,8 @@ class testStatementExtension(unittest.TestCase):
 
         def test_empty(self):
                 extension = StatementExtension()
-                self.assertEqual(extension.get_number_original_iterators(), 0)
-                self.assertEqual(extension.get_original_iterators(), [])
+                self.assertEqual(extension.get_number_original_iterators(), -1)
+                self.assertEqual(extension.get_original_iterators(), None)
                 self.assertEqual(extension.get_expr(), None)
 
         def test_full(self):

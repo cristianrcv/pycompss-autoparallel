@@ -15,7 +15,7 @@ class Statement(object):
                 - extensions : List of Extension
         """
 
-        def __init__(self, domain = None, scattering = None, access = [], extensions = []):
+        def __init__(self, domain = None, scattering = None, access = None, extensions = None):
                 self.domain = domain
                 self.scattering = scattering
                 self.access = access
@@ -38,7 +38,9 @@ class Statement(object):
                 print("# =============================================== Statement " + str(statementId), file = f)
                 # Print total number of relations
                 print("# Number of relations describing the statement:", file = f)
-                totalRelations = (self.domain != None) + (self.scattering != None) + len(self.access)
+                totalRelations = (self.domain != None) + (self.scattering != None)
+                if self.access != None:
+                        totalRelations = totalRelations + len(self.access)
                 print(totalRelations, file = f)
                 print("", file = f)
 
@@ -54,15 +56,17 @@ class Statement(object):
 
                 # Print access
                 print("# ----------------------------------------------  " + str(statementId) + ".3 Access", file = f)
-                for acc in self.access:
-                        acc.write(f)
+                if self.access != None:
+                        for acc in self.access:
+                                acc.write(f)
 
                 # Print extensions
-                print("# ----------------------------------------------  " + str(statementId) + ".4 Statement Extensions", file = f)
-                print("# Number of Statement Extensions", file = f)
-                print(str(len(self.extensions)), file = f)
-                for ext in self.extensions:
-                        ext.write(f)
+                if self.extensions != None:
+                        print("# ----------------------------------------------  " + str(statementId) + ".4 Statement Extensions", file = f)
+                        print("# Number of Statement Extensions", file = f)
+                        print(str(len(self.extensions)), file = f)
+                        for ext in self.extensions:
+                                ext.write(f)
 
                 # Print end separator
                 print("", file = f)
@@ -76,8 +80,8 @@ class testStatement(unittest.TestCase):
 
                 self.assertEqual(s.get_domain(), None)
                 self.assertEqual(s.get_scattering(), None)
-                self.assertEqual(s.get_access(), [])
-                self.assertEqual(s.get_extensions(), [])
+                self.assertEqual(s.get_access(), None)
+                self.assertEqual(s.get_extensions(), None)
 
         def test_full(self):
                 from statement import Relation, RelationType, StatementExtension
