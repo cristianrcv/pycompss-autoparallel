@@ -9,25 +9,25 @@ class Parameter(object):
         Represents a global parameter
 
         Attributes:
-                - type : Type of the parameter
-                - value : Value of the parameter
+                - ptype : Type of the parameter
+                - pvalue : Value of the parameter
         """
 
-        def __init__(self, type = None, value = None):
-                self.type = type
-                self.value = value
+        def __init__(self, ptype = None, pvalue = None):
+                self.ptype = ptype
+                self.pvalue = pvalue
 
         def get_type(self):
-                return self.type
+                return self.ptype
 
         def get_value(self):
-                return self.value
+                return self.pvalue
 
         def write(self, f):
                 # Print header
-                print("<" + str(self.type) + ">", file = f)
-                print(str(self.value), file = f)
-                print("</" + str(self.type) + ">", file = f)
+                print("<" + str(self.ptype) + ">", file = f)
+                print(str(self.pvalue), file = f)
+                print("</" + str(self.ptype) + ">", file = f)
 
 
 import unittest

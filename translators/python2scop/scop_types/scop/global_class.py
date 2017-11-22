@@ -21,7 +21,7 @@ class Global(object):
 
         def get_language(self):
                 return self.language
-        
+
         def get_context(self):
                 return self.context
 

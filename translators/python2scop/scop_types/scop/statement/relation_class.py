@@ -85,9 +85,9 @@ class testRelation(unittest.TestCase):
 
         def test_empty(self):
                 relation = Relation()
-                
+
                 self.assertEqual(relation.get_relation_type().name, RelationType.UNDEFINED.name)
-                self.assertEqual(relation.get_rows(), -1) 
+                self.assertEqual(relation.get_rows(), -1)
                 self.assertEqual(relation.get_columns(), -1)
                 self.assertEqual(relation.get_output_dims(), -1)
                 self.assertEqual(relation.get_input_dims(), -1)

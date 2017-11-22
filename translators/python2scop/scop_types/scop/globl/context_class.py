@@ -70,7 +70,7 @@ class testContext(unittest.TestCase):
 
         def test_empty(self):
                 context = Context()
-                
+
                 self.assertEqual(context.get_context_type().name, ContextType.UNDEFINED.name)
                 self.assertEqual(context.get_rows(), -1) 
                 self.assertEqual(context.get_columns(), -1)
@@ -84,16 +84,16 @@ class testContext(unittest.TestCase):
                 rows = 0
                 cols = 5
                 od = 0
-                id = 0
+                ind = 0
                 ld = 0
                 params = 3
-                context = Context(contextType, rows, cols, od, id, ld, params)
+                context = Context(contextType, rows, cols, od, ind, ld, params)
 
                 self.assertEqual(context.get_context_type().name, contextType.name)
                 self.assertEqual(context.get_rows(), rows)
                 self.assertEqual(context.get_columns(), cols)
                 self.assertEqual(context.get_output_dims(), od)
-                self.assertEqual(context.get_input_dims(), id)
+                self.assertEqual(context.get_input_dims(), ind)
                 self.assertEqual(context.get_local_dims(), ld)
                 self.assertEqual(context.get_params(), params)
 
@@ -102,10 +102,10 @@ class testContext(unittest.TestCase):
                 rows = 0
                 cols = 5
                 od = 0
-                id = 0
+                ind = 0
                 ld = 0
                 params = 3
-                context = Context(contextType, rows, cols, od, id, ld, params)
+                context = Context(contextType, rows, cols, od, ind, ld, params)
 
                 # Generate file
                 fileName = "context_test.out"

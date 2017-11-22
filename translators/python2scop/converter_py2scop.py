@@ -23,7 +23,7 @@ def write_file_header(f):
 #
 def generateDummyScop():
         from scop_types.scop import Global, Statement, Extensions
-                
+
         # Generate global
         from scop_types.scop.globl import Context, ContextType, Parameters
         from scop_types.scop.globl.parameters import Parameter
@@ -73,7 +73,7 @@ def generateDummyScop():
 import unittest
 class testConverter(unittest.TestCase):
 
-        def test_matmul(self):
+        def test_empty(self):
                 outFile = "converter_test_empty.out"
                 
                 # Generate scops from source file
