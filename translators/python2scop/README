@@ -1,11 +1,34 @@
-# Tests require:
-        - Unittest
-        - Nose test
+# Language converter C - OpenScop
+        - Description
+                Uses a small C program to convert from C to OpenScop using CLAN
 
-# Run all class tests with
-$ python nose_tests.py
+        - Compile
+                $ make
 
-# Run single class test with
-$ cd ${class_folder}
-$ python ${class_name}_class.py
+        - Run examples
+                $ make exec
+
+        - Clean
+                $ make clean
+
+# Language converter Python - OpenScop
+        - Description
+                Based on the OpenScop and CLAN documentation builds a Python representation of the code and bulks it on OpenScop format
+
+        - Run all unit tests
+                $ python nose_tests.py
+
+        - Run a single unit test
+                $ cd ${class_folder}
+                $ python ${class_name}_class.py
+
+        - Run examples
+                $ python converter_py2scop.py
+
+        - Clean
+                $ find . -name "*.pyc" -delete
+
+# NOTES:
+        - Python unit tests use the unittest module
+        - To launch all unit tests you require NOSE (available through pip install nose)
 
