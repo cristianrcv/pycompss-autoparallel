@@ -13,12 +13,14 @@ Based on the OpenScop and CLAN documentation, takes a Python code, builds its re
 ### Test
 
 ```
+export PYTHONPATH=$PYTHONPATH:${git_base_dir}/translators/
 python nose_tests.py
 ```
 
 ### Run
 
 ```
+export PYTHONPATH=$PYTHONPATH:${git_base_dir}/translators/
 python translator_py2scop.py -i <source> -o <output>
 ```
 
