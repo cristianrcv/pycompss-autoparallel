@@ -1,45 +1,5 @@
-PyCOMPSs and PLUTO integration
+Python - OpenScop Translator
 =============================
-
-PyCOMPSs and PLUTO integration using OpenSCOP.
-
-## Table of Contents
-
-* [C - OpenScop Converter](#c-openscop-converter)
-* [Python - OpenScop Converter](#python-openscop-converter)
-
-
-## C - OpenScop Converter
-
-Uses a small C program to convert from C to OpenScop using CLAN.
-
-
-### Dependencies
-
-- A valid CLAN installation
-- A valid OpenScop installation
-
-
-### Build
-
-```
-make
-```
-
-### Run
-
-```
-make exec
-```
-
-### Clean
-
-```
-make clean
-```
-
-
-## Python - OpenScop Converter
 
 Based on the OpenScop and CLAN documentation, takes a Python code, builds its representation and bulks it on OpenScop format.
 
@@ -50,23 +10,16 @@ Based on the OpenScop and CLAN documentation, takes a Python code, builds its re
 - To run all tests you require the [Nose][2] Python module
 - To add code coverage you require [coverage][3] and [codacy-coverage][4] Python modules
 
-### Run all unit tests
+### Test
 
 ```
 python nose_tests.py
 ```
 
-### Run a single unit test
+### Run
 
 ```
-cd ${class_folder}
-python ${class_name}_class.py
-```
-
-### Run examples
-
-```
-python converter_py2scop.py
+python translator_py2scop.py -i <source> -o <output>
 ```
 
 ### Clean
