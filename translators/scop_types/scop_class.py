@@ -28,14 +28,58 @@ class Scop(object):
         def get_extensions(self):
                 return self.extensions
 
-        def write(self, f):
+        @staticmethod
+        def read_os(f):
+                # Store all file content
+                with open(f, 'r') as f:
+                        content = f.readlines()
+
+                index = 0
+                # Skip header
+                while content[index] == "<OpenScop>" or content[index].startswith("# CLooG") or content[index] == '\n':
+                        ++index
+
+                # Process global information
+                globl, index = Global.read_os(content, index)
+
+                # Process statements
+                while content[index] == "\n" or content[index].startswith('#'):
+                        ++index
+                num_statements = content[index]
+                ++index
+                
+                statements = []
+                for i in range(num_statements):
+                        statement, index = Statement.read_os(content, index)
+                        statements.append(statement)
+        
+                # Process extensions
+                extensions, index = Extensions.read_os(content, index)
+
+                # Skip footer
+                while index < len(content):
+                        if content[index] != '\n' and content[index] != "</OpenScop>\n":
+                                print("WARNING: Unexpected line at the end of the file: " + str(content[index]))
+                        ++index
+
+                # Build scop
+                scop = Scop(globl, statements, extensions)
+
+                # Return structure
+                return scop
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Write header
                 print("<OpenScop>", file = f)
                 print("", file = f)
 
                 # Print global
                 if self.globl != None:
-                        self.globl.write(f)
+                        self.globl.write_os(f)
 
                 if self.statements != None:
                         # Print number of statements
@@ -46,69 +90,44 @@ class Scop(object):
                         # Print all statements
                         index = 1
                         for s in self.statements:
-                                s.write(f, index)
+                                s.write_os(f, index)
                                 index = index + 1
 
                 # Print extensions
                 if self.extensions != None:
-                        self.extensions.write(f)
+                        self.extensions.write_os(f)
 
                 # Write footer
                 print("</OpenScop>", file = f)
                 print("", file = f)
 
+        def write_py(self, f):
+                pass
 
 import unittest
 class testScop(unittest.TestCase):
 
-        def test_empty(self):
-                scop = Scop()
-
-                self.assertEqual(scop.get_global(), None)
-                self.assertEqual(scop.get_statements(), None)
-                self.assertEqual(scop.get_extensions(), None)
-
-        def test_full(self):
+        # Helper method for unit tests
+        def generate_empty_scop(self):
                 from scop import Global, Statement, Extensions
-                from scop.globl import Context, ContextType, Parameters
-                from scop.globl.parameters import Parameter
-                g = Global("C", Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3), Parameters([Parameter("strings", "mSize kSize nSize")]))
-                s1 = Statement()
-                s2 = Statement()
-                statements = [s1, s2]
-                e = Extensions()
 
-                scop = Scop(g, statements, e)
-
-                self.assertEqual(scop.get_global(), g)
-                self.assertEqual(scop.get_statements(), statements)
-                self.assertEqual(scop.get_extensions(), e)
-
-        def test_empty_print(self):
-                from scop import Global, Statement, Extensions
+                # Generate global
                 g = Global()
+
+                # Generate statements
                 s1 = Statement()
                 statements = [s1]
+
+                # Generate extensions
                 e = Extensions()
 
+                # Generate SCOP
                 scop = Scop(g, statements, e)
- 
-                # Generate file
-                fileName = "scop_test1.out"
-                with open(fileName, 'w') as f:
-                        scop.write(f)
 
-                # Check file content
-                expected = "<OpenScop>\n\n# =============================================== Global\n# Language\nNone\n\n# Context\n# Parameters are provided\n# Number of statements\n1\n\n# =============================================== Statement 1\n# Number of relations describing the statement:\n0\n\n# ----------------------------------------------  1.1 Domain\n# ----------------------------------------------  1.2 Scattering\n# ----------------------------------------------  1.3 Access\n\n# =============================================== Extensions\n</OpenScop>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                return scop
 
-                # Erase file
-                import os
-                os.remove(fileName)
-
-        def test_full_print(self):
+        # Helper method for unit tests
+        def generate_full_scop(self):
                 from scop import Global, Statement, Extensions
                 
                 # Generate global
@@ -151,21 +170,127 @@ class testScop(unittest.TestCase):
 
                 # Generate SCOP
                 scop = Scop(g, statements, e)
+
+                return scop
+
+        def test_empty(self):
+                scop = Scop()
+
+                self.assertEqual(scop.get_global(), None)
+                self.assertEqual(scop.get_statements(), None)
+                self.assertEqual(scop.get_extensions(), None)
+
+        def test_full(self):
+                from scop import Global, Statement, Extensions
+                from scop.globl import Context, ContextType, Parameters
+                from scop.globl.parameters import Parameter
+                g = Global("C", Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3), Parameters([Parameter("strings", "mSize kSize nSize")]))
+                s1 = Statement()
+                s2 = Statement()
+                statements = [s1, s2]
+                e = Extensions()
+
+                scop = Scop(g, statements, e)
+
+                self.assertEqual(scop.get_global(), g)
+                self.assertEqual(scop.get_statements(), statements)
+                self.assertEqual(scop.get_extensions(), e)
+
+        def test_write_os_empty(self):
+                # Generate empty SCOP
+                scop = self.generate_empty_scop()
  
                 # Generate file
-                fileName = "scop_test2.out"
-                with open(fileName, 'w') as f:
-                        scop.write(f)
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                outputFile = dirPath + "/tests/test1.out.scop"
+                expectedFile = dirPath + "/tests/empty.scop"
+                with open(outputFile, 'w') as f:
+                        scop.write_os(f)
 
                 # Check file content
-                expected = "<OpenScop>\n\n# =============================================== Global\n# Language\nC\n\n# Context\nCONTEXT\n0 5 0 0 0 3\n\n# Parameters are provided\n1\n<strings>\nmSize kSize nSize\n</strings>\n\n# Number of statements\n2\n\n# =============================================== Statement 1\n# Number of relations describing the statement:\n5\n\n# ----------------------------------------------  1.1 Domain\nDOMAIN\n9 8 3 0 0 3\n1\t1\t\n1\t-1\t\n\n# ----------------------------------------------  1.2 Scattering\nSCATTERING\n7 15 7 3 0 3\n0\t-1\t\n0\t0\t\n\n# ----------------------------------------------  1.3 Access\nREAD\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\nWRITE\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\nMAY_WRITE\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\n# ----------------------------------------------  1.4 Statement Extensions\n# Number of Statement Extensions\n1\n<body>\n# Number of original iterators\n3\n# List of original iterators\ni j k \n# Statement body expression\nc[i][j] += a[i][k]*b[k][j];\n</body>\n\n# =============================================== Statement 2\n# Number of relations describing the statement:\n5\n\n# ----------------------------------------------  2.1 Domain\nDOMAIN\n9 8 3 0 0 3\n1\t1\t\n1\t-1\t\n\n# ----------------------------------------------  2.2 Scattering\nSCATTERING\n7 15 7 3 0 3\n0\t-1\t\n0\t0\t\n\n# ----------------------------------------------  2.3 Access\nREAD\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\nWRITE\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\nMAY_WRITE\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\n# ----------------------------------------------  2.4 Statement Extensions\n# Number of Statement Extensions\n1\n<body>\n# Number of original iterators\n3\n# List of original iterators\ni j k \n# Statement body expression\nc[i][j] += a[i][k]*b[k][j];\n</body>\n\n# =============================================== Extensions\n<scatnames>\nb0 i b1 j b2 k b3 \n</scatnames>\n\n<arrays>\n# Number of arrays\n9\n# Mapping array-identifiers/array-names\n1 i\n2 mSize\n3 j\n4 kSize\n5 k\n6 nSize\n7 c\n8 a\n9 b\n</arrays>\n\n<coordinates>\n# File name\nexample2_src_matmul.cc\n# Starting line and column\n72 0\n# Ending line and column\n80 0\n# Identation\n8\n</coordinates>\n\n</OpenScop>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                with open(expectedFile, 'r') as f:
+                        expectedContent = f.read()
+                with open(outputFile, 'r') as f:
+                        outputContent = f.read()
+                self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
                 import os
-                os.remove(fileName)
+                os.remove(outputFile)
+
+        def test_write_os_full(self):
+                # Generate full SCOP
+                scop = self.generate_full_scop()
+ 
+                # Generate file
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                outputFile =  dirPath + "/tests/test2.out.scop"
+                expectedFile = dirPath + "/tests/full.scop"
+                with open(outputFile, 'w') as f:
+                        scop.write_os(f)
+
+                # Check file content
+                with open(expectedFile, 'r') as f:
+                        expectedContent = f.read()
+                with open(outputFile, 'r') as f:
+                        outputContent = f.read()
+                self.assertEqual(outputContent, expectedContent)
+
+                # Erase file
+                import os
+                os.remove(outputFile)
+
+        def ttest_read_os_empty(self):
+                # Read from OpenScop
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                inputFile = dirPath + "/tests/empty.scop"
+                scop = Scop.read_os(inputFile)
+
+                # Build expected content
+                scopExp = self.generate_empty_scop()
+
+                # Check loaded content
+                self.assertEqual(scop, scopExp)
+
+        def ttest_read_os_full(self):
+                # Read from OpenScop
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                inputFile = dirPath + "/tests/full.scop"
+                scop = Scop.read_os(inputFile)
+
+                # Build expected content
+                scopExp = self.generate_full_scop()
+
+                # Check loaded content
+                self.assertEqual(scop, scopExp)
+
+        def ttest_write_py_empty(self):
+                # Read from OpenScop
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                inputFile = dirPath + "/tests/empty.scop"
+                outputFile = dirPath + "/tests/test7.out.python"
+                expectedFile = dirPath + "/tests/empty.python"
+
+                scop = Scop.read_os(inputFile)
+
+                # Generate Python file
+                scop.write_py(outputFile)
+
+                # Check file content
+                with open(expectedFile, 'r') as f:
+                        expectedContent = f.read()
+                with open(outputFile, 'r') as f:
+                        outputContent = f.read()
+                self.assertEqual(outputContent, expectedContent)
+
+                # Erase file
+                import os
+                os.remove(outputFile)
 
 
 if __name__ == '__main__':

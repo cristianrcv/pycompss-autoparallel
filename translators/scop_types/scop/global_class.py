@@ -28,7 +28,15 @@ class Global(object):
         def get_parameters(self):
                 return self.parameters
 
-        def write(self, f):
+        @staticmethod
+        def read_os(f):
+                pass
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Write header
                 print("# =============================================== Global", file = f)
 
@@ -46,6 +54,9 @@ class Global(object):
                 print("# Parameters are provided", file = f)
                 if self.parameters != None:
                         self.parameters.write(f)
+
+        def write_py(self, f):
+                pass
 
 
 import unittest
@@ -77,7 +88,7 @@ class testGlobal(unittest.TestCase):
                 self.assertEqual(g.get_context(), context)
                 self.assertEqual(g.get_parameters(), params)
 
-        def test_print(self):
+        def test_write_os(self):
                 lang = "C"
 
                 from globl import Context, ContextType
@@ -93,19 +104,23 @@ class testGlobal(unittest.TestCase):
                 g = Global(lang, context, params)
 
                 # Generate file
-                fileName = "global_test.out"
-                with open(fileName, 'w') as f:
-                        g.write(f)
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                outputFile = dirPath + "/tests/global_test.out.scop"
+                expectedFile = dirPath + "/tests/global_test.expected.scop"
+                with open(outputFile, 'w') as f:
+                        g.write_os(f)
 
                 # Check file content
-                expected = "# =============================================== Global\n# Language\nC\n\n# Context\nCONTEXT\n0 5 0 0 0 3\n\n# Parameters are provided\n1\n<strings>\nmSize kSize nSize\n</strings>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                with open(expectedFile, 'r') as f:
+                        expectedContent = f.read()
+                with open(outputFile, 'r') as f:
+                        outputContent = f.read()
+                self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
                 import os
-                os.remove(fileName)
+                os.remove(outputFile)
 
 
 if __name__ == '__main__':

@@ -33,7 +33,15 @@ class Statement(object):
         def get_extensions(self):
                 return self.extensions
 
-        def write(self, f, statementId):
+        @staticmethod
+        def read_os(f):
+                pass
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f, statementId):
                 # Print header
                 print("# =============================================== Statement " + str(statementId), file = f)
                 # Print total number of relations
@@ -71,6 +79,9 @@ class Statement(object):
                 # Print end separator
                 print("", file = f)
 
+        def write_py(self, f):
+                pass
+
 
 import unittest
 class testStatement(unittest.TestCase):
@@ -100,7 +111,7 @@ class testStatement(unittest.TestCase):
                 self.assertEqual(s.get_access(), access)
                 self.assertEqual(s.get_extensions(), extensions)
 
-        def test_print(self):
+        def test_write_os(self):
                 from statement import Relation, RelationType, StatementExtension
                 domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
                 scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
@@ -113,19 +124,23 @@ class testStatement(unittest.TestCase):
                 s = Statement(domain, scattering, access, extensions)
 
                 # Generate file
-                fileName = "statement_test.out"
-                with open(fileName, 'w') as f:
-                        s.write(f, 1)
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                outputFile = dirPath + "/tests/statement_test.out.scop"
+                expectedFile = dirPath + "/tests/statement_test.expected.scop"
+                with open(outputFile, 'w') as f:
+                        s.write_os(f, 1)
 
                 # Check file content
-                expected = "# =============================================== Statement 1\n# Number of relations describing the statement:\n5\n\n# ----------------------------------------------  1.1 Domain\nDOMAIN\n9 8 3 0 0 3\n1\t1\t\n1\t-1\t\n\n# ----------------------------------------------  1.2 Scattering\nSCATTERING\n7 15 7 3 0 3\n0\t-1\t\n0\t0\t\n\n# ----------------------------------------------  1.3 Access\nREAD\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\nWRITE\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\nMAY_WRITE\n3 11 3 3 0 3\n0\t-1\t\n0\t0\t\n\n# ----------------------------------------------  1.4 Statement Extensions\n# Number of Statement Extensions\n1\n<body>\n# Number of original iterators\n3\n# List of original iterators\ni j k \n# Statement body expression\nc[i][j] += a[i][k]*b[k][j];\n</body>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                with open(expectedFile, 'r') as f:
+                        expectedContent = f.read()
+                with open(outputFile, 'r') as f:
+                        outputContent = f.read()
+                self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
                 import os
-                os.remove(fileName)
+                os.remove(outputFile)
 
 
 if __name__ == '__main__':

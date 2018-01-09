@@ -28,7 +28,15 @@ class Extensions(object):
         def get_coordinates(self):
                 return self.coordinates
 
-        def write(self, f):
+        @staticmethod
+        def read_os(f):
+                pass
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Write header
                 print("# =============================================== Extensions", file = f)
 
@@ -43,6 +51,9 @@ class Extensions(object):
                 # Write coordinates
                 if self.coordinates != None:
                         self.coordinates.write(f)
+
+        def write_py(self, f):
+                pass
 
 
 import unittest
@@ -66,7 +77,7 @@ class testExtensions(unittest.TestCase):
                 self.assertEqual(ext.get_arrays(), arrays)
                 self.assertEqual(ext.get_coordinates(), coordinates)
 
-        def test_print(self):
+        def test_write_os(self):
                 from extensions import Scatnames, Arrays, Coordinates
                 scatnames = Scatnames(["b0", "i", "b1", "j", "b2", "k", "b3"])
                 arrays = Arrays(["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"])
@@ -74,19 +85,23 @@ class testExtensions(unittest.TestCase):
                 ext = Extensions(scatnames, arrays, coordinates)
 
                 # Generate file
-                fileName = "extensions_test.out"
-                with open(fileName, 'w') as f:
-                        ext.write(f)
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                outputFile = dirPath + "/tests/extensions_test.out.scop"
+                expectedFile = dirPath + "/tests/extensions_test.expected.scop"
+                with open(outputFile, 'w') as f:
+                        ext.write_os(f)
 
                 # Check file content
-                expected = "# =============================================== Extensions\n<scatnames>\nb0 i b1 j b2 k b3 \n</scatnames>\n\n<arrays>\n# Number of arrays\n9\n# Mapping array-identifiers/array-names\n1 i\n2 mSize\n3 j\n4 kSize\n5 k\n6 nSize\n7 c\n8 a\n9 b\n</arrays>\n\n<coordinates>\n# File name\nexample2_src_matmul.cc\n# Starting line and column\n72 0\n# Ending line and column\n80 0\n# Identation\n8\n</coordinates>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                with open(expectedFile, 'r') as f:
+                        expectedContent = f.read()
+                with open(outputFile, 'r') as f:
+                        outputContent = f.read()
+                self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
                 import os
-                os.remove(fileName)
+                os.remove(outputFile)
 
 
 if __name__ == '__main__':
