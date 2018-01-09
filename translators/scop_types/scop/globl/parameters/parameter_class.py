@@ -23,11 +23,44 @@ class Parameter(object):
         def get_value(self):
                 return self.pvalue
 
-        def write(self, f):
+        @staticmethod
+        def read_os(content, index):
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process optional header
+                ptype = None
+                if content[index].startswith('<'):
+                        ptype = content[index][1:-1]
+                        index = index + 1
+
+                # Process mandatory field: value
+                pvalue = content[index]
+                index = index + 1
+
+                # Process optional footer
+                if content[index].startswith('</'):
+                        index = index + 1
+
+                # Build Parameter
+                p = Parameter(ptype, pvalue)
+
+                # Return structure
+                return p, index
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Print header
                 print("<" + str(self.ptype) + ">", file = f)
                 print(str(self.pvalue), file = f)
                 print("</" + str(self.ptype) + ">", file = f)
+
+        def write_py(self, f):
+                pass
 
 
 import unittest
@@ -46,7 +79,7 @@ class testParameter(unittest.TestCase):
                 self.assertEqual(param.get_type(), t)
                 self.assertEqual(param.get_value(), val)
 
-        def test_print(self):
+        def test_write_os(self):
                 t = "strings"
                 val = "mSize kSize nSize"
                 param = Parameter(t, val)
@@ -54,7 +87,7 @@ class testParameter(unittest.TestCase):
                 # Generate file
                 fileName = "parameter_test.out"
                 with open(fileName, 'w') as f:
-                        param.write(f)
+                        param.write_os(f)
 
                 # Check file content
                 expected = "<strings>\nmSize kSize nSize\n</strings>\n"

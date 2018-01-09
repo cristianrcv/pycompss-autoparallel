@@ -29,7 +29,15 @@ class StatementExtension(object):
         def get_expr(self):
                 return self.expr
 
-        def write(self, f):
+        @staticmethod
+        def read_os(content, index):
+                pass
+                                                                                                                                                                                                                                                                               
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Print header
                 print("<body>", file = f)
 
@@ -55,6 +63,10 @@ class StatementExtension(object):
                 # Print footer
                 print("</body>", file = f)
 
+        def write_py(f):
+                pass
+
+
 import unittest
 class testStatementExtension(unittest.TestCase):
 
@@ -72,7 +84,7 @@ class testStatementExtension(unittest.TestCase):
                 self.assertEqual(extension.get_original_iterators(), iterators)
                 self.assertEqual(extension.get_expr(), expr)
 
-        def test_print(self):
+        def test_write_os(self):
                 iterators = ["i", "j", "k"]
                 expr = "c[i][j] += a[i][k]*b[k][j];"
                 extension = StatementExtension(iterators, expr)
@@ -80,7 +92,7 @@ class testStatementExtension(unittest.TestCase):
                 # Generate file
                 fileName = "extension_test.out"
                 with open(fileName, 'w') as f:
-                        extension.write(f)
+                        extension.write_os(f)
 
                 # Check file content
                 expected = "<body>\n# Number of original iterators\n3\n# List of original iterators\ni j k \n# Statement body expression\nc[i][j] += a[i][k]*b[k][j];\n</body>\n"

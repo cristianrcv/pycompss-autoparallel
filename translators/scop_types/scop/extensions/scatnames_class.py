@@ -18,7 +18,31 @@ class Scatnames(object):
         def get_names(self):
                 return self.names
 
-        def write(self, f):
+        @staticmethod
+        def read_os(content, index):
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n' or content[index] == '<scatnames>\n':
+                        index = index + 1
+
+                # Process mandatory field: scatnames
+                names = content[index].split()
+                index = index + 1
+
+                # Skip empty lines, any annotation, and footer
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n' or content[index] == '</scatnames>\n'):
+                        index = index + 1
+
+                # Build Scatnames
+                scatnames = Scatnames(names)
+
+                # Return structure
+                return scatnames, index
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Print header
                 print("<scatnames>", file = f)
 
@@ -32,6 +56,10 @@ class Scatnames(object):
                 # Print footer
                 print("</scatnames>", file = f)
                 print("", file = f)
+
+        def write_py(self, f):
+                pass
+
 
 import unittest
 class testScatnames(unittest.TestCase):
@@ -47,14 +75,14 @@ class testScatnames(unittest.TestCase):
 
                 self.assertEqual(s.get_names(), names)
 
-        def test_print(self):
+        def test_write_os(self):
                 names = ["b0", "i", "b1", "j", "b2", "k", "b3"]
                 s = Scatnames(names)
 
                 # Generate file
                 fileName = "scatnames_test.out"
                 with open(fileName, 'w') as f:
-                        s.write(f)
+                        s.write_os(f)
 
                 # Check file content
                 expected = "<scatnames>\nb0 i b1 j b2 k b3 \n</scatnames>\n\n"

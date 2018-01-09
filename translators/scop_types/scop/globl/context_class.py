@@ -54,7 +54,29 @@ class Context(object):
         def get_params(self):
                 return self.params
 
-        def write(self, f):
+        @staticmethod
+        def read_os(content, index):
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n' or content[index] == 'CONTEXT\n':
+                        index = index + 1
+
+                # Process mandatory field: type rows columns outputDims inputDims localDims params
+                line = content[index]
+                index = index + 1
+
+                fields = line.split()
+
+                # Build Context
+                context = Context(*fields)
+
+                # Return structure
+                return context, index
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Print type
                 print(self.contextType.name, file = f)
 
@@ -64,6 +86,8 @@ class Context(object):
                 # Separator
                 print("", file = f)
 
+        def write_py(self, f):
+                pass
 
 import unittest
 class testContext(unittest.TestCase):
@@ -97,7 +121,7 @@ class testContext(unittest.TestCase):
                 self.assertEqual(context.get_local_dims(), ld)
                 self.assertEqual(context.get_params(), params)
 
-        def test_print(self):
+        def test_write_os(self):
                 contextType = ContextType.CONTEXT
                 rows = 0
                 cols = 5
@@ -110,7 +134,7 @@ class testContext(unittest.TestCase):
                 # Generate file
                 fileName = "context_test.out"
                 with open(fileName, 'w') as f:
-                        context.write(f)
+                        context.write_os(f)
 
                 # Check file content
                 expected = "CONTEXT\n0 5 0 0 0 3\n\n"

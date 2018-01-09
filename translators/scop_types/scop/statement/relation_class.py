@@ -64,7 +64,15 @@ class Relation(object):
         def get_constraint_matrix(self):
                 return self.constraintMatrix
 
-        def write(self, f):
+        @staticmethod
+        def read_os(content, index):
+                pass
+                                                                                                                                                                                                                                                                               
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Print type
                 print(self.relationType.name, file = f)
 
@@ -79,6 +87,9 @@ class Relation(object):
                                         line = line + str(value) + "\t"
                                 print(line, file = f)
                 print("", file = f)
+
+        def write_py(f):
+                pass
 
 
 import unittest
@@ -116,7 +127,7 @@ class testRelation(unittest.TestCase):
                 self.assertEqual(relation.get_params(), params)
                 self.assertEqual(relation.get_constraint_matrix(), matrix)
 
-        def test_print(self):
+        def test_write_os(self):
                 relType = RelationType.DOMAIN
                 rows = 9
                 cols = 8
@@ -130,7 +141,7 @@ class testRelation(unittest.TestCase):
                 # Generate file
                 fileName = "relation_test.out"
                 with open(fileName, 'w') as f:
-                        relation.write(f)
+                        relation.write_os(f)
 
                 # Check file content
                 expected = "DOMAIN\n9 8 3 0 0 3\n1\t-1\t\n1\t-1\t\n\n"

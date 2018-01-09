@@ -29,8 +29,28 @@ class Global(object):
                 return self.parameters
 
         @staticmethod
-        def read_os(f):
-                pass
+        def read_os(content, index):
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process mandatory field: language
+                language = content[index]
+                index = index + 1
+
+                # Process context
+                from globl import Context
+                context, index = Context.read_os(content, index)
+
+                # Process parameters
+                from globl import Parameters
+                parameters, index = Parameters.read_os(content, index)
+
+                # Build Global
+                g = Global(language, context, parameters)
+
+                # Return structure
+                return g, index
 
         @staticmethod
         def read_py(f):
@@ -48,12 +68,12 @@ class Global(object):
                 # Print context
                 print("# Context", file = f)
                 if self.context != None:
-                        self.context.write(f)
+                        self.context.write_os(f)
 
                 # Print parameters
                 print("# Parameters are provided", file = f)
                 if self.parameters != None:
-                        self.parameters.write(f)
+                        self.parameters.write_os(f)
 
         def write_py(self, f):
                 pass

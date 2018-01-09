@@ -34,8 +34,8 @@ class Statement(object):
                 return self.extensions
 
         @staticmethod
-        def read_os(f):
-                pass
+        def read_os(content, index):
+                return None, index
 
         @staticmethod
         def read_py(f):
@@ -55,18 +55,18 @@ class Statement(object):
                 # Print domain
                 print("# ----------------------------------------------  " + str(statementId) + ".1 Domain", file = f)
                 if self.domain != None:
-                        self.domain.write(f)
+                        self.domain.write_os(f)
 
                 # Print scattering
                 print("# ----------------------------------------------  " + str(statementId) + ".2 Scattering", file = f)
                 if self.scattering != None:
-                        self.scattering.write(f)
+                        self.scattering.write_os(f)
 
                 # Print access
                 print("# ----------------------------------------------  " + str(statementId) + ".3 Access", file = f)
                 if self.access != None:
                         for acc in self.access:
-                                acc.write(f)
+                                acc.write_os(f)
 
                 # Print extensions
                 if self.extensions != None:
@@ -74,7 +74,7 @@ class Statement(object):
                         print("# Number of Statement Extensions", file = f)
                         print(str(len(self.extensions)), file = f)
                         for ext in self.extensions:
-                                ext.write(f)
+                                ext.write_os(f)
 
                 # Print end separator
                 print("", file = f)

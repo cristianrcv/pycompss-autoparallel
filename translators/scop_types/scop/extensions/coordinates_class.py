@@ -43,7 +43,55 @@ class Coordinates(object):
         def get_identation(self):
                 return self.ident
 
-        def write(self, f):
+        @staticmethod
+        def read_os(content, index):
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n' or content[index] == '<coordinates>\n':
+                        index = index + 1
+
+                # Process mandatory field: fileName
+                fileName = content[index]
+                index = index + 1
+
+                # Skip empty lines and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process mandatory field: start
+                startLine, startCol = content[index].split()
+                index = index + 1
+
+                # Skip empty lines and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process mandatory field: end
+                endLine, endCol = content[index].split()
+                index = index + 1
+
+                # Skip empty lines and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process mandatory field: identation
+                identation = content[index].split()
+                index = index + 1
+
+                # Skip empty lines, any annotation, and footer
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n' or content[index] == '</coordinates>\n'):
+                        index = index + 1
+
+                # Build Coordinates
+                c = Coordinates(fileName, startLine, startCol, endLine, endCol, identation)
+                
+                # Return structure
+                return c, index
+
+        @staticmethod                                                                                                                                                                                                                                                          
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 # Print header
                 print("<coordinates>", file = f)
 
@@ -66,6 +114,9 @@ class Coordinates(object):
                 # Print footer
                 print("</coordinates>", file = f)
                 print("", file = f)
+
+        def write_py(self, f):
+                pass
 
 
 import unittest
@@ -98,7 +149,7 @@ class testCoordinates(unittest.TestCase):
                 self.assertEqual(c.get_identation(), ident)
 
 
-        def test_print(self):
+        def test_write_os(self):
                 fn = "example2_src_matmul.cc"
                 sl = 72
                 sc = 0
@@ -110,7 +161,7 @@ class testCoordinates(unittest.TestCase):
                 # Generate file
                 fileName = "coordinates_test.out"
                 with open(fileName, 'w') as f:
-                        c.write(f)
+                        c.write_os(f)
 
                 # Check file content
                 expected = "<coordinates>\n# File name\nexample2_src_matmul.cc\n# Starting line and column\n72 0\n# Ending line and column\n80 0\n# Identation\n8\n</coordinates>\n\n"

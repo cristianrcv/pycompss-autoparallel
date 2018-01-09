@@ -18,16 +18,47 @@ class Parameters(object):
         def get_parameters(self):
                 return self.parameters
 
-        def write(self, f):
+        @staticmethod
+        def read_os(content, index):
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process mandatory field: num_params
+                num_params = int(content[index])
+                index = index + 1
+
+                # Process each parameter
+                from parameters import Parameter
+                params = []
+                for i in range(num_params):
+                        p, index = Parameter.read_os(content, index)
+                        params.append(p)
+
+                # Build Parameters
+                parameters = Parameters(params)
+
+                # Return structure
+                return parameters, index
+
+        @staticmethod
+        def read_py(f):
+                pass
+
+        def write_os(self, f):
                 if self.parameters != None:
                         # Print number of parameter
                         print(str(len(self.parameters)), file = f)
 
                         # Print parameters
                         for param in self.parameters:
-                                param.write(f)
+                                param.write_os(f)
 
                 print("", file = f)
+
+        def write_py(self, f):
+                pass
+
 
 import unittest
 class testParameters(unittest.TestCase):
@@ -45,7 +76,7 @@ class testParameters(unittest.TestCase):
 
                 self.assertEqual(params.get_parameters(), [p1])
 
-        def test_print(self):
+        def test_write_os(self):
                 from parameters import Parameter
                 t = "strings"
                 val = "mSize kSize nSize"
@@ -55,7 +86,7 @@ class testParameters(unittest.TestCase):
                 # Generate file
                 fileName = "parameters_test.out"
                 with open(fileName, 'w') as f:
-                        params.write(f)
+                        params.write_os(f)
 
                 # Check file content
                 expected = "1\n<strings>\nmSize kSize nSize\n</strings>\n\n"

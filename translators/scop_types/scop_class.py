@@ -36,31 +36,38 @@ class Scop(object):
 
                 index = 0
                 # Skip header
-                while content[index] == "<OpenScop>" or content[index].startswith("# CLooG") or content[index] == '\n':
-                        ++index
+                while content[index] == '<OpenScop>\n' or content[index].startswith('# CLooG') or content[index] == '\n':
+                        index = index + 1
 
                 # Process global information
+                from scop import Global
                 globl, index = Global.read_os(content, index)
 
                 # Process statements
+                from scop import Statement
                 while content[index] == "\n" or content[index].startswith('#'):
-                        ++index
-                num_statements = content[index]
-                ++index
-                
+                        index = index + 1
+                num_statements = int(content[index])
+                index = index + 1
+
                 statements = []
                 for i in range(num_statements):
                         statement, index = Statement.read_os(content, index)
                         statements.append(statement)
         
                 # Process extensions
+                index=108
+                print("INIT EXTS WITH: " + str(content))
+                print("INIT EXTS WITH: " + str(index))
+
+                from scop import Extensions
                 extensions, index = Extensions.read_os(content, index)
 
                 # Skip footer
                 while index < len(content):
-                        if content[index] != '\n' and content[index] != "</OpenScop>\n":
+                        if content[index] != '\n' and content[index] != '</OpenScop>\n':
                                 print("WARNING: Unexpected line at the end of the file: " + str(content[index]))
-                        ++index
+                        index = index + 1
 
                 # Build scop
                 scop = Scop(globl, statements, extensions)
@@ -255,7 +262,7 @@ class testScop(unittest.TestCase):
                 # Check loaded content
                 self.assertEqual(scop, scopExp)
 
-        def ttest_read_os_full(self):
+        def test_read_os_full(self):
                 # Read from OpenScop
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))

@@ -29,8 +29,36 @@ class Extensions(object):
                 return self.coordinates
 
         @staticmethod
-        def read_os(f):
-                pass
+        def read_os(content, index):
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process optional field: scatnames
+                from extensions import Scatnames
+                scatnames = None
+                if content[index] == '<scatnames>\n':
+                        scatnames, index = Scatnames.read_os(content, index)
+
+                # Process mandatory field: arrays
+                from extensions import Arrays
+                arrays, index = Arrays.read_os(content, index)
+
+                # Skip empty lines and any annotation
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n'):
+                        index = index + 1
+
+                # Process optional field: coordinates
+                from extensions import Coordinates
+                coordinates = None
+                if index < len(content) and content[index] == '<coordinates>\n':
+                        coordinates, index = Coordinates.read_os(content, index)
+
+                # Build Extensions
+                ext = Extensions(scatnames, arrays, coordinates)
+                
+                # Return structure
+                return ext, index
 
         @staticmethod
         def read_py(f):
@@ -42,15 +70,15 @@ class Extensions(object):
 
                 # Write scatnames
                 if self.scatnames != None:
-                        self.scatnames.write(f)
+                        self.scatnames.write_os(f)
 
                 # Write arrays
                 if self.arrays != None:
-                        self.arrays.write(f)
+                        self.arrays.write_os(f)
 
                 # Write coordinates
                 if self.coordinates != None:
-                        self.coordinates.write(f)
+                        self.coordinates.write_os(f)
 
         def write_py(self, f):
                 pass
