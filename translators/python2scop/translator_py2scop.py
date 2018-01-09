@@ -69,7 +69,7 @@ def readFile(fileName):
         from scop_types import Scop
         scop = Scop(g, statements, e)
 
-        return scop
+        return [scop]
 
 #
 # TRANSLATOR
@@ -89,7 +89,7 @@ import unittest
 class testTranslator(unittest.TestCase):
 
         def test_matmul(self):
-                srcFile = "./tests/test1_matmul.src.py"
+                srcFile = "./tests/test1_matmul.src"
                 expectedFile="./tests/test1_matmul.expected.scop"
                 outFile = "./tests/test1_matmul.out.scop"
  
