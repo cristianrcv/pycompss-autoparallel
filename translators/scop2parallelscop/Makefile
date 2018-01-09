@@ -4,17 +4,21 @@
 
 PLUTO_EXEC = ./pluto_exec.sh
 
-test_all: test1 test2
+tests: test1 test2
 
 test1:
 	@echo "Executing Test 1: Matmul"
-	$(PLUTO_EXEC) test1_matmul.src test1_matmul.out
+	$(PLUTO_EXEC) ./tests/test1_matmul.src.scop ./tests/test1_matmul.out.scop
+	diff ./tests/test1_matmul.out.scop ./tests/test1_matmul.expected.scop
+	@echo "PASS"
 
 test2:
 	@echo "Executing Test 2: Seidel"
-	$(PLUTO_EXEC) test2_seidel.src test2_seidel.out
+	$(PLUTO_EXEC) ./tests/test2_seidel.src.scop ./tests/test2_seidel.out.scop
+	diff ./tests/test2_seidel.out.scop ./tests/test2_seidel.expected.scop
+	@echo "PASS"
 
 clean:
 	@echo "Cleaning folder"
-	-rm -f *.out
+	-rm -f ./tests/t1_matmul.out.scop ./tests/test2_seidel.out.scop
 
