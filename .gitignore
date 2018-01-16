@@ -99,3 +99,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Test files
+translators/scop2pscop2py/tests/test1_matmul.out.py
+translators/scop2pscop2py/tests/test2_seidel.out.py
+

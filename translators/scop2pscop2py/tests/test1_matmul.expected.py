@@ -5,15 +5,15 @@ def S1(zT3,zT4,zT5,i,j,k):
 # Start of CLooG code
 if ((kSize >= 1) and (mSize >= 1) and (nSize >= 1)):
         lbp=0
-        ubp=int(math.floor(mSize-1,32))
+        ubp=int(math.floor(float(mSize-1)/float(32)))
         # parallel for
         for t1 in range(lbp, ubp):
                 lbp=0
-                ubp=int(math.floor(kSize-1,32))
-                for t2 in range(0, int(math.floor(kSize-1,32))):
+                ubp=int(math.floor(float(kSize-1)/float(32)))
+                for t2 in range(0, int(math.floor(float(kSize-1)/float(32)))):
                         lbp=0
-                        ubp=int(math.floor(nSize-1,32))
-                        for t3 in range(0, int(math.floor(nSize-1,32))):
+                        ubp=int(math.floor(float(nSize-1)/float(32)))
+                        for t3 in range(0, int(math.floor(float(nSize-1)/float(32)))):
                                 lbp=32*t1
                                 ubp=min(mSize-1,32*t1+31)
                                 for t4 in range(32*t1, min(mSize-1,32*t1+31)):
