@@ -48,7 +48,7 @@ PyCOMPSs and PLUTO integration using OpenSCOP.
 This is part of a collaboration between the [CAMUS Team][4] at [INRIA][5] and the [Workflows and Distributed Computing Team][6] at [BSC][7] and is still under development. 
 
 This work is supervised by:
-- Rosa M. Badia Sala (BSC)
+- Rosa M. Badia (BSC)
 - Philippe Clauss (INRIA)
 - Jorge Ejarque (BSC)
 - Manuel Selva (INRIA)
