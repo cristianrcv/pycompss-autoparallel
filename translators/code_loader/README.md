@@ -7,10 +7,17 @@ Loads the content of a Python function using the Inspect module
 ### Dependencies
 
 
-### Test
+### Test with debug
 
 ```
 python nose_tests.py
+```
+
+
+### Test without debug                                                                                                                                                                                                                                                         
+
+```
+python -O nose_tests.py
 ```
 
 

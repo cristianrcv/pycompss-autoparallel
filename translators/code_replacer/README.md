@@ -7,10 +7,17 @@ Replaces the code of a given function by the new given code. It creates a new fi
 ### Dependencies
 
 
-### Test
+### Test with debug
 
 ```
 python nose_tests.py
+```
+
+
+### Test without debug                                                                                                                                                                                                                                                         
+
+```
+python -O nose_tests.py
 ```
 
 

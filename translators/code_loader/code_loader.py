@@ -4,9 +4,6 @@
 # For better print formatting
 from __future__ import print_function
 
-# Debug flag
-DEBUG=1
-
 
 # 
 # Replacer class

@@ -4,9 +4,6 @@
 # For better print formatting
 from __future__ import print_function
 
-# Debug flag
-DEBUG=1
-
 
 # 
 # Code Replacer class
@@ -64,20 +61,20 @@ class CodeReplacer(object):
                                 f.write(new_content)
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot create new source file", e)
-                if DEBUG:
+                if __debug__:
                         print("[code_replacer] New code generated in file " + str(new_file))
         
                 # Load new function from new file
                 # Similar to: from new_module import func.__name__ as new_func
                 new_module = os.path.splitext(new_file)[0]
-                if DEBUG:
+                if __debug__:
                         print("[code_replacer] Import module " + str(func.__name__) + " from " + str(new_module))
                 try:
                         import importlib
                         new_func = getattr(importlib.import_module(new_module), func.__name__)
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot load new function and module", e)
-                if DEBUG:
+                if __debug__:
                         print("[code_replacer] New function: " + str(new_func))
         
                 # Finish

@@ -4,9 +4,6 @@
 # For better print formatting
 from __future__ import print_function
 
-# Debug flag
-DEBUG=1
-
 
 # 
 # Translator class
@@ -40,7 +37,7 @@ class Scop2PScop2Py(object):
         
                 # Construct binary call
                 cmd = [PLC, source] + mandatory_opts + basic_opts + adv_opts + mode_opts
-                if DEBUG:
+                if __debug__:
                         print("[scop2pscop2py] Command: " + str(cmd))
         
                 # Call binary
@@ -64,7 +61,7 @@ class Scop2PScop2Py(object):
                         raise Scop2PScop2PyException("[ERROR] Pluto binary exit value = " + str(exit_value), None)
         
                 # Finish 
-                if DEBUG:
+                if __debug__:
                         print("[scop2pscop2py] Pluto binary successfull")
                         print("[scop2pscop2py] Binary output:")
                         print(stdout)

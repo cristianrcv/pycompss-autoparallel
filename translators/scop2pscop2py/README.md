@@ -12,10 +12,17 @@ Uses the PLUTO tool to generate parallel SCOP code from a source SCOP representa
 - To add code coverage you require [coverage][3] and [codacy-coverage][4] Python modules
 
 
-### Test
+### Test with debug
 
 ```
 python nose_tests.py
+```
+
+
+### Test without debug
+
+```
+python -O nose_tests.py
 ```
 
 

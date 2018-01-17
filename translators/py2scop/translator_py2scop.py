@@ -4,8 +4,10 @@
 # For better print formatting
 from __future__ import print_function
 
-# Debug flag
-DEBUG=1
+# TODO: Workarround with pythonpath
+import sys
+import os
+sys.path.insert(0, os.getcwd() + '/../../translators/')
 
 
 # 

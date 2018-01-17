@@ -4,15 +4,7 @@
 # TODO: Workarround with pythonpath
 import sys
 import os
-sys.path.insert(0, os.getcwd() + '/../../translators/code_loader')
-sys.path.insert(0, os.getcwd() + '/../../translators/code_replacer')
-sys.path.insert(0, os.getcwd() + '/../../translators/py2pycompss')
-sys.path.insert(0, os.getcwd() + '/../../translators/py2scop')
-sys.path.insert(0, os.getcwd() + '/../../translators/scop2pscop2py')
-
-
-# Debug flag
-DEBUG=1
+sys.path.insert(0, os.getcwd() + '/../../translators/')
 
 
 #
@@ -30,21 +22,21 @@ def parallel(func):
         # Return:
         #
         
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Start decorator for function: " + str(func))
 
         new_func = func
         try:
                 # Get the source code of the function
                 func_source = get_py(func)
-                if DEBUG:
+                if __debug__:
                         print("[decorator] Func source code")
                         # print(str(func_source))
 
                 # Process python code to scop
                 scop_file = ".tmp_gen_scop.scop"
                 py2scop(func_source, scop_file)
-                if DEBUG:
+                if __debug__:
                         print("[decorator] Generated OpenScop content")
                         # with open(scop_file, 'r') as f:
                         #         print(f.read())
@@ -52,7 +44,7 @@ def parallel(func):
                 # Parallelize OpenScop code and process it back to python
                 py_file = ".tmp_gen_parallel.py"
                 scop2pscop2py(scop_file, py_file)
-                if DEBUG:
+                if __debug__:
                         print("[decorator] Generated Parallel Python content")
                         # with open(py_file, 'r') as f:
                         #        print(f.read())
@@ -60,7 +52,7 @@ def parallel(func):
                 # Add PyCOMPSs annotations
                 pycompss_file = ".tmp_gen_pycompss.py"
                 py2pycompss(func_source, py_file, pycompss_file)
-                if DEBUG:
+                if __debug__:
                         print("[decorator] Generated PyCOMPSs content")
                         # with open(pycompss_file, 'r') as f:
                         #        print(f.read())
@@ -102,14 +94,14 @@ def get_py(func):
         #       - GetPyException
         #
 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Start get_py")
 
         from code_loader import CodeLoader
         func_source = CodeLoader.load(func)
 
         # Finish
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Finished get_py")
         return func_source
         
@@ -126,14 +118,14 @@ def py2scop(source, output):
         #       - Py2ScopException
         #
 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Start py2scop")
 
         from py2scop import Py2Scop
         Py2Scop.translate(source, output)
         
         # Finish
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Finished py2scop")
         
 def scop2pscop2py(source, output):
@@ -149,14 +141,14 @@ def scop2pscop2py(source, output):
         #       - Scop2PScop2PyException
         #
 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Start scop2pscop2py")
 
         from scop2pscop2py import Scop2PScop2Py
         Scop2PScop2Py.translate(source, output)
 
         # Finish 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Finished scop2pscop2py")
 
 def py2pycompss(func_source, source, output):
@@ -173,14 +165,14 @@ def py2pycompss(func_source, source, output):
         #       - Py2PyCOMPSsException
         #
 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Start py2pycompss")
 
         from py2pycompss import Py2PyCOMPSs
         Py2PyCOMPSs.translate(func_source, source, output)
 
         # Finish
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Finished py2pycompss")
 
 def load_generated_code(func, new_code):
@@ -196,14 +188,14 @@ def load_generated_code(func, new_code):
         #       - LoadGeneratedCodeException
         #
 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Start load_generated_code")
        
         from code_replacer import CodeReplacer
         new_func = CodeReplacer.replace(func, new_code)
 
         # Finish
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Finished load_generated_code")
         return new_func
 
@@ -216,16 +208,16 @@ def clean(list_of_files):
         # Return:
         #
 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Cleaning...")
 
         import os
         for file in list_of_files:
-                if DEBUG:
+                if __debug__:
                         print("[decorator] Cleaning file " + str(file))
                 os.remove(file)
 
-        if DEBUG:
+        if __debug__:
                 print("[decorator] Finished cleaning")
 
 
