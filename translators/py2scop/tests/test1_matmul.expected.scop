@@ -4,7 +4,7 @@
 
 # =============================================== Global
 # Language
-C
+p
 
 # Context
 CONTEXT
@@ -17,7 +17,7 @@ mSize kSize nSize
 </strings>
 
 # Number of statements
-2
+1
 
 # =============================================== Statement 1
 # Number of relations describing the statement:
@@ -26,35 +26,57 @@ mSize kSize nSize
 # ----------------------------------------------  1.1 Domain
 DOMAIN
 9 8 3 0 0 3
-1	1	
-1	-1	
+# e/i|  i    j    k |mSi. kSi. nSi.|  1  
+   1    1    0    0    0    0    0    0    ## i >= 0
+   1   -1    0    0    1    0    0   -1    ## -i+mSize-1 >= 0
+   1    0    0    0    1    0    0   -1    ## mSize-1 >= 0
+   1    0    1    0    0    0    0    0    ## j >= 0
+   1    0   -1    0    0    1    0   -1    ## -j+kSize-1 >= 0
+   1    0    0    0    0    1    0   -1    ## kSize-1 >= 0
+   1    0    0    1    0    0    0    0    ## k >= 0
+   1    0    0   -1    0    0    1   -1    ## -k+nSize-1 >= 0
+   1    0    0    0    0    0    1   -1    ## nSize-1 >= 0
 
 # ----------------------------------------------  1.2 Scattering
 SCATTERING
 7 15 7 3 0 3
-0	-1	
-0	0	
+# e/i| c1   c2   c3   c4   c5   c6   c7 |  i    j    k |mSi. kSi. nSi.|  1  
+   0   -1    0    0    0    0    0    0    0    0    0    0    0    0    0    ## c1 == 0
+   0    0   -1    0    0    0    0    0    1    0    0    0    0    0    0    ## c2 == i
+   0    0    0   -1    0    0    0    0    0    0    0    0    0    0    0    ## c3 == 0
+   0    0    0    0   -1    0    0    0    0    1    0    0    0    0    0    ## c4 == j
+   0    0    0    0    0   -1    0    0    0    0    0    0    0    0    0    ## c5 == 0
+   0    0    0    0    0    0   -1    0    0    0    1    0    0    0    0    ## c6 == k
+   0    0    0    0    0    0    0   -1    0    0    0    0    0    0    0    ## c7 == 0
 
 # ----------------------------------------------  1.3 Access
 READ
 3 11 3 3 0 3
-0	-1	
-0	0	
+# e/i| Arr  [1]  [2]|  i    j    k |mSi. kSi. nSi.|  1  
+   0   -1    0    0    0    0    0    0    0    0    7    ## Arr == c
+   0    0   -1    0    1    0    0    0    0    0    0    ## [1] == i
+   0    0    0   -1    0    1    0    0    0    0    0    ## [2] == j
 
 WRITE
 3 11 3 3 0 3
-0	-1	
-0	0	
+# e/i| Arr  [1]  [2]|  i    j    k |mSi. kSi. nSi.|  1  
+   0   -1    0    0    0    0    0    0    0    0    7    ## Arr == c
+   0    0   -1    0    1    0    0    0    0    0    0    ## [1] == i
+   0    0    0   -1    0    1    0    0    0    0    0    ## [2] == j
 
 READ
 3 11 3 3 0 3
-0	-1	
-0	0	
+# e/i| Arr  [1]  [2]|  i    j    k |mSi. kSi. nSi.|  1  
+   0   -1    0    0    0    0    0    0    0    0    8    ## Arr == a
+   0    0   -1    0    1    0    0    0    0    0    0    ## [1] == i
+   0    0    0   -1    0    0    1    0    0    0    0    ## [2] == k
 
 READ
 3 11 3 3 0 3
-0	-1	
-0	0	
+# e/i| Arr  [1]  [2]|  i    j    k |mSi. kSi. nSi.|  1  
+   0   -1    0    0    0    0    0    0    0    0    9    ## Arr == b
+   0    0   -1    0    0    0    1    0    0    0    0    ## [1] == k
+   0    0    0   -1    0    1    0    0    0    0    0    ## [2] == j
 
 # ----------------------------------------------  1.4 Statement Extensions
 # Number of Statement Extensions
@@ -63,58 +85,14 @@ READ
 # Number of original iterators
 3
 # List of original iterators
-i j k 
+i j k
 # Statement body expression
 c[i][j] += a[i][k]*b[k][j];
 </body>
 
-# =============================================== Statement 2
-# Number of relations describing the statement:
-5
-
-# ----------------------------------------------  2.1 Domain
-DOMAIN
-9 8 3 0 0 3
-1	1	
-1	-1	
-
-# ----------------------------------------------  2.2 Scattering
-SCATTERING
-7 15 7 3 0 3
-0	-1	
-0	0	
-
-# ----------------------------------------------  2.3 Access
-READ
-3 11 3 3 0 3
-0	-1	
-0	0	
-
-WRITE
-3 11 3 3 0 3
-0	-1	
-0	0	
-
-READ
-3 11 3 3 0 3
-0	-1	
-0	0	
-
-# ----------------------------------------------  2.4 Statement Extensions
-# Number of Statement Extensions
-1
-<body>
-# Number of original iterators
-3
-# List of original iterators
-i j k 
-# Statement body expression
-a[i][k] += b[i][k];
-</body>
-
 # =============================================== Extensions
 <scatnames>
-b0 i b1 j b2 k b3 
+b0 i b1 j b2 k b3
 </scatnames>
 
 <arrays>
@@ -138,8 +116,8 @@ example2_src_matmul.cc
 # Starting line and column
 72 0
 # Ending line and column
-80 0
-# Identation
+79 0
+# Indentation
 8
 </coordinates>
 
