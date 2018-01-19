@@ -39,3 +39,6 @@
   # Generate XML file
   coverage xml
 
+  # Exit with last command status
+  exit 
+
