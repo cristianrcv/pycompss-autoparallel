@@ -83,7 +83,7 @@ class Coordinates(object):
 
                 # Build Coordinates
                 c = Coordinates(fileName, startLine, startCol, endLine, endCol, identation)
-                
+
                 # Return structure
                 return c, index
 

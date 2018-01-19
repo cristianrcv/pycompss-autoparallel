@@ -1,11 +1,12 @@
-#!/usr/bin/python                                                                                                                                                                                                                                                              
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
 
 # For better print formatting
 from __future__ import print_function
 
 
-# 
+#
 # Translator class
 #
 
@@ -26,7 +27,7 @@ class Py2PyCOMPSs(object):
                 #       - Py2PyCOMPSsException
                 #
 
-                # TODO: Add real code        
+                # TODO: Add real code
 
                 try:
                         import os
@@ -36,11 +37,10 @@ class Py2PyCOMPSs(object):
                         copyfile(pycompss_file, output)
                 except Exception as e:
                         raise Py2PyCOMPSsException("[ERROR] Cannot copy PyCOMPSs file", e)
-        
 
-#                                                                                                                                                                                                                                                                              
+#
 # Exception Class
-#                                                                                                                                                                                                                                                                              
+#
 
 class Py2PyCOMPSsException(Exception):
 
@@ -77,13 +77,13 @@ class testPy2PyCOMPSs(unittest.TestCase):
                 self.assertEqual(outContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outFile)
 
 
 #
 # MAIN
 #
+
 if __name__ == '__main__':
         unittest.main()
 

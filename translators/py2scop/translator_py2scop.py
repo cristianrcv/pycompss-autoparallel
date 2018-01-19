@@ -1,4 +1,5 @@
-#!/usr/bin/python                                                                                                                                                                                                                                                              
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
 
 # For better print formatting
@@ -13,6 +14,7 @@ sys.path.insert(0, os.getcwd() + '/../../translators/')
 # 
 # Translator class
 #
+
 class Py2Scop(object):
 
         # WRITE FILE
@@ -109,9 +111,9 @@ class Py2Scop(object):
                         raise Py2ScopException("[ERROR] Cannot copy SCOP file", e)
 
 
-#                                                                                                                                       
+#
 # Exception Class
-#                                                                                                                                                                                                                                                                              
+#
 
 class Py2ScopException(Exception):
 
@@ -126,6 +128,7 @@ class Py2ScopException(Exception):
 #
 # UNIT TESTS
 #
+
 import unittest
 class testPy2Scop(unittest.TestCase):
 
@@ -147,13 +150,13 @@ class testPy2Scop(unittest.TestCase):
                 self.assertEqual(outContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outFile)
 
 
 #
 # MAIN
 #
+
 if __name__ == '__main__':
         import argparse
         parser = argparse.ArgumentParser()

@@ -1,11 +1,12 @@
-#!/usr/bin/python                                                                                                                                                                                                                                                              
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
 
 # For better print formatting
 from __future__ import print_function
 
 
-# 
+#
 # Code Replacer class
 #
 
@@ -81,9 +82,9 @@ class CodeReplacer(object):
                 return new_func
 
 
-#                                                                                                                                                                                                                                                                              
+#
 # Exception Class
-#                                                                                                                                                                                                                                                                              
+#
 
 class CodeReplacerException(Exception):
 
@@ -95,7 +96,7 @@ class CodeReplacerException(Exception):
                 return "Exception on CodeReplacer.replace method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)
 
 
-# 
+#
 # UNIT TEST CASES
 #
 

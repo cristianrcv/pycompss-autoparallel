@@ -1,11 +1,12 @@
-#!/usr/bin/python                                                                                                                                                                                                                                                              
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
 
 # For better print formatting
 from __future__ import print_function
 
 
-# 
+#
 # Translator class
 #
 
@@ -67,9 +68,9 @@ class Scop2PScop2Py(object):
                         print(stdout)
 
 
-#                                                                                                                                 
+#
 # Exception Class
-#                                                                                                                                                                                                                                                                              
+#
 
 class Scop2PScop2PyException(Exception):
 
@@ -81,7 +82,7 @@ class Scop2PScop2PyException(Exception):
                 return "Exception on Scop2PScop2Py.translate method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)        
 
 
-# 
+#
 # UNIT TEST CASES
 #
 

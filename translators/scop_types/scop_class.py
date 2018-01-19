@@ -54,7 +54,7 @@ class Scop(object):
                 for i in range(num_statements):
                         statement, index = Statement.read_os(content, index)
                         statements.append(statement)
-        
+
                 # Process extensions
                 index=108
                 print("INIT EXTS WITH: " + str(content))

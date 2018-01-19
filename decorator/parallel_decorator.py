@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 # -*- coding: utf-8 -*-
 
 # TODO: Workarround with pythonpath
@@ -13,7 +14,7 @@ sys.path.insert(0, os.getcwd() + '/../../translators/')
 
 def parallel(func):
         #
-        # Receives a function annotated with the @parallel decorator and modifies the 
+        # Receives a function annotated with the @parallel decorator and modifies the
         # user code to make it parallel. Since it removes the @parallel decorator each
         # function is only processed once
         #
@@ -147,7 +148,7 @@ def scop2pscop2py(source, output):
         from scop2pscop2py import Scop2PScop2Py
         Scop2PScop2Py.translate(source, output)
 
-        # Finish 
+        # Finish
         if __debug__:
                 print("[decorator] Finished scop2pscop2py")
 

@@ -1,4 +1,5 @@
-#!/usr/bin/python                                                                                                                                                                                                                                                              
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
 
 # For better print formatting
@@ -33,9 +34,9 @@ class CodeLoader(object):
                 return func_source
 
 
-#                                                                                                                                                                                                                                                                              
+#
 # Exception Class
-#                                                                                                                                                                                                                                                                              
+#
 
 class CodeLoaderException(Exception):
 
@@ -51,11 +52,36 @@ class CodeLoaderException(Exception):
 # UNIT TEST CASES
 #
 
+class DummyTestClass():
+
+        def dummy_func():
+                # A dummy function
+                print ("A dummy function")
+
 import unittest
-class testCodeLoader(unittest.TestCase):
+class TestCodeLoader(unittest.TestCase):
 
         def test_code_loader(self):
-                pass
+                # Get a function pointer
+                func_name = 'dummy_func'
+                func_class = DummyTestClass()
+                func = None
+                try:
+                        func = getattr(func_class, func_name)
+                except AttributeError:
+                        raise NotImplementedError("Class `{}` does not implement `{}`".format(func_class.__class__.__name__, func_name))
+
+                # Load function source
+                source_func = CodeLoader.load(func)
+
+                # Check output
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                expect_func_file = dirPath + "/tests/dummy_func_expected.python"
+                with open(expect_func_file, 'r') as f:
+                        expected_func = f.read()
+
+                self.assertEquals(source_func, expected_func)
 
 
 #
