@@ -100,6 +100,9 @@ ENV/
 # mypy
 .mypy_cache/
 
+# Codacy token file
+.coverage_token
+
 # Test files
 translators/scop2pscop2py/tests/test1_matmul.out.py
 translators/scop2pscop2py/tests/test2_seidel.out.py
