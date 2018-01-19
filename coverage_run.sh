@@ -41,6 +41,9 @@
           exit $ev
   fi
 
+  # Show report to user
+  coverage report -m
+
   # Generate XML file
   coverage xml
   ev=$?
