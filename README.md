@@ -1,11 +1,13 @@
 <!-- Automatic builds status -->
 <!-- [![Build Status](https://travis-ci.org/XX)](https://travis-ci.org/XX) -->
 
-<!-- Test coverage status -->
-[![Test Coverage](https://api.codacy.com/project/badge/Coverage/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-pluto?utm_source=github.com&utm_medium=referral&utm_content=cristianrcv/pycompss-pluto&utm_campaign=Badge_Coverage)
+<!-- Codacy -->
+[![codacy_coverage](https://api.codacy.com/project/badge/Coverage/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-pluto?utm_source=github.com&utm_medium=referral&utm_content=cristianrcv/pycompss-pluto&utm_campaign=Badge_Coverage)
 
-<!-- Code Status -->
-[![Code Status](https://api.codacy.com/project/badge/Grade/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-pluto?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cristianrcv/pycompss-pluto&amp;utm_campaign=Badge_Grade)
+[![codacy_grade](https://api.codacy.com/project/badge/Grade/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-pluto?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cristianrcv/pycompss-pluto&amp;utm_campaign=Badge_Grade)
+
+<!-- Codecov -->
+[![codecov](https://codecov.io/gh/cristianrcv/pycompss-pluto/branch/master/graph/badge.svg)](https://codecov.io/gh/cristianrcv/pycompss-pluto)
 
 <!-- Maven central packages version -->
 <!-- [![Maven Central](https://maven-badges.herokuapp.com/maven-central/XX)](https://maven-badges.herokuapp.com/maven-central/XX) -->
