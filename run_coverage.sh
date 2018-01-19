@@ -35,10 +35,20 @@
           translators/py2scop/.coverage \
           translators/scop2pscop2py/.coverage \
           translators/scop_types/.coverage
+  ev=$?
+  if [ "$ev" -ne 0 ]; then
+          echo "[ERROR] Coverage combine failed with exit value: $ev"
+          exit $ev
+  fi
 
   # Generate XML file
   coverage xml
+  ev=$?
+  if [ "$ev" -ne 0 ]; then
+          echo "[ERROR] Coverage XML generation failed with exit value: $ev"
+          exit $ev
+  fi
 
-  # Exit with last command status
-  exit 
+  # Exit all ok
+  exit 0
 
