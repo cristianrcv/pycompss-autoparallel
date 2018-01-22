@@ -15,7 +15,7 @@ class Scop2PScop2Py(object):
         @staticmethod
         def translate(source, output):
                 #
-                # Inputs an OpenScop representation to PLUTO that generates 
+                # Inputs an OpenScop representation to PLUTO that generates
                 # its parallel version in Python
                 #
                 # Arguments:

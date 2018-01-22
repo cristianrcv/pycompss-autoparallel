@@ -67,7 +67,7 @@ class Relation(object):
         @staticmethod
         def read_os(content, index):
                 pass
-                                                                                                                                                                                                                                                                               
+
         @staticmethod
         def read_py(f):
                 pass

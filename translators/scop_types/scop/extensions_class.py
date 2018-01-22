@@ -56,7 +56,7 @@ class Extensions(object):
 
                 # Build Extensions
                 ext = Extensions(scatnames, arrays, coordinates)
-                
+
                 # Return structure
                 return ext, index
 

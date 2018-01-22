@@ -80,7 +80,7 @@ class Py2Scop(object):
         
                 return [scop]
         
-        @staticmethod 
+        @staticmethod
         def translate(source, output):
                 #
                 # Inputs a Python code with scop pragmas and outputs its

@@ -25,7 +25,7 @@ class CodeReplacer(object):
                 # Raise:
                 #       - CodeReplacerException
                 #
-        
+
                 # Retrieve original content
                 try:
                         import inspect
@@ -34,26 +34,26 @@ class CodeReplacer(object):
                                 original_content = f.read()
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot load original code from file", e)
-        
+
                 # Retrieve function content
                 try:
                         func_content = inspect.getsource(func)
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot retrieve function content", e)
-        
+
                 # Retrieve new code
                 try:
                         with open(new_code, 'r') as f:
                                 new_content = f.read()
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot retrieve new content", e)
-        
+
                 # Replace function content by new code in original content
                 try:
                         new_content = original_content.replace(func_content, new_content)
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot generate new content", e)
-        
+
                 # Create new source file
                 try:
                         import os
@@ -64,7 +64,7 @@ class CodeReplacer(object):
                         raise CodeReplacerException("[ERROR] Cannot create new source file", e)
                 if __debug__:
                         print("[code_replacer] New code generated in file " + str(new_file))
-        
+
                 # Load new function from new file
                 # Similar to: from new_module import func.__name__ as new_func
                 new_module = os.path.splitext(new_file)[0]
@@ -77,7 +77,7 @@ class CodeReplacer(object):
                         raise CodeReplacerException("[ERROR] Cannot load new function and module", e)
                 if __debug__:
                         print("[code_replacer] New function: " + str(new_func))
-        
+
                 # Finish
                 return new_func
 

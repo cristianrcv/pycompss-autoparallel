@@ -84,7 +84,7 @@ def parallel(func):
 #
 
 def get_py(func):
-        # 
+        #
         # Returns the source code of the given function
         #
         # Arguments:
