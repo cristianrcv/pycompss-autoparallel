@@ -230,7 +230,7 @@ class TestScop(unittest.TestCase):
         def test_write_os_full(self):
                 # Generate full SCOP
                 scop = TestScop.generate_full_scop()
- 
+
                 # Generate file
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))

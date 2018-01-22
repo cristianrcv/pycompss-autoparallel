@@ -17,7 +17,7 @@ def parallel(func):
         Receives a function annotated with the @parallel decorator and modifies the
         user code to make it parallel. Since it removes the @parallel decorator each
         function is only processed once
-        
+ 
         Arguments:
                 - func : Function annotated with the @parallel decorator
         Return:
@@ -86,7 +86,7 @@ def parallel(func):
 def get_py(func):
         """
         Returns the source code of the given function
-        
+
         Arguments:
                 - func : Function
         Return:
@@ -110,7 +110,7 @@ def py2scop(source, output):
         """
         Inputs a Python code with scop pragmas and outputs its
         openscop representation in the given file
-        
+
         Arguments:
                 source : Python code with scop prgramas
                 output : OpenScop output file path
@@ -133,7 +133,7 @@ def scop2pscop2py(source, output):
         """
         Inputs an OpenScop representation to PLUTO that generates
         its parallel version in Python
-        
+
         Arguments:
                 - source : OpenScop source file path
                 - output : Python output file path
@@ -155,7 +155,7 @@ def scop2pscop2py(source, output):
 def py2pycompss(func_source, source, output):
         """
         Inputs a Python code with parallel annotations and outputs its PyCOMPSs code
-        
+
         Arguments:
                 - func_source : Python original function
                 - source : Python with parallel annotations file path
@@ -179,7 +179,7 @@ def py2pycompss(func_source, source, output):
 def load_generated_code(func, new_code):
         """
         Replaces the func code by the content of new_code
-        
+
         Arguments:
                 - func : function to be replaced
                 - new_code : File path containing the new code
@@ -203,7 +203,7 @@ def load_generated_code(func, new_code):
 def clean(list_of_files):
         """
         Cleans intermediate files
-        
+
         Arguments:
                 - list_of_files : List of files
         Return:

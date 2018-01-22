@@ -34,7 +34,7 @@ class Py2Scop(object):
         @staticmethod
         def readFile(fileName):
                 from scop_types.scop import Global, Statement, Extensions
- 
+
                 # Generate global
                 from scop_types.scop.globl import Context, ContextType, Parameters
                 from scop_types.scop.globl.parameters import Parameter

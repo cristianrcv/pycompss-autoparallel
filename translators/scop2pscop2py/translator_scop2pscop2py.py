@@ -45,7 +45,7 @@ class Scop2PScop2Py(object):
                 try:
                         from subprocess import Popen, PIPE
                         process = Popen(cmd, stdin = None, stdout = PIPE, stderr = PIPE, shell = False)
-        
+
                         # Wait for completion and capture output, error and exit value
                         stdout, stderr = process.communicate()
                         exit_value = process.returncode
