@@ -54,7 +54,7 @@ class Py2Scop(object):
                 s1_ext1 = StatementExtension(["i", "j", "k"], "c[i][j] += a[i][k]*b[k][j];")
                 s1_extensions = [s1_ext1]
                 s1 = Statement(s1_domain, s1_scattering, s1_access, s1_extensions)
- 
+
                 s2_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
                 s2_scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
                 s2_a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])

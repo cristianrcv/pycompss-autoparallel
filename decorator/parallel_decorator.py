@@ -17,7 +17,7 @@ def parallel(func):
         Receives a function annotated with the @parallel decorator and modifies the
         user code to make it parallel. Since it removes the @parallel decorator each
         function is only processed once
- 
+
         Arguments:
                 - func : Function annotated with the @parallel decorator
         Return:
