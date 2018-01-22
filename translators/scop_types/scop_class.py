@@ -225,7 +225,6 @@ class TestScop(unittest.TestCase):
                 self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outputFile)
 
         def test_write_os_full(self):
@@ -248,7 +247,6 @@ class TestScop(unittest.TestCase):
                 self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outputFile)
 
         def ttest_read_os_empty(self):
@@ -298,7 +296,6 @@ class TestScop(unittest.TestCase):
                 self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outputFile)
 
 

@@ -143,7 +143,6 @@ class TestGlobal(unittest.TestCase):
                 self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outputFile)
 
 

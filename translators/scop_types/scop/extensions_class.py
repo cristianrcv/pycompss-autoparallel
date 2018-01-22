@@ -132,7 +132,6 @@ class TestExtensions(unittest.TestCase):
                 self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outputFile)
 
 

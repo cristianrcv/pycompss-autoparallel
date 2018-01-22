@@ -31,7 +31,7 @@ class Parameters(object):
                 # Process each parameter
                 from parameters import Parameter
                 params = []
-                for i in range(num_params):
+                for _ in range(num_params):
                         p, index = Parameter.read_os(content, index)
                         params.append(p)
 
