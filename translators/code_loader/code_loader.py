@@ -54,7 +54,7 @@ class CodeLoaderException(Exception):
 
 class DummyTestClass():
 
-        def dummy_func():
+        def dummy_func(self):
                 # A dummy function
                 print ("A dummy function")
 
