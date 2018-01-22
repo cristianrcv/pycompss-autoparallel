@@ -22,7 +22,7 @@ def parallel(func):
         #       - func : Function annotated with the @parallel decorator
         # Return:
         #
-        
+
         if __debug__:
                 print("[decorator] Start decorator for function: " + str(func))
 
@@ -131,7 +131,7 @@ def py2scop(source, output):
         
 def scop2pscop2py(source, output):
         #
-        # Inputs an OpenScop representation to PLUTO that generates 
+        # Inputs an OpenScop representation to PLUTO that generates
         # its parallel version in Python
         #
         # Arguments:
@@ -222,12 +222,12 @@ def clean(list_of_files):
                 print("[decorator] Finished cleaning")
 
 
-# 
+#
 # UNIT TEST CASES
 #
 
 import unittest
-class testParallelDecorator(unittest.TestCase):
+class TestParallelDecorator(unittest.TestCase):
 
         def test_decorator(self):
                 pass

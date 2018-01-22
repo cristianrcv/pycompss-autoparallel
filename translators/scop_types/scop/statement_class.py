@@ -83,8 +83,12 @@ class Statement(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testStatement(unittest.TestCase):
+class TestStatement(unittest.TestCase):
 
         def test_empty(self):
                 s = Statement()
@@ -139,9 +143,12 @@ class testStatement(unittest.TestCase):
                 self.assertEqual(outputContent, expectedContent)
 
                 # Erase file
-                import os
                 os.remove(outputFile)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

@@ -63,8 +63,12 @@ class Parameter(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testParameter(unittest.TestCase):
+class TestParameter(unittest.TestCase):
 
         def test_empty(self):
                 param = Parameter()
@@ -99,6 +103,10 @@ class testParameter(unittest.TestCase):
                 import os
                 os.remove(fileName)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

@@ -84,8 +84,12 @@ class Extensions(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testExtensions(unittest.TestCase):
+class TestExtensions(unittest.TestCase):
 
         def test_empty(self):
                 ext = Extensions()
@@ -131,6 +135,10 @@ class testExtensions(unittest.TestCase):
                 import os
                 os.remove(outputFile)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

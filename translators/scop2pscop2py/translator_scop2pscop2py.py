@@ -10,7 +10,7 @@ from __future__ import print_function
 # Translator class
 #
 
-class Scop2PScop2Py(object): 
+class Scop2PScop2Py(object):
 
         @staticmethod
         def translate(source, output):
@@ -25,7 +25,7 @@ class Scop2PScop2Py(object):
                 # Raise:
                 #       - Scop2PScop2PyException
                 #
-        
+
                 # PLUTO binary location
                 PLUTO_DIR = "/opt/pluto/bin/" #"/opt/COMPSs/Dependencies/pluto/"
                 PLC = PLUTO_DIR + "polycc"
@@ -61,7 +61,7 @@ class Scop2PScop2Py(object):
                         print(stderr)
                         raise Scop2PScop2PyException("[ERROR] Pluto binary exit value = " + str(exit_value), None)
         
-                # Finish 
+                # Finish
                 if __debug__:
                         print("[scop2pscop2py] Pluto binary successfull")
                         print("[scop2pscop2py] Binary output:")
@@ -79,7 +79,7 @@ class Scop2PScop2PyException(Exception):
                 self.nested_exception = nested_exception
 
         def __str__(self):
-                return "Exception on Scop2PScop2Py.translate method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)        
+                return "Exception on Scop2PScop2Py.translate method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)
 
 
 #
@@ -87,7 +87,7 @@ class Scop2PScop2PyException(Exception):
 #
 
 import unittest
-class testScop2PScop2Py(unittest.TestCase):
+class TestScop2PScop2Py(unittest.TestCase):
 
         def test_matmul(self):
                 import os

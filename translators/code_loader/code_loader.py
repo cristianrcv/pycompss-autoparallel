@@ -14,7 +14,7 @@ class CodeLoader(object):
 
         @staticmethod
         def load(func):
-                # 
+                #
                 # Returns the source code of the given function
                 #
                 # Arguments:
@@ -24,7 +24,7 @@ class CodeLoader(object):
                 # Raise:
                 #       - GetPyException
                 #
-        
+
                 try:
                         import inspect
                         func_source = inspect.getsource(func)

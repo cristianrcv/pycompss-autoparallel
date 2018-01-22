@@ -57,7 +57,7 @@ class Py2PyCOMPSsException(Exception):
 #
 
 import unittest
-class testPy2PyCOMPSs(unittest.TestCase):
+class TestPy2PyCOMPSs(unittest.TestCase):
 
         def test_matmul(self):
                 import os
@@ -65,7 +65,7 @@ class testPy2PyCOMPSs(unittest.TestCase):
                 srcFile = dirPath + "/tests/test1_matmul.src.python"
                 expectedFile = dirPath + "/tests/test1_matmul.expected.pycompss"
                 outFile = dirPath + "/tests/test1_matmul.out.pycompss"
- 
+
                 # Translate
                 Py2PyCOMPSs.translate(None, srcFile, outFile)
                

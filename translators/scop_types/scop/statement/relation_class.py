@@ -92,8 +92,12 @@ class Relation(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testRelation(unittest.TestCase):
+class TestRelation(unittest.TestCase):
 
         def test_empty(self):
                 relation = Relation()
@@ -153,6 +157,10 @@ class testRelation(unittest.TestCase):
                 import os
                 os.remove(fileName)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

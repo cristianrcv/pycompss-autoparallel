@@ -56,11 +56,11 @@ class Arrays(object):
 
                 # Build Arrays
                 arrays = Arrays(values)
-                
+
                 # Return structure
                 return arrays, index
 
-        @staticmethod                                                                                                                                                                                                                                                          
+        @staticmethod
         def read_py(f):
                 pass
 
@@ -88,8 +88,12 @@ class Arrays(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testArrays(unittest.TestCase):
+class TestArrays(unittest.TestCase):
 
         def test_empty(self):
                 a = Arrays()
@@ -121,6 +125,10 @@ class testArrays(unittest.TestCase):
                 import os
                 os.remove(fileName)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

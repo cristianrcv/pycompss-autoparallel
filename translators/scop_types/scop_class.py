@@ -51,7 +51,7 @@ class Scop(object):
                 index = index + 1
 
                 statements = []
-                for i in range(num_statements):
+                for _ in range(num_statements):
                         statement, index = Statement.read_os(content, index)
                         statements.append(statement)
 
@@ -112,10 +112,11 @@ class Scop(object):
                 pass
 
 import unittest
-class testScop(unittest.TestCase):
+class TestScop(unittest.TestCase):
 
         # Helper method for unit tests
-        def generate_empty_scop(self):
+        @staticmethod
+        def generate_empty_scop():
                 from scop import Global, Statement, Extensions
 
                 # Generate global
@@ -134,7 +135,8 @@ class testScop(unittest.TestCase):
                 return scop
 
         # Helper method for unit tests
-        def generate_full_scop(self):
+        @staticmethod
+        def generate_full_scop():
                 from scop import Global, Statement, Extensions
                 
                 # Generate global
@@ -205,7 +207,7 @@ class testScop(unittest.TestCase):
 
         def test_write_os_empty(self):
                 # Generate empty SCOP
-                scop = self.generate_empty_scop()
+                scop = TestScop.generate_empty_scop()
  
                 # Generate file
                 import os
@@ -228,7 +230,7 @@ class testScop(unittest.TestCase):
 
         def test_write_os_full(self):
                 # Generate full SCOP
-                scop = self.generate_full_scop()
+                scop = TestScop.generate_full_scop()
  
                 # Generate file
                 import os
@@ -257,7 +259,7 @@ class testScop(unittest.TestCase):
                 scop = Scop.read_os(inputFile)
 
                 # Build expected content
-                scopExp = self.generate_empty_scop()
+                scopExp = TestScop.generate_empty_scop()
 
                 # Check loaded content
                 self.assertEqual(scop, scopExp)
@@ -270,7 +272,7 @@ class testScop(unittest.TestCase):
                 scop = Scop.read_os(inputFile)
 
                 # Build expected content
-                scopExp = self.generate_full_scop()
+                scopExp = TestScop.generate_full_scop()
 
                 # Check loaded content
                 self.assertEqual(scop, scopExp)

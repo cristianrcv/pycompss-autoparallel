@@ -87,7 +87,7 @@ class Coordinates(object):
                 # Return structure
                 return c, index
 
-        @staticmethod                                                                                                                                                                                                                                                          
+        @staticmethod
         def read_py(f):
                 pass
 
@@ -119,8 +119,12 @@ class Coordinates(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testCoordinates(unittest.TestCase):
+class TestCoordinates(unittest.TestCase):
 
         def test_empty(self):
                 c = Coordinates()
@@ -173,6 +177,10 @@ class testCoordinates(unittest.TestCase):
                 import os
                 os.remove(fileName)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

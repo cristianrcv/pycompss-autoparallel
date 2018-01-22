@@ -32,7 +32,7 @@ class StatementExtension(object):
         @staticmethod
         def read_os(content, index):
                 pass
-                                                                                                                                                                                                                                                                               
+
         @staticmethod
         def read_py(f):
                 pass
@@ -67,8 +67,12 @@ class StatementExtension(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testStatementExtension(unittest.TestCase):
+class TestStatementExtension(unittest.TestCase):
 
         def test_empty(self):
                 extension = StatementExtension()
@@ -104,6 +108,10 @@ class testStatementExtension(unittest.TestCase):
                 import os
                 os.remove(fileName)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

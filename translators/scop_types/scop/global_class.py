@@ -79,8 +79,12 @@ class Global(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testGlobal(unittest.TestCase):
+class TestGlobal(unittest.TestCase):
 
         def test_empty(self):
                 g = Global()
@@ -142,6 +146,10 @@ class testGlobal(unittest.TestCase):
                 import os
                 os.remove(outputFile)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

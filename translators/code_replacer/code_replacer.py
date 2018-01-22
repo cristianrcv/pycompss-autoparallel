@@ -101,7 +101,7 @@ class CodeReplacerException(Exception):
 #
 
 import unittest
-class testCodeReplacer(unittest.TestCase):
+class TestCodeReplacer(unittest.TestCase):
 
         def test_code_replacer(self):
                 pass

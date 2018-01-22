@@ -89,8 +89,13 @@ class Context(object):
         def write_py(self, f):
                 pass
 
+
+#
+# UNIT TESTS
+#
+
 import unittest
-class testContext(unittest.TestCase):
+class TestContext(unittest.TestCase):
 
         def test_empty(self):
                 context = Context()
@@ -146,6 +151,10 @@ class testContext(unittest.TestCase):
                 import os
                 os.remove(fileName)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()

@@ -61,8 +61,12 @@ class Scatnames(object):
                 pass
 
 
+#
+# UNIT TESTS
+#
+
 import unittest
-class testScatnames(unittest.TestCase):
+class TestScatnames(unittest.TestCase):
 
         def test_empty(self):
                 s = Scatnames()
@@ -94,6 +98,10 @@ class testScatnames(unittest.TestCase):
                 import os
                 os.remove(fileName)
 
+
+#
+# MAIN
+#
 
 if __name__ == '__main__':
         unittest.main()
