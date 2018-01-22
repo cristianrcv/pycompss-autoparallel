@@ -138,7 +138,7 @@ class TestPy2Scop(unittest.TestCase):
                 srcFile = dirPath + "/tests/test1_matmul.src.python"
                 expectedFile = dirPath + "/tests/test1_matmul.expected.scop"
                 outFile = dirPath + "/tests/test1_matmul.out.scop"
- 
+
                 # Translate
                 Py2Scop.translate(srcFile, outFile)
 

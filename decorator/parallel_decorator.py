@@ -124,7 +124,7 @@ def py2scop(source, output):
 
         from py2scop import Py2Scop
         Py2Scop.translate(source, output)
-        
+
         # Finish
         if __debug__:
                 print("[decorator] Finished py2scop")
