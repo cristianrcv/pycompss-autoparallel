@@ -138,14 +138,14 @@ class TestScop(unittest.TestCase):
         @staticmethod
         def generate_full_scop():
                 from scop import Global, Statement, Extensions
-                
+
                 # Generate global
                 from scop.globl import Context, ContextType, Parameters
                 from scop.globl.parameters import Parameter
                 context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
                 params = Parameters([Parameter("strings", "mSize kSize nSize")])
                 g = Global("C", context, params)
-                
+
                 # Generate statements
                 from scop.statement import Relation, RelationType, StatementExtension
                 s1_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])

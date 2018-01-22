@@ -68,7 +68,7 @@ class TestPy2PyCOMPSs(unittest.TestCase):
 
                 # Translate
                 Py2PyCOMPSs.translate(None, srcFile, outFile)
-               
+
                 # Check file content
                 with open(expectedFile, 'r') as f:
                         expectedContent = f.read()

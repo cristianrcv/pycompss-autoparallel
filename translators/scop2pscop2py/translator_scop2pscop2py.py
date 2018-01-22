@@ -29,7 +29,7 @@ class Scop2PScop2Py(object):
                 # PLUTO binary location
                 PLUTO_DIR = "/opt/pluto/bin/" #"/opt/COMPSs/Dependencies/pluto/"
                 PLC = PLUTO_DIR + "polycc"
-        
+
                 # Pluto binary options
                 mandatory_opts = [ "--readscop", "-o " + output ]
                 basic_opts = [ "--tile", "--parallel" ]

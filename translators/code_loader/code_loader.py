@@ -30,7 +30,7 @@ class CodeLoader(object):
                         func_source = inspect.getsource(func)
                 except Exception as e:
                         raise CodeLoaderException("[ERROR] Cannot obtain source code from function", e)
-        
+
                 return func_source
 
 
@@ -48,13 +48,14 @@ class CodeLoaderException(Exception):
                 return "Exception on CodeLoader.load method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)
 
 
-# 
+#
 # UNIT TEST CASES
 #
 
 class DummyTestClass():
 
-        def dummy_func(self):
+        @staticmethod
+        def dummy_func():
                 # A dummy function
                 print ("A dummy function")
 

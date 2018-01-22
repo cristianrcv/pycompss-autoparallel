@@ -105,7 +105,7 @@ def get_py(func):
         if __debug__:
                 print("[decorator] Finished get_py")
         return func_source
-        
+
 def py2scop(source, output):
         #
         # Inputs a Python code with scop pragmas and outputs its
