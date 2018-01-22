@@ -208,7 +208,7 @@ class TestScop(unittest.TestCase):
         def test_write_os_empty(self):
                 # Generate empty SCOP
                 scop = TestScop.generate_empty_scop()
- 
+
                 # Generate file
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))

@@ -35,12 +35,12 @@ class Scop2PScop2Py(object):
                 basic_opts = [ "--tile", "--parallel" ]
                 adv_opts = [] # ["--rar", "--lastwriter"]
                 mode_opts = [] # ["--silent"] # ["--debug"] # ["--moredebug"]
-        
+
                 # Construct binary call
                 cmd = [PLC, source] + mandatory_opts + basic_opts + adv_opts + mode_opts
                 if __debug__:
                         print("[scop2pscop2py] Command: " + str(cmd))
-        
+
                 # Call binary
                 try:
                         from subprocess import Popen, PIPE
@@ -51,7 +51,7 @@ class Scop2PScop2Py(object):
                         exit_value = process.returncode
                 except Exception as e:
                         raise Scop2PScop2PyException("[ERROR] PLUTO binary execution error", e)
-        
+
                 # Check process values
                 if exit_value != 0:
                         print("[ERROR] Pluto binary returned non-zero exit value: " + str(exit_value))
@@ -60,7 +60,7 @@ class Scop2PScop2Py(object):
                         print("[scop2pscop2py] Binary error:")
                         print(stderr)
                         raise Scop2PScop2PyException("[ERROR] Pluto binary exit value = " + str(exit_value), None)
-        
+
                 # Finish
                 if __debug__:
                         print("[scop2pscop2py] Pluto binary successfull")

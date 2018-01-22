@@ -34,14 +34,14 @@ class Py2Scop(object):
         @staticmethod
         def readFile(fileName):
                 from scop_types.scop import Global, Statement, Extensions
-        
+ 
                 # Generate global
                 from scop_types.scop.globl import Context, ContextType, Parameters
                 from scop_types.scop.globl.parameters import Parameter
                 context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
                 params = Parameters([Parameter("strings", "mSize kSize nSize")])
                 g = Global("C", context, params)
-        
+
                 # Generate statements
                 from scop_types.scop.statement import Relation, RelationType, StatementExtension
                 s1_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
@@ -54,7 +54,7 @@ class Py2Scop(object):
                 s1_ext1 = StatementExtension(["i", "j", "k"], "c[i][j] += a[i][k]*b[k][j];")
                 s1_extensions = [s1_ext1]
                 s1 = Statement(s1_domain, s1_scattering, s1_access, s1_extensions)
-        
+ 
                 s2_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
                 s2_scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
                 s2_a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
@@ -64,22 +64,22 @@ class Py2Scop(object):
                 s2_ext1 = StatementExtension(["i", "j", "k"], "a[i][k] += b[i][k];")
                 s2_extensions = [s2_ext1]
                 s2 = Statement(s2_domain, s2_scattering, s2_access, s2_extensions)
-        
+
                 statements = [s1, s2]
-        
+
                 # Generate extensions
                 from scop_types.scop.extensions import Scatnames, Arrays, Coordinates
                 scatnames = Scatnames(["b0", "i", "b1", "j", "b2", "k", "b3"])
                 arrays = Arrays(["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"])
                 coordinates = Coordinates("example2_src_matmul.cc", 72, 0, 80, 0, 8)
                 e = Extensions(scatnames, arrays, coordinates)
-        
+
                 # Generate SCOP
                 from scop_types import Scop
                 scop = Scop(g, statements, e)
-        
+
                 return [scop]
-        
+
         @staticmethod
         def translate(source, output):
                 #
@@ -93,14 +93,14 @@ class Py2Scop(object):
                 # Raise:
                 #       - Py2ScopException
                 #
-                
+
                 # TODO: Add real code
                 # Generate scops from source file
                 #scops = readFile(srcFile)
-        
+
                 # Generate file
                 #writeFile(outFile, scops)
-        
+
                 try:
                         import os
                         dirPath = os.path.dirname(os.path.realpath(__file__))
@@ -141,7 +141,7 @@ class TestPy2Scop(unittest.TestCase):
  
                 # Translate
                 Py2Scop.translate(srcFile, outFile)
-               
+
                 # Check file content
                 with open(expectedFile, 'r') as f:
                         expectedContent = f.read()

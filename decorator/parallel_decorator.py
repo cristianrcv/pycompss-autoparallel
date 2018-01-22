@@ -13,15 +13,15 @@ sys.path.insert(0, os.getcwd() + '/../../translators/')
 #
 
 def parallel(func):
-        #
-        # Receives a function annotated with the @parallel decorator and modifies the
-        # user code to make it parallel. Since it removes the @parallel decorator each
-        # function is only processed once
-        #
-        # Arguments:
-        #       - func : Function annotated with the @parallel decorator
-        # Return:
-        #
+        """
+        Receives a function annotated with the @parallel decorator and modifies the
+        user code to make it parallel. Since it removes the @parallel decorator each
+        function is only processed once
+        
+        Arguments:
+                - func : Function annotated with the @parallel decorator
+        Return:
+        """
 
         if __debug__:
                 print("[decorator] Start decorator for function: " + str(func))
@@ -84,16 +84,16 @@ def parallel(func):
 #
 
 def get_py(func):
-        #
-        # Returns the source code of the given function
-        #
-        # Arguments:
-        #       - func : Function
-        # Return:
-        #       - func_source : Source code of the function
-        # Raise:
-        #       - GetPyException
-        #
+        """
+        Returns the source code of the given function
+        
+        Arguments:
+                - func : Function
+        Return:
+                - func_source : Source code of the function
+        Raise:
+                - GetPyException
+        """
 
         if __debug__:
                 print("[decorator] Start get_py")
@@ -107,17 +107,17 @@ def get_py(func):
         return func_source
 
 def py2scop(source, output):
-        #
-        # Inputs a Python code with scop pragmas and outputs its
-        # openscop representation in the given file
-        #
-        # Arguments:
-        #       source : Python code with scop prgramas
-        #       output : OpenScop output file path
-        # Return:
-        # Raise:
-        #       - Py2ScopException
-        #
+        """
+        Inputs a Python code with scop pragmas and outputs its
+        openscop representation in the given file
+        
+        Arguments:
+                source : Python code with scop prgramas
+                output : OpenScop output file path
+        Return:
+        Raise:
+                - Py2ScopException
+        """
 
         if __debug__:
                 print("[decorator] Start py2scop")
@@ -128,19 +128,19 @@ def py2scop(source, output):
         # Finish
         if __debug__:
                 print("[decorator] Finished py2scop")
-        
+ 
 def scop2pscop2py(source, output):
-        #
-        # Inputs an OpenScop representation to PLUTO that generates
-        # its parallel version in Python
-        #
-        # Arguments:
-        #       - source : OpenScop source file path
-        #       - output : Python output file path
-        # Return:
-        # Raise:
-        #       - Scop2PScop2PyException
-        #
+        """
+        Inputs an OpenScop representation to PLUTO that generates
+        its parallel version in Python
+        
+        Arguments:
+                - source : OpenScop source file path
+                - output : Python output file path
+        Return:
+        Raise:
+                - Scop2PScop2PyException
+        """
 
         if __debug__:
                 print("[decorator] Start scop2pscop2py")
@@ -153,18 +153,18 @@ def scop2pscop2py(source, output):
                 print("[decorator] Finished scop2pscop2py")
 
 def py2pycompss(func_source, source, output):
-        #
-        # Inputs a Python code with parallel annotations and outputs its PyCOMPSs code
-        #
-        # Arguments:
-        #       - func_source : Python original function
-        #       - source : Python with parallel annotations file path
-        #       - output : PyCOMPSs file path
-        # Return:
-        #       - error : Non-zero value if an error is found, 0 otherwise
-        # Raise:
-        #       - Py2PyCOMPSsException
-        #
+        """
+        Inputs a Python code with parallel annotations and outputs its PyCOMPSs code
+        
+        Arguments:
+                - func_source : Python original function
+                - source : Python with parallel annotations file path
+                - output : PyCOMPSs file path
+        Return:
+                - error : Non-zero value if an error is found, 0 otherwise
+        Raise:
+                - Py2PyCOMPSsException
+        """
 
         if __debug__:
                 print("[decorator] Start py2pycompss")
@@ -177,17 +177,17 @@ def py2pycompss(func_source, source, output):
                 print("[decorator] Finished py2pycompss")
 
 def load_generated_code(func, new_code):
-        #
-        # Replaces the func code by the content of new_code
-        #
-        # Arguments:
-        #       - func : function to be replaced
-        #       - new_code : File path containing the new code
-        # Return:
-        #       - new_func : pointer to the new function
-        # Raise:
-        #       - LoadGeneratedCodeException
-        #
+        """
+        Replaces the func code by the content of new_code
+        
+        Arguments:
+                - func : function to be replaced
+                - new_code : File path containing the new code
+        Return:
+                - new_func : pointer to the new function
+        Raise:
+                - LoadGeneratedCodeException
+        """
 
         if __debug__:
                 print("[decorator] Start load_generated_code")
@@ -201,13 +201,13 @@ def load_generated_code(func, new_code):
         return new_func
 
 def clean(list_of_files):
-        #
-        # Cleans intermediate files
-        #
-        # Arguments:
-        #       - list_of_files : List of files
-        # Return:
-        #
+        """
+        Cleans intermediate files
+        
+        Arguments:
+                - list_of_files : List of files
+        Return:
+        """
 
         if __debug__:
                 print("[decorator] Cleaning...")
