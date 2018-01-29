@@ -19,7 +19,7 @@ def initialize(n, m, bSize, random):
 
 # Performs the matrix multiplication by blocks
 from pycompss.api.parallel import parallel
-@parallel
+@parallel()
 def matmul(mSize, nSize, kSize, bSize, debug):
         # Initialize
         a = initialize(mSize, nSize, bSize, True)

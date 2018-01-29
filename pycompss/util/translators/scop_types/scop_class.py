@@ -44,11 +44,11 @@ class Scop(object):
                         index = index + 1
 
                 # Process global information
-                from pycompss.utils.translators.scop_types.scop.global_class import Global
+                from pycompss.util.translators.scop_types.scop.global_class import Global
                 globl, index = Global.read_os(content, index)
 
                 # Process statements
-                from pycompss.utils.translators.scop_types.scop.statement_class import Statement
+                from pycompss.util.translators.scop_types.scop.statement_class import Statement
                 while content[index] == "\n" or content[index].startswith('#'):
                         index = index + 1
                 num_statements = int(content[index])
@@ -64,7 +64,7 @@ class Scop(object):
                 print("INIT EXTS WITH: " + str(content))
                 print("INIT EXTS WITH: " + str(index))
 
-                from pycompss.utils.translators.scop_types.scop.extensions_class import Extensions
+                from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
                 extensions, index = Extensions.read_os(content, index)
 
                 # Skip footer
@@ -125,9 +125,9 @@ class TestScop(unittest.TestCase):
         # Helper method for unit tests
         @staticmethod
         def generate_empty_scop():
-                from pycompss.utils.translators.scop_types.scop.global_class import Global
-                from pycompss.utils.translators.scop_types.scop.statement_class import Statement
-                from pycompss.utils.translators.scop_types.scop.extensions_class import Extensions
+                from pycompss.util.translators.scop_types.scop.global_class import Global
+                from pycompss.util.translators.scop_types.scop.statement_class import Statement
+                from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
 
                 # Generate global
                 g = Global()
@@ -147,21 +147,21 @@ class TestScop(unittest.TestCase):
         # Helper method for unit tests
         @staticmethod
         def generate_full_scop():
-                from pycompss.utils.translators.scop_types.scop.global_class import Global
-                from pycompss.utils.translators.scop_types.scop.statement_class import Statement
-                from pycompss.utils.translators.scop_types.scop.extensions_class import Extensions
+                from pycompss.util.translators.scop_types.scop.global_class import Global
+                from pycompss.util.translators.scop_types.scop.statement_class import Statement
+                from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
 
                 # Generate global
-                from pycompss.utils.translators.scop_types.scop.globl.context_class import Context, ContextType
-                from pycompss.utils.translators.scop_types.scop.globl.parameters_class import Parameters
-                from pycompss.utils.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                from pycompss.util.translators.scop_types.scop.globl.context_class import Context, ContextType
+                from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
                 params = Parameters([Parameter("strings", "mSize kSize nSize")])
                 g = Global("C", context, params)
 
                 # Generate statements
-                from pycompss.utils.translators.scop_types.scop.statement.relation_class import Relation, RelationType
-                from pycompss.utils.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
+                from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation, RelationType
+                from pycompss.util.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
                 s1_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
                 s1_scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
                 s1_a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
@@ -185,9 +185,9 @@ class TestScop(unittest.TestCase):
                 statements = [s1, s2]
 
                 # Generate extensions
-                from pycompss.utils.translators.scop_types.scop.extensions.arrays_class import Arrays
-                from pycompss.utils.translators.scop_types.scop.extensions.coordinates_class import Coordinates
-                from pycompss.utils.translators.scop_types.scop.extensions.scatnames_class import Scatnames
+                from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
+                from pycompss.util.translators.scop_types.scop.extensions.coordinates_class import Coordinates
+                from pycompss.util.translators.scop_types.scop.extensions.scatnames_class import Scatnames
                 scatnames = Scatnames(["b0", "i", "b1", "j", "b2", "k", "b3"])
                 arrays = Arrays(["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"])
                 coordinates = Coordinates("example2_src_matmul.cc", 72, 0, 80, 0, 8)
@@ -206,13 +206,13 @@ class TestScop(unittest.TestCase):
                 self.assertEqual(scop.get_extensions(), None)
 
         def test_full(self):
-                from pycompss.utils.translators.scop_types.scop.global_class import Global
-                from pycompss.utils.translators.scop_types.scop.statement_class import Statement
-                from pycompss.utils.translators.scop_types.scop.extensions_class import Extensions
+                from pycompss.util.translators.scop_types.scop.global_class import Global
+                from pycompss.util.translators.scop_types.scop.statement_class import Statement
+                from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
 
-                from pycompss.utils.translators.scop_types.scop.globl.context_class import Context, ContextType
-                from pycompss.utils.translators.scop_types.scop.globl.parameters_class import Parameters
-                from pycompss.utils.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                from pycompss.util.translators.scop_types.scop.globl.context_class import Context, ContextType
+                from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 g = Global("C", Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3), Parameters([Parameter("strings", "mSize kSize nSize")]))
                 s1 = Statement()
                 s2 = Statement()

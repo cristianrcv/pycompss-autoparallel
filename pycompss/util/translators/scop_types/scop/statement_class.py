@@ -102,8 +102,8 @@ class TestStatement(unittest.TestCase):
                 self.assertEqual(s.get_extensions(), None)
 
         def test_full(self):
-                from pycompss.utils.translators.scop_types.scop.statement.relation_class import Relation, RelationType
-                from pycompss.utils.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
+                from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation, RelationType
+                from pycompss.util.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
                 domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
                 scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
                 a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
@@ -120,8 +120,8 @@ class TestStatement(unittest.TestCase):
                 self.assertEqual(s.get_extensions(), extensions)
 
         def test_write_os(self):
-                from pycompss.utils.translators.scop_types.scop.statement.relation_class import Relation, RelationType
-                from pycompss.utils.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
+                from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation, RelationType
+                from pycompss.util.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
                 domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
                 scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
                 a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])

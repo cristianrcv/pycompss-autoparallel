@@ -33,7 +33,7 @@ class Parameters(object):
                 index = index + 1
 
                 # Process each parameter
-                from pycompss.utils.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 params = []
                 for _ in range(num_params):
                         p, index = Parameter.read_os(content, index)
@@ -75,7 +75,7 @@ class TestParameters(unittest.TestCase):
                 self.assertEqual(params.get_parameters(), None)
 
         def test_full(self):
-                from pycompss.utils.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 t = "strings"
                 val = "mSize kSize nSize"
                 p1 = Parameter(t, val)
@@ -84,7 +84,7 @@ class TestParameters(unittest.TestCase):
                 self.assertEqual(params.get_parameters(), [p1])
 
         def test_write_os(self):
-                from pycompss.utils.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 t = "strings"
                 val = "mSize kSize nSize"
                 p1 = Parameter(t, val)

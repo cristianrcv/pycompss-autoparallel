@@ -5,6 +5,9 @@
 # For better print formatting
 from __future__ import print_function
 
+# Imports
+import unittest
+
 
 #
 # Translator class
@@ -38,6 +41,7 @@ class Py2PyCOMPSs(object):
                 except Exception as e:
                         raise Py2PyCOMPSsException("[ERROR] Cannot copy PyCOMPSs file", e)
 
+
 #
 # Exception Class
 #
@@ -56,7 +60,6 @@ class Py2PyCOMPSsException(Exception):
 # UNIT TESTS
 #
 
-import unittest
 class TestPy2PyCOMPSs(unittest.TestCase):
 
         def test_matmul(self):
@@ -86,4 +89,3 @@ class TestPy2PyCOMPSs(unittest.TestCase):
 
 if __name__ == '__main__':
         unittest.main()
-

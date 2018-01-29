@@ -39,13 +39,13 @@ class Extensions(object):
                         index = index + 1
 
                 # Process optional field: scatnames
-                from pycompss.utils.translators.scop_types.scop.extensions.scatnames_class import Scatnames
+                from pycompss.util.translators.scop_types.scop.extensions.scatnames_class import Scatnames
                 scatnames = None
                 if content[index] == '<scatnames>\n':
                         scatnames, index = Scatnames.read_os(content, index)
 
                 # Process mandatory field: arrays
-                from pycompss.utils.translators.scop_types.scop.extensions.arrays_class import Arrays
+                from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
                 arrays, index = Arrays.read_os(content, index)
 
                 # Skip empty lines and any annotation
@@ -53,7 +53,7 @@ class Extensions(object):
                         index = index + 1
 
                 # Process optional field: coordinates
-                from pycompss.utils.translators.scop_types.scop.extensions.coordinates_class import Coordinates
+                from pycompss.util.translators.scop_types.scop.extensions.coordinates_class import Coordinates
                 coordinates = None
                 if index < len(content) and content[index] == '<coordinates>\n':
                         coordinates, index = Coordinates.read_os(content, index)
@@ -102,9 +102,9 @@ class TestExtensions(unittest.TestCase):
                 self.assertEqual(ext.get_coordinates(), None)
 
         def test_full(self):
-                from pycompss.utils.translators.scop_types.scop.extensions.arrays_class import Arrays
-                from pycompss.utils.translators.scop_types.scop.extensions.coordinates_class import Coordinates
-                from pycompss.utils.translators.scop_types.scop.extensions.scatnames_class import Scatnames
+                from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
+                from pycompss.util.translators.scop_types.scop.extensions.coordinates_class import Coordinates
+                from pycompss.util.translators.scop_types.scop.extensions.scatnames_class import Scatnames
                 scatnames = Scatnames(["b0", "i", "b1", "j", "b2", "k", "b3"])
                 arrays = Arrays(["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"])
                 coordinates = Coordinates("example2_src_matmul.cc", 72, 0, 80, 0, 8)
@@ -115,9 +115,9 @@ class TestExtensions(unittest.TestCase):
                 self.assertEqual(ext.get_coordinates(), coordinates)
 
         def test_write_os(self):
-                from pycompss.utils.translators.scop_types.scop.extensions.arrays_class import Arrays
-                from pycompss.utils.translators.scop_types.scop.extensions.coordinates_class import Coordinates
-                from pycompss.utils.translators.scop_types.scop.extensions.scatnames_class import Scatnames
+                from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
+                from pycompss.util.translators.scop_types.scop.extensions.coordinates_class import Coordinates
+                from pycompss.util.translators.scop_types.scop.extensions.scatnames_class import Scatnames
                 scatnames = Scatnames(["b0", "i", "b1", "j", "b2", "k", "b3"])
                 arrays = Arrays(["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"])
                 coordinates = Coordinates("example2_src_matmul.cc", 72, 0, 80, 0, 8)

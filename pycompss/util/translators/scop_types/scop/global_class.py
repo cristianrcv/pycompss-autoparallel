@@ -43,11 +43,11 @@ class Global(object):
                 index = index + 1
 
                 # Process context
-                from pycompss.utils.translators.scop_types.scop.globl.context_class import Context
+                from pycompss.util.translators.scop_types.scop.globl.context_class import Context
                 context, index = Context.read_os(content, index)
 
                 # Process parameters
-                from pycompss.utils.translators.scop_types.scop.globl.parameters_class import Parameters
+                from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
                 parameters, index = Parameters.read_os(content, index)
 
                 # Build Global
@@ -99,11 +99,11 @@ class TestGlobal(unittest.TestCase):
         def test_full(self):
                 lang = "C"
 
-                from pycompss.utils.translators.scop_types.scop.globl.context_class import Context, ContextType
+                from pycompss.util.translators.scop_types.scop.globl.context_class import Context, ContextType
                 context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
 
-                from pycompss.utils.translators.scop_types.scop.globl.parameters_class import Parameters
-                from pycompss.utils.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 t = "strings"
                 val = "mSize kSize nSize"
                 p1 = Parameter(t, val)
@@ -118,11 +118,11 @@ class TestGlobal(unittest.TestCase):
         def test_write_os(self):
                 lang = "C"
 
-                from pycompss.utils.translators.scop_types.scop.globl.context_class import Context, ContextType
+                from pycompss.util.translators.scop_types.scop.globl.context_class import Context, ContextType
                 context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
 
-                from pycompss.utils.translators.scop_types.scop.globl.parameters_class import Parameters
-                from pycompss.utils.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 t = "strings"
                 val = "mSize kSize nSize"
                 p1 = Parameter(t, val)
