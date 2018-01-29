@@ -1,5 +1,10 @@
 #!/usr/bin/python
+
 # -*- coding: utf-8 -*-
+
+# Imports
+from pycompss.api.parallel import parallel
+
 
 # Initializes a matrix with size (n x m) with blocks (bSize x bSize) randomly or not
 def initialize(n, m, bSize, random):
@@ -17,8 +22,8 @@ def initialize(n, m, bSize, random):
                         matrix[i].append(mb)
         return matrix
 
+
 # Performs the matrix multiplication by blocks
-from pycompss.api.parallel import parallel
 @parallel()
 def matmul(mSize, nSize, kSize, bSize, debug):
         # Initialize
@@ -30,7 +35,7 @@ def matmul(mSize, nSize, kSize, bSize, debug):
         if debug:
                 print "Matrix A:"
                 print a
-	        print "Matrix B:"
+                print "Matrix B:"
                 print b
                 print "Matrix C:"
                 print c
@@ -45,7 +50,7 @@ def matmul(mSize, nSize, kSize, bSize, debug):
         # Debug
         if debug:
                 print "Matrix C:"
-	        print c
+                print c
 
         # Result
         return c
@@ -70,4 +75,3 @@ if __name__ == "__main__":
 
         # Log results and time
         print "Ellapsed Time {} (s)".format(endTime - startTime)
-
