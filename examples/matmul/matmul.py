@@ -18,10 +18,7 @@ def initialize(n, m, bSize, random):
         return matrix
 
 # Performs the matrix multiplication by blocks
-import sys
-import os
-sys.path.insert(0, os.getcwd() + '/../../decorator')
-from parallel_decorator import parallel
+from pycompss.api.parallel import parallel
 @parallel
 def matmul(mSize, nSize, kSize, bSize, debug):
         # Initialize
