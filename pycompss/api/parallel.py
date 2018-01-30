@@ -2,6 +2,9 @@
 
 # -*- coding: utf-8 -*-
 
+# For better print formatting
+from __future__ import print_function
+
 # Imports
 import unittest
 import logging

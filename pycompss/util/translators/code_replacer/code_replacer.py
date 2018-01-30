@@ -7,6 +7,14 @@ from __future__ import print_function
 
 # Imports
 import unittest
+import logging
+
+
+#
+# Logger definition
+#
+
+logger = logging.getLogger(__name__)
 
 
 #
@@ -66,20 +74,20 @@ class CodeReplacer(object):
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot create new source file", e)
                 if __debug__:
-                        print("[code_replacer] New code generated in file " + str(new_file))
+                        logger.debug("[code_replacer] New code generated in file " + str(new_file))
 
                 # Load new function from new file
                 # Similar to: from new_module import func.__name__ as new_func
                 new_module = os.path.splitext(new_file)[0]
                 if __debug__:
-                        print("[code_replacer] Import module " + str(func.__name__) + " from " + str(new_module))
+                        logger.debug("[code_replacer] Import module " + str(func.__name__) + " from " + str(new_module))
                 try:
                         import importlib
                         new_func = getattr(importlib.import_module(new_module), func.__name__)
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot load new function and module", e)
                 if __debug__:
-                        print("[code_replacer] New function: " + str(new_func))
+                        logger.debug("[code_replacer] New function: " + str(new_func))
 
                 # Finish
                 return new_func

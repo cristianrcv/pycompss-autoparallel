@@ -7,6 +7,14 @@ from __future__ import print_function
 
 # Imports
 import unittest
+import logging
+
+
+#
+# Logger definition
+#
+
+logger = logging.getLogger(__name__)
 
 
 #
@@ -42,7 +50,7 @@ class Scop2PScop2Py(object):
                 # Construct binary call
                 cmd = [PLC, source] + mandatory_opts + basic_opts + adv_opts + mode_opts
                 if __debug__:
-                        print("[scop2pscop2py] Command: " + str(cmd))
+                        logger.debug("[scop2pscop2py] Command: " + str(cmd))
 
                 # Call binary
                 try:
@@ -57,18 +65,18 @@ class Scop2PScop2Py(object):
 
                 # Check process values
                 if exit_value != 0:
-                        print("[ERROR] Pluto binary returned non-zero exit value: " + str(exit_value))
-                        print("[scop2pscop2py] Binary output:")
-                        print(stdout)
-                        print("[scop2pscop2py] Binary error:")
-                        print(stderr)
+                        logger.debug("[ERROR] Pluto binary returned non-zero exit value: " + str(exit_value))
+                        logger.debug("[scop2pscop2py] Binary output:")
+                        logger.debug(stdout)
+                        logger.debug("[scop2pscop2py] Binary error:")
+                        logger.debug(stderr)
                         raise Scop2PScop2PyException("[ERROR] Pluto binary exit value = " + str(exit_value), None)
 
                 # Finish
                 if __debug__:
-                        print("[scop2pscop2py] Pluto binary successfull")
-                        print("[scop2pscop2py] Binary output:")
-                        print(stdout)
+                        logger.debug("[scop2pscop2py] Pluto binary successfull")
+                        logger.debug("[scop2pscop2py] Binary output:")
+                        logger.debug(stdout)
 
 
 #
