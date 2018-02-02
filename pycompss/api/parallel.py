@@ -74,7 +74,7 @@ class parallel(object):
                         # Embed code into user file
                         new_func = self._load_generated_code(func, pycompss_file)
                 except Exception as e:
-                        logger.debug(e)
+                        logger.error(e)
                         raise
                 finally:
                         # Clean
@@ -107,12 +107,30 @@ class parallel(object):
                                                 setattr(slf, k, v)
 
                         # Call the method
+                        if __debug__:
+                                logger.debug("Calling user method")
                         ret = new_func(*args, **kwargs)
 
+                        # Put things back
                         if len(args) > 0:
-                                # Put things back
                                 for k, v in saved.items():
                                         setattr(slf, k, v)
+
+                        # Restore user code (according to code_replacer)
+                        if __debug__:
+                                logger.debug("Restoring user code")
+                        try:
+                                import inspect
+                                original_file = inspect.getfile(new_func)
+                                import os
+                                bkp_file = os.path.splitext(original_file)[0] + "_bkp.py"
+                                from shutil import copyfile
+                                copyfile(bkp_file, original_file)
+
+                                os.remove(bkp_file)
+                        except Exception as e:
+                                logger.error(e)
+                                raise
 
                         return ret
                 parallel_f.__doc__ = new_func.__doc__

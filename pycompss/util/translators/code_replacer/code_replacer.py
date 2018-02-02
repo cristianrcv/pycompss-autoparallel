@@ -40,8 +40,8 @@ class CodeReplacer(object):
                 # Retrieve original content
                 try:
                         import inspect
-                        func_file = inspect.getfile(func)
-                        with open(func_file, 'r') as f:
+                        original_file = inspect.getfile(func)
+                        with open(original_file, 'r') as f:
                                 original_content = f.read()
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot load original code from file", e)
@@ -65,10 +65,21 @@ class CodeReplacer(object):
                 except Exception as e:
                         raise CodeReplacerException("[ERROR] Cannot generate new content", e)
 
+                # Backup user file
+                try:
+                        import os
+                        from shutil import copyfile
+                        bkp_file = os.path.splitext(original_file)[0] + "_bkp.py"
+                        copyfile(original_file, bkp_file)
+                except Exception as e:
+                        raise CodeReplacerException("[ERROR] Cannot backup source file", e)
+                if __debug__:
+                        logger.debug("[code_replacer] User code backup in file " + str(bkp_file))
+
                 # Create new source file
                 try:
                         import os
-                        new_file = os.path.splitext(func_file)[0] + "_autogen.py"
+                        new_file = os.path.splitext(original_file)[0] + "_autogen.py"
                         with open(new_file, 'w') as f:
                                 f.write(new_content)
                 except Exception as e:
@@ -76,9 +87,16 @@ class CodeReplacer(object):
                 if __debug__:
                         logger.debug("[code_replacer] New code generated in file " + str(new_file))
 
+                # Move new content to original file
+                try:
+                        from shutil import copyfile
+                        copyfile(new_file, original_file)
+                except Exception as e:
+                        raise CodeReplacerException("[ERROR] Cannot replace original file", e)
+
                 # Load new function from new file
                 # Similar to: from new_module import func.__name__ as new_func
-                new_module = os.path.splitext(new_file)[0]
+                new_module = os.path.splitext(original_file)[0]
                 if __debug__:
                         logger.debug("[code_replacer] Import module " + str(func.__name__) + " from " + str(new_module))
                 try:
