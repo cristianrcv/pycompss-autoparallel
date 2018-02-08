@@ -43,7 +43,7 @@ class Scop2PScop2Py(object):
 
                 # Pluto binary options
                 mandatory_opts = ["--readscop", "-o " + output]
-                basic_opts = ["--tile", "--parallel"]
+                basic_opts = ["--parallel"]  # ["--tile", "--parallel"]
                 adv_opts = []  # ["--rar", "--lastwriter"]
                 mode_opts = []  # ["--silent"] # ["--debug"] # ["--moredebug"]
 
