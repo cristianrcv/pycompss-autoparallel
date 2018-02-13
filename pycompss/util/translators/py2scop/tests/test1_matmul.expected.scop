@@ -112,7 +112,7 @@ b0 i b1 j b2 k b3
 
 <coordinates>
 # File name
-example2_src_matmul.cc
+test1_matmul.expected.scop
 # Starting line and column
 72 0
 # Ending line and column

@@ -150,7 +150,7 @@ b0 t b1 i b2 j b3
 
 <coordinates>
 # File name
-example1_src_seidel.c
+test2_seidel.src.scop
 # Starting line and column
 73 0
 # Ending line and column
