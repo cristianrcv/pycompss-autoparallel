@@ -96,14 +96,14 @@ class CodeReplacer(object):
 
                 # Load new function from new file
                 # Similar to: from new_module import func.__name__ as new_func
-                new_module = os.path.splitext(original_file)[0]
+                new_module = os.path.splitext(os.path.basename(original_file))[0]
                 if __debug__:
                         logger.debug("[code_replacer] Import module " + str(func.__name__) + " from " + str(new_module))
                 try:
                         import importlib
                         new_func = getattr(importlib.import_module(new_module), func.__name__)
                 except Exception as e:
-                        raise CodeReplacerException("[ERROR] Cannot load new function and module", e)
+                        raise CodeReplacerException("[ERROR] Cannot load new function and module " + str(func.__name__) + " from " + str(new_module), e)
                 if __debug__:
                         logger.debug("[code_replacer] New function: " + str(new_func))
 
@@ -132,7 +132,62 @@ class CodeReplacerException(Exception):
 class TestCodeReplacer(unittest.TestCase):
 
         def test_code_replacer(self):
-                pass
+                # Insert function file into pythonpath
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                testsPath = dirPath + "/tests"
+                import sys
+                sys.path.insert(0, testsPath)
+
+                # Import function to replace
+                from tests.original import test_func as f
+                import inspect
+                userFile = inspect.getfile(f)
+
+                # Import new code
+                import os
+                file_new_code = testsPath + "/new.py"
+
+                try:
+                        # Perform replace
+                        new_f = CodeReplacer.replace(f, file_new_code)
+
+                        # Check function has been reloaded
+                        self.assertNotEqual(f, new_f)
+
+                        # Check final user file content
+                        expectedFile = testsPath + "/expected.python"
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(userFile, 'r') as f:
+                                userContent = f.read()
+                        self.assertEqual(userContent, expectedContent)
+                except Exception as e:
+                        raise
+                finally:
+                        TestCodeReplacer._restore(testsPath, userFile)
+                        TestCodeReplacer._clean(testsPath)
+
+        @staticmethod
+        def _restore(testsPath, userFile):
+                bkpFile = testsPath + "/original_bkp.py"
+                try:
+                        from shutil import copyfile
+                        copyfile(bkpFile, userFile)
+                except Exception as e:
+                        print("ERROR: Cannot restore original file")
+                        print (str(e))
+
+        @staticmethod
+        def _clean(testsPath):
+                import os
+                bkpFile = testsPath + "/original_bkp.py"
+                if os.path.isfile(bkpFile):
+                        os.remove(bkpFile)
+
+                autogenFile = testsPath + "/original_autogen.py"
+                if os.path.isfile(autogenFile):
+                        os.remove(autogenFile)
 
 
 #
