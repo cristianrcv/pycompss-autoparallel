@@ -162,7 +162,7 @@ class TestCodeReplacer(unittest.TestCase):
                         with open(userFile, 'r') as f:
                                 userContent = f.read()
                         self.assertEqual(userContent, expectedContent)
-                except Exception as e:
+                except Exception:
                         raise
                 finally:
                         TestCodeReplacer._restore(testsPath, userFile)

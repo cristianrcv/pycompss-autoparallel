@@ -112,18 +112,21 @@ class TestScop2PScop2Py(unittest.TestCase):
                 # Expected output file
                 expected_file = dirPath + "/tests/test1_matmul.expected.python"
 
-                # Generate scop2pscop2py
-                Scop2PScop2Py.translate(source_file, output_file)
+                try:
+                        # Generate scop2pscop2py
+                        Scop2PScop2Py.translate(source_file, output_file)
 
-                # Check file content
-                with open(expected_file, 'r') as f:
-                        expected_content = f.read()
-                with open(output_file, 'r') as f:
-                        output_content = f.read()
-                self.assertEqual(output_content, expected_content)
-
-                # Erase output file
-                os.remove(output_file)
+                        # Check file content
+                        with open(expected_file, 'r') as f:
+                                expected_content = f.read()
+                        with open(output_file, 'r') as f:
+                                output_content = f.read()
+                        self.assertEqual(output_content, expected_content)
+                except Exception:
+                        raise
+                finally:
+                        # Erase output file
+                        TestScop2PScop2Py._clean(output_file)
 
         def test_seidel(self):
                 import os
@@ -138,18 +141,27 @@ class TestScop2PScop2Py(unittest.TestCase):
                 # Expected output file
                 expected_file = dirPath + "/tests/test2_seidel.expected.python"
 
-                # Generate scop2pscop2py
-                Scop2PScop2Py.translate(source_file, output_file)
+                try:
+                        # Generate scop2pscop2py
+                        Scop2PScop2Py.translate(source_file, output_file)
 
-                # Check file content
-                with open(expected_file, 'r') as f:
-                        expected_content = f.read()
-                with open(output_file, 'r') as f:
-                        output_content = f.read()
-                self.assertEqual(output_content, expected_content)
+                        # Check file content
+                        with open(expected_file, 'r') as f:
+                                expected_content = f.read()
+                        with open(output_file, 'r') as f:
+                                output_content = f.read()
+                        self.assertEqual(output_content, expected_content)
+                except Exception:
+                        raise
+                finally:
+                        # Erase output file
+                        TestScop2PScop2Py._clean(output_file)
 
-                # Erase output file
-                os.remove(output_file)
+        @staticmethod
+        def _clean(f):
+                import os
+                if os.path.isfile(f):
+                        os.remove(f)
 
 
 #
