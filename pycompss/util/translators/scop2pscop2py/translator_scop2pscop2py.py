@@ -38,10 +38,12 @@ class Scop2PScop2Py(object):
                 #
 
                 # PLUTO binary location
+                # TODO: Add installation path and checker 
                 PLUTO_DIR = "/opt/pluto/bin/"  # "/opt/COMPSs/Dependencies/pluto/"
                 PLC = PLUTO_DIR + "polycc"
 
                 # Pluto binary options
+                # TODO: Tune PLUTO options
                 mandatory_opts = ["--readscop", "-o " + output]
                 basic_opts = ["--parallel"]  # ["--tile", "--parallel"]
                 adv_opts = []  # ["--rar", "--lastwriter"]
