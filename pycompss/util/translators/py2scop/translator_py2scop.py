@@ -108,7 +108,7 @@ class Py2Scop(object):
                 import copy
 
                 # DEBUG: Print current node information
-                #print('  ' + str(for_level) + " " + Py2Scop._debug_str_node(node))
+                # print('  ' + str(for_level) + " " + Py2Scop._debug_str_node(node))
 
                 # Copy current node if it is an outermost loop
                 if isinstance(node, _ast.For) and for_level == 0:
@@ -158,11 +158,61 @@ class Py2Scop(object):
 
                 # TODO: IMPLEMENT METHOD
 
-                from pycompss.util.translators.scop_types.scop_class import Scop
-                scop = Scop()
-
                 import ast
                 print(ast.dump(tree))
+
+                from pycompss.util.translators.scop_types.scop.global_class import Global
+                from pycompss.util.translators.scop_types.scop.statement_class import Statement
+                from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
+
+                # Generate global
+                from pycompss.util.translators.scop_types.scop.globl.context_class import Context
+                from pycompss.util.translators.scop_types.scop.globl.context_class import ContextType
+                from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
+                from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
+                context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
+                params = Parameters([Parameter("strings", "mSize kSize nSize")])
+                g = Global("C", context, params)
+
+                # Generate statements
+                from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation
+                from pycompss.util.translators.scop_types.scop.statement.relation_class import RelationType
+                from pycompss.util.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
+                s1_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
+                s1_scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_a2 = Relation(RelationType.WRITE, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_a3 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_a4 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_access = [s1_a1, s1_a2, s1_a3, s1_a4]
+                s1_ext1 = StatementExtension(["i", "j", "k"], "c[i][j] += a[i][k]*b[k][j];")
+                s1_extensions = [s1_ext1]
+                s1 = Statement(s1_domain, s1_scattering, s1_access, s1_extensions)
+
+                s2_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
+                s2_scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_a2 = Relation(RelationType.WRITE, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_a3 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_access = [s2_a1, s2_a2, s2_a3]
+                s2_ext1 = StatementExtension(["i", "j", "k"], "a[i][k] += b[i][k];")
+                s2_extensions = [s2_ext1]
+                s2 = Statement(s2_domain, s2_scattering, s2_access, s2_extensions)
+
+                statements = [s1, s2]
+
+                # Generate extensions
+                from pycompss.util.translators.scop_types.scop.extensions.scatnames_class import Scatnames
+                from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
+                from pycompss.util.translators.scop_types.scop.extensions.coordinates_class import Coordinates
+                scatnames = Scatnames(["b0", "i", "b1", "j", "b2", "k", "b3"])
+                arrays = Arrays(["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"])
+                coordinates = Coordinates("example2_src_matmul.cc", 72, 0, 80, 0, 8)
+                e = Extensions(scatnames, arrays, coordinates)
+
+                # Generate SCOP
+                from pycompss.util.translators.scop_types.scop_class import Scop
+                scop = Scop(g, statements, e)
 
                 return scop
 
@@ -229,8 +279,8 @@ class TestPy2Scop(unittest.TestCase):
                 fbs = Py2Scop._ast_extract_for_blocks(func_ast, 0, [])
 
                 # DEBUG: Print fbs
-                #print("---- DEBUG FOR " + str(func_name))
-                #for fb in fbs:
+                # print("---- DEBUG FOR " + str(func_name))
+                # for fb in fbs:
                 #        print(ast.dump(fb))
 
                 # Return generated blocks
@@ -273,7 +323,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 0)
 
@@ -282,7 +332,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 1)
 
@@ -291,7 +341,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 1)
 
@@ -300,7 +350,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 1)
 
@@ -309,7 +359,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 1)
 
@@ -318,7 +368,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 2)
 
@@ -327,7 +377,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 2)
 
@@ -336,7 +386,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 2)
 
@@ -345,7 +395,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 1)
 
@@ -354,7 +404,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 1)
 
@@ -363,7 +413,7 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)
-                
+
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 4)
 
@@ -374,7 +424,7 @@ class TestPy2Scop(unittest.TestCase):
                 scop = TestPy2Scop._test_ast2scop(func_name)
 
                 # Check scop
-                #TODO: check scop
+                # TODO: check scop
 
         def ttest_matmul(self):
                 import os
