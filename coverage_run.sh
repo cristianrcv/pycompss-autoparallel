@@ -6,7 +6,7 @@
 
   # Run a coverage report for a module
   run() {
-    coverage run --omit="/usr/lib/*" nose_tests.py
+    coverage run --omit="*/tests/*,/usr/lib/*" nose_tests.py
     coverage report -m
   }
 
