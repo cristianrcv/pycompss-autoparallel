@@ -24,7 +24,7 @@ class ExtensionPlugin(Plugin):
 
         @classmethod
         def wantDirectory(cls, directory):
-                return True
+                return not ('tests' in directory)
 
         @classmethod
         def wantModule(cls, file):
