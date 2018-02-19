@@ -266,8 +266,8 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Import function to replace
                 import importlib
-                t1ag = getattr(__import__("tests.test1_ast_generation"), "test1_ast_generation")
-                func = getattr(t1ag, func_name)
+                test_module = importlib.import_module("pycompss.util.translators.py2scop.tests.test1_ast_generation")
+                func = getattr(test_module, func_name)
 
                 # Create AST
                 import inspect
@@ -297,8 +297,8 @@ class TestPy2Scop(unittest.TestCase):
 
                 # Import function to replace
                 import importlib
-                t1ag = getattr(__import__("tests.test2_ast2scop"), "test2_ast2scop")
-                func = getattr(t1ag, func_name)
+                test_module = importlib.import_module("pycompss.util.translators.py2scop.tests.test2_ast2scop")
+                func = getattr(test_module, func_name)
 
                 # Create AST
                 import inspect
