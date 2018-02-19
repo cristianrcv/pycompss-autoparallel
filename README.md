@@ -2,7 +2,7 @@
 <!-- [![Build Status](https://travis-ci.org/XX)](https://travis-ci.org/XX) -->
 
 <!-- Codacy -->
-[![codacy_coverage](https://api.codacy.com/project/badge/Coverage/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-pluto?utm_source=github.com&utm_medium=referral&utm_content=cristianrcv/pycompss-pluto&utm_campaign=Badge_Coverage)
+<!-- [![codacy_coverage](https://api.codacy.com/project/badge/Coverage/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-pluto?utm_source=github.com&utm_medium=referral&utm_content=cristianrcv/pycompss-pluto&utm_campaign=Badge_Coverage) -->
 
 [![codacy_grade](https://api.codacy.com/project/badge/Grade/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-pluto?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cristianrcv/pycompss-pluto&amp;utm_campaign=Badge_Grade)
 
