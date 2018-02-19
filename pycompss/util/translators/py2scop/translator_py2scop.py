@@ -50,7 +50,6 @@ class Py2Scop(object):
                 # openscop representation in the given file
                 #
                 # Arguments:
-                #       func : Python function
                 #       baseFileName : OpenScop base name for output file path
                 # Return:
                 #       outputFileNames : List of written OS files (one per loop block)
@@ -60,7 +59,7 @@ class Py2Scop(object):
 
                 # Generate the list of for blocks
                 try:
-                        self.for_blocks = Py2Scop._ast_extract_for_blocks(self.func_ast, 0, [])
+                        self.for_blocks = Py2Scop._ast_extract_for_blocks(self.func_ast)
                 except Exception as e:
                         raise Py2ScopException("ERROR: Cannot generate code blocks", e)
 
@@ -89,7 +88,7 @@ class Py2Scop(object):
 
         # Process AST code
         @staticmethod
-        def _ast_extract_for_blocks(node, for_level=0, for_blocks=[]):
+        def _ast_extract_for_blocks(node, for_level=0, for_blocks=None):
                 #
                 # Inputs an AST node and process it and its childs recursively
                 #
@@ -114,6 +113,8 @@ class Py2Scop(object):
                 if isinstance(node, _ast.For) and for_level == 0:
                         node_copy = copy.deepcopy(node)
                         ast.fix_missing_locations(node_copy)
+                        if for_blocks is None:
+                                for_blocks = []
                         for_blocks.append(node_copy)
 
                 # Prepare for next recursion
@@ -276,7 +277,7 @@ class TestPy2Scop(unittest.TestCase):
                 func_ast = ast.parse(func_code)
 
                 # Retrieve for blocks
-                fbs = Py2Scop._ast_extract_for_blocks(func_ast, 0, [])
+                fbs = Py2Scop._ast_extract_for_blocks(func_ast)
 
                 # DEBUG: Print fbs
                 # print("---- DEBUG FOR " + str(func_name))
@@ -325,7 +326,7 @@ class TestPy2Scop(unittest.TestCase):
                 fbs = TestPy2Scop._test_ast_generation(func_name)
 
                 # Check the number of generated for blocks
-                self.assertEquals(len(fbs), 0)
+                self.assertEquals(fbs, None)
 
         def test_ast_simple1(self):
                 func_name = "simple1"
@@ -464,14 +465,27 @@ if __name__ == '__main__':
         import argparse
         parser = argparse.ArgumentParser()
         parser.add_argument('-i', '--input', help="Input file containing python code")
-        parser.add_argument('-o', '--output', help="Output file written in SCOP format")
+        parser.add_argument('-f', '--func_name', help="Name of the function to load from the input")
+        parser.add_argument('-o', '--output', help="Base name for the output file(s) written in SCOP format")
         args = parser.parse_args()
 
-        if args.input and args.output:
-                Py2Scop.translate(args.input, args.output)
-        elif args.input or args.output:
+        if args.input and args.func_name and args.output:
+                # Import function to replace
+                import importlib
+                func_module = importlib.import_module(args.input)
+                func = getattr(func_module, args.func_name)
+
+                # Translate
+                translator = Py2Scop(func)
+                outputFiles = translator.translate(args.output)
+
+                # Print information
+                print("SCOP files generated:")
+                for of in outputFiles:
+                        print(of)
+        elif args.input or args.func_name or args.output:
                 print("ERROR: Invalid arguments.")
-                print(" - Add input and output parameters to invoke the main class")
+                print(" - Add input, func_name, and output parameters to invoke the main class")
                 print(" - Add no arguments to invoke unit tests")
                 print("Aborting...")
         else:

@@ -3,6 +3,7 @@ def empty(a, b, c):
         print "HEADER"
         print "FOOTER"
 
+
 # Single loop with different header / footer options
 def simple1(a, b, c):
         print "HEADER"
@@ -10,18 +11,23 @@ def simple1(a, b, c):
                 c = c + a*b
         print "FOOTER"
 
+
 def simple2(a, b, c):
         for i in range(1, 10, 1):
                 c = c + a*b
         print "FOOTER"
 
+
 def simple3(a, b, c):
         print "HEADER"
         for i in range(1, 10, 1):
                 c = c + a*b
+
+
 def simple4(a, b, c):
         for i in range(1, 10, 1):
                 c = c + a*b
+
 
 # 2 loops with different intermediate options
 def intermediate1(a, b, c):
@@ -32,6 +38,7 @@ def intermediate1(a, b, c):
                 c = c + a*b
         print "FOOTER"
 
+
 def intermediate2(a, b, c):
         print "HEADER"
         for i1 in range(1, 10, 1):
@@ -40,6 +47,7 @@ def intermediate2(a, b, c):
         for i2 in range(1, 10, 1):
                 c = c + a*b
         print "FOOTER"
+
 
 def intermediate3(a, b, c):
         print "HEADER"
@@ -50,6 +58,7 @@ def intermediate3(a, b, c):
                 c = c + a*b
         print "FOOTER"
 
+
 # Different loop nests
 def loop_nests1(a, b, c):
         print "HEADER"
@@ -57,6 +66,7 @@ def loop_nests1(a, b, c):
                 for j1 in range(1, 20, 1):
                         c = c + a*b
         print "FOOTER"
+
 
 def loop_nests2(a, b, c):
         print "HEADER"
@@ -67,6 +77,7 @@ def loop_nests2(a, b, c):
                         for k1 in range(1, 40, 1):
                                 c = c + a*b
         print "FOOTER"
+
 
 # Complex test
 def complex(a, b, c):
@@ -87,4 +98,3 @@ def complex(a, b, c):
                 for i4 in range(1, 70, 1):
                         c = c + a*b
         print "BYE"
-

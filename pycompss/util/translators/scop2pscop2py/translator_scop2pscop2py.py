@@ -38,7 +38,7 @@ class Scop2PScop2Py(object):
                 #
 
                 # PLUTO binary location
-                # TODO: Add installation path and checker 
+                # TODO: Add installation path and checker
                 PLUTO_DIR = "/opt/pluto/bin/"  # "/opt/COMPSs/Dependencies/pluto/"
                 PLC = PLUTO_DIR + "polycc"
 
