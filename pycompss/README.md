@@ -22,7 +22,7 @@ PyCOMPSs and PLUTO integration using OpenSCOP.
 
 ```
 export PYTHONPATH=${git_base_dir}
-python nose_tests.py
+python nose_tests.py -s
 ```
 
 
