@@ -17,9 +17,12 @@ class Parameter(object):
                 - pvalue : Value of the parameter
         """
 
-        def __init__(self, ptype=None, pvalue=None):
+        def __init__(self, ptype=None, values_list=None):
                 self.ptype = ptype
-                self.pvalue = pvalue
+                if values_list is None:
+                        self.pvalue = None
+                else:
+                        self.pvalue = " ".join(values_list)
 
         def get_type(self):
                 return self.ptype
@@ -80,16 +83,17 @@ class TestParameter(unittest.TestCase):
 
         def test_full(self):
                 t = "strings"
-                val = "mSize kSize nSize"
-                param = Parameter(t, val)
+                val_list = ["mSize", "kSize", "nSize"]
+                param = Parameter(t, val_list)
 
+                val = "mSize kSize nSize"
                 self.assertEqual(param.get_type(), t)
                 self.assertEqual(param.get_value(), val)
 
         def test_write_os(self):
                 t = "strings"
-                val = "mSize kSize nSize"
-                param = Parameter(t, val)
+                val_list = ["mSize", "kSize", "nSize"]
+                param = Parameter(t, val_list)
 
                 # Generate file
                 fileName = "parameter_test.out"

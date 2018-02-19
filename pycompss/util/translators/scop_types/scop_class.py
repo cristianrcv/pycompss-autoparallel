@@ -156,7 +156,7 @@ class TestScop(unittest.TestCase):
                 from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
                 from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 context = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3)
-                params = Parameters([Parameter("strings", "mSize kSize nSize")])
+                params = Parameters([Parameter("strings", ["mSize", "kSize", "nSize"])])
                 g = Global("C", context, params)
 
                 # Generate statements
@@ -213,7 +213,7 @@ class TestScop(unittest.TestCase):
                 from pycompss.util.translators.scop_types.scop.globl.context_class import Context, ContextType
                 from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
                 from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
-                g = Global("C", Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3), Parameters([Parameter("strings", "mSize kSize nSize")]))
+                g = Global("C", Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, 3), Parameters([Parameter("strings", ["mSize", "kSize", "nSize"])]))
                 s1 = Statement()
                 s2 = Statement()
                 statements = [s1, s2]

@@ -105,7 +105,7 @@ class TestGlobal(unittest.TestCase):
                 from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
                 from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 t = "strings"
-                val = "mSize kSize nSize"
+                val = ["mSize", "kSize", "nSize"]
                 p1 = Parameter(t, val)
                 params = Parameters([p1])
 
@@ -124,7 +124,7 @@ class TestGlobal(unittest.TestCase):
                 from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
                 from pycompss.util.translators.scop_types.scop.globl.parameters.parameter_class import Parameter
                 t = "strings"
-                val = "mSize kSize nSize"
+                val = ["mSize", "kSize", "nSize"]
                 p1 = Parameter(t, val)
                 params = Parameters([p1])
 

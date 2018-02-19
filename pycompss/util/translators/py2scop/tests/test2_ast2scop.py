@@ -64,12 +64,13 @@ def loop_nests1(a, b, c):
 
 def loop_nests2(a, b, c):
         print "HEADER"
-        for i1 in range(1, 10, 1):
-                for j1 in range(1, 20, 1):
-                        c = c + a*b
-                for j2 in range(1, 30, 1):
-                        for k1 in range(1, 40, 1):
+        for i1 in range(1, 2*N-M+K, 1):
+                for j1 in range(1, M, 1):
+                        c[i1][j1] = c[i1][j1] + a[i1][j1]*b[i1][M-j1]
+                for j2 in range(1, M, 1):
+                        for k1 in range(1, K, 1):
                                 c = c + a*b
+                        c = c + a*b
         print "FOOTER"
 
 
