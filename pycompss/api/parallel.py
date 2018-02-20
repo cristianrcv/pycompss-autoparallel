@@ -48,24 +48,26 @@ class parallel(object):
                                 # logger.debug(str(func_source))
 
                         # Process python code to scop
-                        scop_file = ".tmp_gen_scop.scop"
-                        self._py2scop(func_source, scop_file)
+                        base_scop_file = ".tmp_gen_scop.scop"
+                        scop_files = self._py2scop(func, base_scop_file)
                         if __debug__:
                                 logger.debug("[decorator] Generated OpenScop content")
-                                # with open(scop_file, 'r') as f:
-                                #         logger.debug(f.read())
+                                # for scop_file in scop_files:
+                                #       with open(scop_file, 'r') as f:
+                                #               logger.debug(f.read())
 
-                        # Parallelize OpenScop code and process it back to python
-                        py_file = ".tmp_gen_parallel.py"
-                        self._scop2pscop2py(scop_file, py_file)
+                        # Parallelize each OpenScop code and process it back to python
+                        base_py_file = ".tmp_gen_parallel.py"
+                        py_files = self._scop2pscop2py(scop_files, base_py_file)
                         if __debug__:
                                 logger.debug("[decorator] Generated Parallel Python content")
-                                # with open(py_file, 'r') as f:
-                                #        logger.debug(f.read())
+                                # for py_file in py_files:
+                                #       with open(py_file, 'r') as f:
+                                #               logger.debug(f.read())
 
-                        # Add PyCOMPSs annotations
+                        # Merges and adds PyCOMPSs annotations
                         pycompss_file = ".tmp_gen_pycompss.py"
-                        self._py2pycompss(func_source, py_file, pycompss_file)
+                        self._py2pycompss(func_source, py_files, pycompss_file)
                         if __debug__:
                                 logger.debug("[decorator] Generated PyCOMPSs content")
                                 # with open(pycompss_file, 'r') as f:
@@ -79,10 +81,12 @@ class parallel(object):
                 finally:
                         # Clean
                         files_to_clean = []
-                        if 'scop_file' in locals():
-                                files_to_clean.append(scop_file)
-                        if 'py_file' in locals():
-                                files_to_clean.append(py_file)
+                        if 'scop_files' in locals():
+                                for f in scop_files:
+                                        files_to_clean.append(f)
+                        if 'py_files' in locals():
+                                for f in py_files:
+                                        files_to_clean.append(f)
                         if 'pycompss_file' in locals():
                                 files_to_clean.append(pycompss_file)
                         self._clean(files_to_clean)
@@ -159,15 +163,17 @@ class parallel(object):
                         logger.debug("[decorator] Finished get_py")
                 return func_source
 
-        def _py2scop(self, source, output):
+        def _py2scop(self, func, base_output):
                 """
-                Inputs a Python code with scop pragmas and outputs its
-                openscop representation in the given file
+                Inputs a Python function and outputs a OpenScop representation for
+                each loop block found in the code. Output files are generated from
+                the base_output file name and appending the loop block id
 
                 Arguments:
-                        source : Python code with scop prgramas
-                        output : OpenScop output file path
+                        func : Python function to translate
+                        base_output : OpenScop output base file path
                 Return:
+                        output_files : List of file names of the OS generated files
                 Raise:
                         - Py2ScopException
                 """
@@ -176,21 +182,27 @@ class parallel(object):
                         logger.debug("[decorator] Start py2scop")
 
                 from pycompss.util.translators.py2scop.translator_py2scop import Py2Scop
-                Py2Scop.translate(source, output)
+                translator = Py2Scop(func)
+                output_files = translator.translate(base_output)
 
                 # Finish
                 if __debug__:
                         logger.debug("[decorator] Finished py2scop")
 
-        def _scop2pscop2py(self, source, output):
+                return output_files
+
+        def _scop2pscop2py(self, scop_files, base_output):
                 """
-                Inputs an OpenScop representation to PLUTO that generates
-                its parallel version in Python
+                Inputs each given OpenScop file to PLUTO to generate
+                its Python parallel version. Output files are generated
+                from the base_output file name and appending the loop block id
 
                 Arguments:
-                        - source : OpenScop source file path
-                        - output : Python output file path
+                        - scop_files : List of OpenScop file names
+                        - base_output: Parallel Python output base file path
                 Return:
+                        - output_files : List of file names containing the generated
+                                paralell Python code
                 Raise:
                         - Scop2PScop2PyException
                 """
@@ -199,23 +211,35 @@ class parallel(object):
                         logger.debug("[decorator] Start scop2pscop2py")
 
                 from pycompss.util.translators.scop2pscop2py.translator_scop2pscop2py import Scop2PScop2Py
-                Scop2PScop2Py.translate(source, output)
+                output_files = []
+                id = 0
+                for sf in scop_files:
+                        # Generate file name
+                        of = base_output + str(id)
+                        # Perform PLUTO call
+                        Scop2PScop2Py.translate(sf, of)
+                        # Prepare for next iteration
+                        output_files.append(of)
+                        id = id + 1
 
                 # Finish
                 if __debug__:
                         logger.debug("[decorator] Finished scop2pscop2py")
 
-        def _py2pycompss(self, func_source, source, output):
+                return output_files
+
+        def _py2pycompss(self, func_source, par_py_files, output):
                 """
-                Inputs a Python code with parallel annotations and outputs its
-                PyCOMPSs code
+                Substitutes the given parallel python files into the original
+                function code and adds the required PyCOMPSs annotations. The
+                result is stored in the given output file
 
                 Arguments:
                         - func_source : Python original function
-                        - source : Python with parallel annotations file path
+                        - par_py_files : List of files containing the Python parallelization
+                                of each for block in the func_source
                         - output : PyCOMPSs file path
                 Return:
-                        - error : Non-zero value if an error is found, 0 otherwise
                 Raise:
                         - Py2PyCOMPSsException
                 """
@@ -224,7 +248,7 @@ class parallel(object):
                         logger.debug("[decorator] Start py2pycompss")
 
                 from pycompss.util.translators.py2pycompss.translator_py2pycompss import Py2PyCOMPSs
-                Py2PyCOMPSs.translate(func_source, source, output)
+                Py2PyCOMPSs.translate(func_source, par_py_files, output)
 
                 # Finish
                 if __debug__:

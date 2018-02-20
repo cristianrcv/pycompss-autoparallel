@@ -25,17 +25,20 @@ class Scop2PScop2Py(object):
 
         @staticmethod
         def translate(source, output):
-                #
-                # Inputs an OpenScop representation to PLUTO that generates
-                # its parallel version in Python
-                #
-                # Arguments:
-                #       - source : OpenScop source file path
-                #       - output : Python output file path
-                # Return:
-                # Raise:
-                #       - Scop2PScop2PyException
-                #
+                """
+                Inputs an OpenScop representation to PLUTO that generates
+                its parallel version in Python
+
+                Arguments:
+                        - source : OpenScop source file path
+                        - output : Python output file path
+                Return:
+                Raise:
+                        - Scop2PScop2PyException
+                """
+
+                if __debug__:
+                        logger.debug("[scop2pscop2py] Translating " + str(source) + " into " + str(output))
 
                 # PLUTO binary location
                 # TODO: Add installation path and checker
@@ -67,11 +70,11 @@ class Scop2PScop2Py(object):
 
                 # Check process values
                 if exit_value != 0:
-                        logger.debug("[ERROR] Pluto binary returned non-zero exit value: " + str(exit_value))
-                        logger.debug("[scop2pscop2py] Binary output:")
-                        logger.debug(stdout)
-                        logger.debug("[scop2pscop2py] Binary error:")
-                        logger.debug(stderr)
+                        logger.error("[ERROR] Pluto binary returned non-zero exit value: " + str(exit_value))
+                        logger.error("[scop2pscop2py] Binary output:")
+                        logger.error(stdout)
+                        logger.error("[scop2pscop2py] Binary error:")
+                        logger.error(stderr)
                         raise Scop2PScop2PyException("[ERROR] Pluto binary exit value = " + str(exit_value), None)
 
                 # Finish
@@ -87,12 +90,17 @@ class Scop2PScop2Py(object):
 
 class Scop2PScop2PyException(Exception):
 
-        def __init__(self, msg, nested_exception):
+        def __init__(self, msg=None, nested_exception=None):
                 self.msg = msg
                 self.nested_exception = nested_exception
 
         def __str__(self):
-                return "Exception on Scop2PScop2Py.translate method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)
+                s = "Exception on Scop2PScop2Py.translate method.\n"
+                if self.msg is not None:
+                        s = s + "Message: " + str(self.msg) + "\n"
+                if self.nested_exception is not None:
+                        s = s + "Nested Exception: " + str(self.nested_exception) + "\n"
+                return s
 
 
 #

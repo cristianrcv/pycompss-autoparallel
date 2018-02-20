@@ -25,17 +25,20 @@ class CodeReplacer(object):
 
         @staticmethod
         def replace(func, new_code):
-                #
-                # Replaces the func code by the content of new_code
-                #
-                # Arguments:
-                #       - func : function to be replaced
-                #       - new_code : File path containing the new code
-                # Return:
-                #       - new_func : pointer to the new function
-                # Raise:
-                #       - CodeReplacerException
-                #
+                """
+                Replaces the func code by the content of new_code
+
+                Arguments:
+                        - func : function to be replaced
+                        - new_code : File path containing the new code
+                Return:
+                        - new_func : pointer to the new function
+                Raise:
+                        - CodeReplacerException
+                """
+
+                if __debug__:
+                        logger.debug("[code_replacer] Replacing code of " + str(func) + " by code inside " + str(new_code))
 
                 # Retrieve original content
                 try:
@@ -117,12 +120,17 @@ class CodeReplacer(object):
 
 class CodeReplacerException(Exception):
 
-        def __init__(self, msg, nested_exception):
+        def __init__(self, msg=None, nested_exception=None):
                 self.msg = msg
                 self.nested_exception = nested_exception
 
         def __str__(self):
-                return "Exception on CodeReplacer.replace method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)
+                s = "Exception on CodeReplacer.replace method.\n"
+                if self.msg is not None:
+                        s = s + "Message: " + str(self.msg) + "\n"
+                if self.nested_exception is not None:
+                        s = s + "Nested Exception: " + str(self.nested_exception) + "\n"
+                return s
 
 
 #

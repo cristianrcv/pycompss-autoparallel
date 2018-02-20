@@ -7,6 +7,13 @@ from __future__ import print_function
 
 # Imports
 import unittest
+import logging
+
+#
+# Logger definition
+#
+
+logger = logging.getLogger(__name__)
 
 
 #
@@ -17,22 +24,27 @@ class CodeLoader(object):
 
         @staticmethod
         def load(func):
-                #
-                # Returns the source code of the given function
-                #
-                # Arguments:
-                #       - func : Function
-                # Return:
-                #       - func_source : Source code of the function
-                # Raise:
-                #       - GetPyException
-                #
+                """
+                Returns the source code of the given function
 
+                Arguments:
+                        - func : Function
+                Return:
+                        - func_source : Source code of the function
+                Raise:
+                        - GetPyException
+                """
+
+                if __debug__:
+                        logger.debug("[CodeLoader] Load code from " + str(func))
                 try:
                         import inspect
                         func_source = inspect.getsource(func)
                 except Exception as e:
                         raise CodeLoaderException("[ERROR] Cannot obtain source code from function", e)
+
+                if __debug__:
+                        logger.debug("[CodeLoader] Code successfully loaded")
 
                 return func_source
 
@@ -43,12 +55,17 @@ class CodeLoader(object):
 
 class CodeLoaderException(Exception):
 
-        def __init__(self, msg, nested_exception):
+        def __init__(self, msg=None, nested_exception=None):
                 self.msg = msg
                 self.nested_exception = nested_exception
 
         def __str__(self):
-                return "Exception on CodeLoader.load method.\n Message: " + str(self.msg) + "\n Nested Exception: " + str(self.nested_exception)
+                s = "Exception on CodeLoader.load method.\n"
+                if self.msg is not None:
+                        s = s + "Message: " + str(self.msg) + "\n"
+                if self.nested_exception is not None:
+                        s = s + "Nested Exception: " + str(self.nested_exception) + "\n"
+                return s
 
 
 #
