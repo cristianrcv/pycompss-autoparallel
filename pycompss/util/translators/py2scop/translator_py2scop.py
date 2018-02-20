@@ -219,7 +219,7 @@ class Py2Scop(object):
                 array_vars_set = set(array_vars_list)  # Erase repeated
                 if 'range' in array_vars_set:  # Erase keywords
                         array_vars_set.remove('range')
-                array_vars_loop = list(array_vars_set)
+                array_vars_list = list(array_vars_set)
                 # All variables
                 all_vars_list = Py2Scop._get_all_params(tree)
                 all_vars_set = set(all_vars_list)  # Erase repeated
@@ -368,7 +368,6 @@ class Py2Scop(object):
 
                 import ast
                 import _ast
-                import copy
 
                 # Process current node
                 statements_scop = []
@@ -885,7 +884,7 @@ class TestPy2Scop(unittest.TestCase):
                 self.assertEquals(len(fbs), 1)
 
         def test_ast_complex(self):
-                func_name = "complex"
+                func_name = "complex_loops"
 
                 # Retrieve for blocks
                 fbs = TestPy2Scop._test_ast_generation(func_name)

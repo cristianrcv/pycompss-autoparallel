@@ -153,9 +153,7 @@ class TestCodeReplacer(unittest.TestCase):
                 userFile = inspect.getfile(f)
 
                 # Import new code
-                import os
                 file_new_code = testsPath + "/new.py"
-
                 try:
                         # Perform replace
                         new_f = CodeReplacer.replace(f, file_new_code)

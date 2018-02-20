@@ -212,15 +212,15 @@ class parallel(object):
 
                 from pycompss.util.translators.scop2pscop2py.translator_scop2pscop2py import Scop2PScop2Py
                 output_files = []
-                id = 0
+                file_num = 0
                 for sf in scop_files:
                         # Generate file name
-                        of = base_output + str(id)
+                        of = base_output + str(file_num)
                         # Perform PLUTO call
                         Scop2PScop2Py.translate(sf, of)
                         # Prepare for next iteration
                         output_files.append(of)
-                        id = id + 1
+                        file_num = file_num + 1
 
                 # Finish
                 if __debug__:
