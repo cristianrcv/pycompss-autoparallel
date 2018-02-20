@@ -406,7 +406,7 @@ class Py2Scop(object):
                 domain_in_dims = 0
                 domain_local_dims = 0
                 domain_num_pars = len(param_vars)
-                domain_matrix = [[0]*domain_cols]*domain_rows
+                domain_matrix = [[0 for col in range(domain_cols)] for row in range(domain_rows)]
                 # Create dictionary from col name to col index
                 names2index = {}
                 names2index['e/i'] = 0
@@ -454,7 +454,7 @@ class Py2Scop(object):
                 scattering_in_dims = len(iter_vars)
                 scattering_local_dims = 0
                 scattering_num_pars = len(param_vars)
-                scattering_matrix = [[0]*scattering_cols]*scattering_rows
+                scattering_matrix = [[0 for col in range(scattering_cols)] for row in range(scattering_rows)]
                 # Create dictionary from col name to col index
                 names2index = {}
                 names2index['e/i'] = 0
@@ -469,7 +469,14 @@ class Py2Scop(object):
                         index = index + 1
                 names2index['indep'] = index
                 # Add scattering values
-                # TODO: Add increments and loop positions of scattering matrix
+                for row_ind in range(0, scattering_rows):
+                        # Mark control variable
+                        col_ind = row_ind + 1
+                        scattering_matrix[row_ind][col_ind] = -1
+                        # Mark iteration variable when needed
+                        if row_ind%2 == 1:
+                                col_ind = 1 + len(control_vars) + row_ind/2
+                                scattering_matrix[row_ind][col_ind] = 1
 
                 scattering_scop = Relation(RelationType.SCATTERING, scattering_rows, scattering_cols, scattering_out_dims, scattering_in_dims, scattering_local_dims, scattering_num_pars, scattering_matrix)
 
@@ -558,14 +565,13 @@ class Py2Scop(object):
                 access_in_dims = len(iter_vars)
                 access_local_dims = 0
                 access_num_pars = len(param_vars)
-                access_matrix = [[0]*access_cols]*access_rows
+                access_matrix = [[0 for col in range(access_cols)] for row in range(access_rows)]
 
                 # Create dictionary from col name to col index
                 names2index = {}
                 names2index['e/i'] = 0
-                names2index['Arr'] = 1
-                index = 2
-                for i in range(1, array_dims + 1):
+                index = 1
+                for i in range(array_dims):
                         ac = "[" + str(i) + "]"
                         names2index[ac] = i
                         index = index + 1
@@ -834,9 +840,8 @@ class TestPy2Scop(unittest.TestCase):
                 # Check the number of generated for blocks
                 self.assertEquals(len(fbs), 4)
 
-        def test_ast2scop(self):
+        def test_ast2scop_simple1(self):
                 func_name = "simple1"
-                func_name = "loop_nests2"
 
                 # Retrieve scop
                 scop = TestPy2Scop._test_ast2scop(func_name)
@@ -859,10 +864,138 @@ class TestPy2Scop(unittest.TestCase):
                         raise
                 finally:
                         # Erase generated file
-                        # TODO: Erase test file
-                        # os.remove(test_file)
-                        pass
+                        os.remove(test_file)
 
+        def test_ast2scop_simple2(self):
+                func_name = "simple2"
+
+                # Retrieve scop
+                scop = TestPy2Scop._test_ast2scop(func_name)
+
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                test_file = dirPath + "/tests/" + str(func_name) + ".scop"
+                try:
+                        # Write scop to file
+                        Py2Scop.write_os(scop, test_file)
+
+                        # Check scop
+                        expectedFile = dirPath + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(test_file, 'r') as f:
+                                outContent = f.read()
+                        self.assertEqual(outContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase generated file
+                        os.remove(test_file)
+
+        def test_ast2scop_simple3(self):
+                func_name = "simple3"
+
+                # Retrieve scop
+                scop = TestPy2Scop._test_ast2scop(func_name)
+
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                test_file = dirPath + "/tests/" + str(func_name) + ".scop"
+                try:
+                        # Write scop to file
+                        Py2Scop.write_os(scop, test_file)
+
+                        # Check scop
+                        expectedFile = dirPath + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(test_file, 'r') as f:
+                                outContent = f.read()
+                        self.assertEqual(outContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase generated file
+                        os.remove(test_file)
+
+        def test_ast2scop_simple4(self):
+                func_name = "simple4"
+
+                # Retrieve scop
+                scop = TestPy2Scop._test_ast2scop(func_name)
+
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                test_file = dirPath + "/tests/" + str(func_name) + ".scop"
+                try:
+                        # Write scop to file
+                        Py2Scop.write_os(scop, test_file)
+
+                        # Check scop
+                        expectedFile = dirPath + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(test_file, 'r') as f:
+                                outContent = f.read()
+                        self.assertEqual(outContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase generated file
+                        os.remove(test_file)
+
+        def test_ast2scop_loop_nests1(self):
+                func_name = "loop_nests1"
+
+                # Retrieve scop
+                scop = TestPy2Scop._test_ast2scop(func_name)
+
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                test_file = dirPath + "/tests/" + str(func_name) + ".scop"
+                try:
+                        # Write scop to file
+                        Py2Scop.write_os(scop, test_file)
+
+                        # Check scop
+                        expectedFile = dirPath + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(test_file, 'r') as f:
+                                outContent = f.read()
+                        self.assertEqual(outContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase generated file
+                        os.remove(test_file)
+
+        def test_ast2scop_multi_statements(self):
+                func_name = "multi_statements1"
+
+                # Retrieve scop
+                scop = TestPy2Scop._test_ast2scop(func_name)
+
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                test_file = dirPath + "/tests/" + str(func_name) + ".scop"
+                try:
+                        # Write scop to file
+                        Py2Scop.write_os(scop, test_file)
+
+                        # Check scop
+                        expectedFile = dirPath + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(test_file, 'r') as f:
+                                outContent = f.read()
+                        self.assertEqual(outContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase generated file
+                        os.remove(test_file)
+ 
         def ttest_matmul(self):
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))
