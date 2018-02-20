@@ -63,7 +63,7 @@ class Py2Scop(object):
                         scop.write_os(f)
 
         # TRANSLATE
-        def translate(baseFileName):
+        def translate(self, baseFileName):
                 #
                 # Inputs a Python code with scop pragmas and outputs its
                 # openscop representation in the given file
@@ -83,24 +83,30 @@ class Py2Scop(object):
                         raise Py2ScopException("ERROR: Cannot generate code blocks", e)
 
                 # Translate loop blocks
+                self.scops = []
                 try:
-                        for fb in self.for_blocks:
-                                self.scops.append(Py2Scop._ast2scop(fb))
+                        if self.for_blocks is not None:
+                                for fb in self.for_blocks:
+                                        self.scops.append(Py2Scop._ast2scop(fb))
                 except Exception as e:
                         raise Py2ScopException("ERROR: Cannot generate SCOPs from ForBlocks", e)
 
                 # Write loop blocks
                 outputFileNames = []
                 numFiles = 0
-                for i in range(1, len(self.scops), 2):
+                for scop in self.scops:
                         fileName = baseFileName + str(numFiles)
                         try:
-                                Py2Scop.write_os(self.scops[i], fileName)
+                                Py2Scop.write_os(scop, fileName)
                         except Exception as e:
-                                raise Py2ScopException("ERROR: Cannot write OS file " + str(i), e)
+                                raise Py2ScopException("ERROR: Cannot write OS file " + str(fileName), e)
 
                         numFiles = numFiles + 1
                         outputFileNames.append(fileName)
+
+                # Add a warn
+                if numFiles == 0:
+                        print("WARN: No for loop found. No SCOP file generated")
 
                 # Return written fileNames
                 return outputFileNames
@@ -124,9 +130,6 @@ class Py2Scop(object):
                 import ast
                 import _ast
                 import copy
-
-                # DEBUG: Print current node information
-                # print('  ' + str(for_level) + " " + Py2Scop._debug_str_node(node))
 
                 # Copy current node if it is an outermost loop
                 if isinstance(node, _ast.For) and for_level == 0:
@@ -339,7 +342,7 @@ class Py2Scop(object):
 
                 # Process current node
                 statements_scop = []
-                if isinstance(node, _ast.Assign):
+                if isinstance(node, _ast.Assign) or isinstance(node, _ast.AugAssign):
                         s_scop = Py2Scop._process_statement(node, for_fathers, param_vars, all_vars)
                         statements_scop.append(s_scop)
 
@@ -422,20 +425,28 @@ class Py2Scop(object):
                 row_id = 0
                 for f in fathers_loop:
                         loop_var = f.target.id
+
                         # LOWER BOUND
-                        # We mark the expression
-                        domain_matrix[row_id] = Py2Scop._process_expr(f.iter.args[0], names2index, domain_cols)
-                        # i >= expr --> i - expr >= 0
-                        domain_matrix[row_id] = [-x for x in domain_matrix[row_id]]
-                        # We mark it as an inequality
+                        if len(f.iter.args) == 1:
+                                # For loop expression is of the form range(N), we don't process expr
+                                ub_index = 0
+                        else:
+                                # For loop expression is of the form range(N,M), we process expr
+                                ub_index = 1
+                                # We mark the expression
+                                domain_matrix[row_id] = Py2Scop._process_expr(f.iter.args[0], names2index, domain_cols)
+                                # i >= expr --> i - expr >= 0
+                                domain_matrix[row_id] = [-x for x in domain_matrix[row_id]]
+                        #  We mark it as an inequality
                         domain_matrix[row_id][names2index['e/i']] = 1
                         # We mark the loop variable
                         domain_matrix[row_id][names2index[loop_var]] = 1
                         # Prepare for next row
                         row_id = row_id + 1
+
                         # UPPER BOUND
                         # We mark the expression
-                        domain_matrix[row_id] = Py2Scop._process_expr(f.iter.args[1], names2index, domain_cols)
+                        domain_matrix[row_id] = Py2Scop._process_expr(f.iter.args[ub_index], names2index, domain_cols)
                         # i < expr --> i - expr < 0 --> -i + expr > 0 --> -i + expr -1 >= 0
                         domain_matrix[row_id][-1] = domain_matrix[row_id][-1] - 1
                         # We mark it as an inequality
@@ -474,7 +485,7 @@ class Py2Scop(object):
                         col_ind = row_ind + 1
                         scattering_matrix[row_ind][col_ind] = -1
                         # Mark iteration variable when needed
-                        if row_ind%2 == 1:
+                        if row_ind % 2 == 1:
                                 col_ind = 1 + len(control_vars) + row_ind/2
                                 scattering_matrix[row_ind][col_ind] = 1
 
@@ -484,8 +495,15 @@ class Py2Scop(object):
                 import _ast
                 accesses_scop = []
                 # Add write access
-                if isinstance(statement_loop.targets[0], _ast.Subscript):
-                        accesses_scop.append(Py2Scop._process_access(statement_loop.targets[0], RelationType.WRITE, iter_vars, param_vars, all_vars))
+                if isinstance(statement_loop, _ast.Assign):
+                        # Expr is of the form x = expr
+                        if isinstance(statement_loop.targets[0], _ast.Subscript):
+                                accesses_scop.append(Py2Scop._process_access(statement_loop.targets[0], RelationType.WRITE, iter_vars, param_vars, all_vars))
+                elif isinstance(statement_loop, _ast.AugAssign):
+                        # Expr is of the form x += expr
+                        if isinstance(statement_loop.target, _ast.Subscript):
+                                accesses_scop.append(Py2Scop._process_access(statement_loop.target, RelationType.WRITE, iter_vars, param_vars, all_vars))
+                                accesses_scop.append(Py2Scop._process_access(statement_loop.target, RelationType.READ, iter_vars, param_vars, all_vars))
                 # Add read accesses
                 accesses_scop.extend(Py2Scop._process_accesses(statement_loop.value, iter_vars, param_vars, all_vars))
 
@@ -944,6 +962,32 @@ class TestPy2Scop(unittest.TestCase):
                         # Erase generated file
                         os.remove(test_file)
 
+        def test_ast2scop_simple5(self):
+                func_name = "simple5"
+
+                # Retrieve scop
+                scop = TestPy2Scop._test_ast2scop(func_name)
+
+                import os
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                test_file = dirPath + "/tests/" + str(func_name) + ".scop"
+                try:
+                        # Write scop to file
+                        Py2Scop.write_os(scop, test_file)
+
+                        # Check scop
+                        expectedFile = dirPath + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(test_file, 'r') as f:
+                                outContent = f.read()
+                        self.assertEqual(outContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase generated file
+                        os.remove(test_file)
+
         def test_ast2scop_loop_nests1(self):
                 func_name = "loop_nests1"
 
@@ -995,23 +1039,34 @@ class TestPy2Scop(unittest.TestCase):
                 finally:
                         # Erase generated file
                         os.remove(test_file)
- 
-        def ttest_matmul(self):
+
+        def test_matmul(self):
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))
-                srcFile = dirPath + "/tests/test2_matmul.src.python"
-                expectedFile = dirPath + "/tests/test2_matmul.expected.scop"
-                baseOutFile = dirPath + "/tests/test2_matmul.out.scop"
+                testsPath = dirPath + "/tests"
+
+                func_name = "matmul"
+                baseOutFile = testsPath + "/test3_matmul.out.scop"
 
                 try:
+                        # Insert function file into pythonpath
+                        import sys
+                        sys.path.insert(0, testsPath)
+
+                        # Import function to replace
+                        import importlib
+                        test_module = importlib.import_module("pycompss.util.translators.py2scop.tests.test3_matmul")
+                        func = getattr(test_module, func_name)
+
                         # Translate
-                        translator = Py2Scop()
-                        outputFiles = translator.translate(srcFile, baseOutFile)
+                        translator = Py2Scop(func)
+                        outputFiles = translator.translate(baseOutFile)
 
                         # Check that there is only one output file
                         self.assertEqual(len(outputFiles), 1)
 
                         # Check file content
+                        expectedFile = testsPath + "/test3_matmul.expected.scop"
                         with open(expectedFile, 'r') as f:
                                 expectedContent = f.read()
                         with open(outputFiles[0], 'r') as f:

@@ -1,7 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-@parallel
 def matmul(mSize, nSize, kSize, bSize, debug):
         # Initialize
         a = initialize(mSize, nSize, bSize, True)
@@ -12,7 +8,7 @@ def matmul(mSize, nSize, kSize, bSize, debug):
         if debug:
                 print "Matrix A:"
                 print a
-	        print "Matrix B:"
+                print "Matrix B:"
                 print b
                 print "Matrix C:"
                 print c
@@ -27,8 +23,7 @@ def matmul(mSize, nSize, kSize, bSize, debug):
         # Debug
         if debug:
                 print "Matrix C:"
-	        print c
+                print c
 
         # Result
         return c
-

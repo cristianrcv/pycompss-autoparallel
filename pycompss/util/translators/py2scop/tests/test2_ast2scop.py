@@ -19,6 +19,11 @@ def simple4(a, b, c):
                 c[i] = c[i] + a[i]*b[i]
 
 
+def simple5(a, b, c):
+        for i in range(N):
+                c[i] = c[i] + a[i]*b[i]
+
+
 # Different loop nests
 def loop_nests1(a, b, c):
         for i in range(0, N, 1):
