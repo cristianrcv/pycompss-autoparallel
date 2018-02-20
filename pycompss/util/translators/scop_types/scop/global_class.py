@@ -56,10 +56,6 @@ class Global(object):
                 # Return structure
                 return g, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Write header
                 print("# =============================================== Global", file=f)
@@ -78,9 +74,6 @@ class Global(object):
                 print("# Parameters are provided", file=f)
                 if self.parameters is not None:
                         self.parameters.write_os(f)
-
-        def write_py(self, f):
-                pass
 
 
 #

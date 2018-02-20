@@ -64,10 +64,6 @@ class Arrays(object):
                 # Return structure
                 return arrays, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Print header
                 print("<arrays>", file=f)
@@ -87,9 +83,6 @@ class Arrays(object):
                 # Print footer
                 print("</arrays>", file=f)
                 print("", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #

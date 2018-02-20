@@ -79,10 +79,6 @@ class Scop(object):
                 # Return structure
                 return scop
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Write header
                 print("<OpenScop>", file=f)
@@ -111,9 +107,6 @@ class Scop(object):
                 # Write footer
                 print("</OpenScop>", file=f)
                 print("", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #
@@ -294,29 +287,6 @@ class TestScop(unittest.TestCase):
 
                 # Check loaded content
                 self.assertEqual(scop, scopExp)
-
-        def ttest_write_py_empty(self):
-                # Read from OpenScop
-                import os
-                dirPath = os.path.dirname(os.path.realpath(__file__))
-                inputFile = dirPath + "/tests/empty.scop"
-                outputFile = dirPath + "/tests/test7.out.python"
-                expectedFile = dirPath + "/tests/empty.python"
-
-                scop = Scop.read_os(inputFile)
-
-                # Generate Python file
-                scop.write_py(outputFile)
-
-                # Check file content
-                with open(expectedFile, 'r') as f:
-                        expectedContent = f.read()
-                with open(outputFile, 'r') as f:
-                        outputContent = f.read()
-                self.assertEqual(outputContent, expectedContent)
-
-                # Erase file
-                os.remove(outputFile)
 
 
 #

@@ -64,10 +64,6 @@ class Extensions(object):
                 # Return structure
                 return ext, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Write header
                 print("# =============================================== Extensions", file=f)
@@ -83,9 +79,6 @@ class Extensions(object):
                 # Write coordinates
                 if self.coordinates is not None:
                         self.coordinates.write_os(f)
-
-        def write_py(self, f):
-                pass
 
 
 #

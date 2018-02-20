@@ -42,10 +42,6 @@ class Scatnames(object):
                 # Return structure
                 return scatnames, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Print header
                 print("<scatnames>", file=f)
@@ -60,9 +56,6 @@ class Scatnames(object):
                 # Print footer
                 print("</scatnames>", file=f)
                 print("", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #

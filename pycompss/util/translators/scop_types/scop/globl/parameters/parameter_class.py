@@ -56,18 +56,11 @@ class Parameter(object):
                 # Return structure
                 return p, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Print header
                 print("<" + str(self.ptype) + ">", file=f)
                 print(str(self.pvalue), file=f)
                 print("</" + str(self.ptype) + ">", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #

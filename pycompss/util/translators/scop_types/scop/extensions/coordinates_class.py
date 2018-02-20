@@ -91,10 +91,6 @@ class Coordinates(object):
                 # Return structure
                 return c, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Print header
                 print("<coordinates>", file=f)
@@ -118,9 +114,6 @@ class Coordinates(object):
                 # Print footer
                 print("</coordinates>", file=f)
                 print("", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #

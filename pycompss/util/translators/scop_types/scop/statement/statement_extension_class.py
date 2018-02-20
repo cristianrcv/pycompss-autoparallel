@@ -37,10 +37,6 @@ class StatementExtension(object):
         def read_os(content, index):
                 pass
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Print header
                 print("<body>", file=f)
@@ -66,9 +62,6 @@ class StatementExtension(object):
 
                 # Print footer
                 print("</body>", file=f)
-
-        def write_py(f):
-                pass
 
 
 #

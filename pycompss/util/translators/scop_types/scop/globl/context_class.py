@@ -84,10 +84,6 @@ class Context(object):
                 # Return structure
                 return context, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Print type
                 print(self.contextType.name, file=f)
@@ -97,9 +93,6 @@ class Context(object):
 
                 # Separator
                 print("", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #

@@ -41,10 +41,6 @@ class Statement(object):
         def read_os(content, index):
                 return None, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f, statementId):
                 # Print header
                 print("# =============================================== Statement " + str(statementId), file=f)
@@ -82,9 +78,6 @@ class Statement(object):
 
                 # Print end separator
                 print("", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #

@@ -80,10 +80,6 @@ class Relation(object):
         def read_os(content, index):
                 pass
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 # Print type
                 print(self.relationType.name, file=f)
@@ -99,9 +95,6 @@ class Relation(object):
                                         line = line + str(value) + "\t"
                                 print(line, file=f)
                 print("", file=f)
-
-        def write_py(f):
-                pass
 
 
 #

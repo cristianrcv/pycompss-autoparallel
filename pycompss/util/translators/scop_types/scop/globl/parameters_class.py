@@ -45,10 +45,6 @@ class Parameters(object):
                 # Return structure
                 return parameters, index
 
-        @staticmethod
-        def read_py(f):
-                pass
-
         def write_os(self, f):
                 if self.parameters is not None:
                         # Print number of parameter
@@ -59,9 +55,6 @@ class Parameters(object):
                                 param.write_os(f)
 
                 print("", file=f)
-
-        def write_py(self, f):
-                pass
 
 
 #
