@@ -79,20 +79,56 @@ class TestScatnames(unittest.TestCase):
                 names = ["b0", "i", "b1", "j", "b2", "k", "b3"]
                 s = Scatnames(names)
 
-                # Generate file
-                fileName = "scatnames_test.out"
-                with open(fileName, 'w') as f:
-                        s.write_os(f)
+                try:
+                        # Generate file
+                        fileName = "scatnames_test.out"
+                        with open(fileName, 'w') as f:
+                                s.write_os(f)
 
-                # Check file content
-                expected = "<scatnames>\nb0 i b1 j b2 k b3 \n</scatnames>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                        # Check file content
+                        expected = "<scatnames>\nb0 i b1 j b2 k b3 \n</scatnames>\n\n"
+                        with open(fileName, 'r') as f:
+                                content = f.read()
+                        self.assertEqual(content, expected)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        import os
+                        os.remove(fileName)
 
-                # Erase file
+        def test_read_os(self):
+                # Store all file content
                 import os
-                os.remove(fileName)
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                scatnamesFile = dirPath + "/tests/scatnames_test.expected.scop"
+                with open(scatnamesFile, 'r') as f:
+                        content = f.readlines()
+
+                # Read from file
+                scatnames, index = Scatnames.read_os(content, 0)
+
+                # Check index value
+                self.assertEqual(index, len(content))
+
+                # Check Scatnames object content
+                try:
+                        # Write to file
+                        outputFile = dirPath + "/tests/scatnames_test.out.scop"
+                        with open(outputFile, 'w') as f:
+                                scatnames.write_os(f)
+
+                        # Check file content
+                        with open(scatnamesFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Remove test file
+                        os.remove(outputFile)
 
 
 #

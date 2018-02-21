@@ -55,7 +55,7 @@ class Arrays(object):
                                 num_values = num_values + 1
 
                 # Skip empty lines, any annotation, and footer
-                while content[index].startswith('#') or content[index] == '\n' or content[index] == '</arrays>\n':
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n' or content[index] == '</arrays>\n'):
                         index = index + 1
 
                 # Build Arrays
@@ -106,20 +106,56 @@ class TestArrays(unittest.TestCase):
                 values = ["i", "mSize", "j", "kSize", "k", "nSize", "c", "a", "b"]
                 a = Arrays(values)
 
-                # Generate file
-                fileName = "arrays_test.out"
-                with open(fileName, 'w') as f:
-                        a.write_os(f)
+                try:
+                        # Generate file
+                        fileName = "arrays_test.out"
+                        with open(fileName, 'w') as f:
+                                a.write_os(f)
 
-                # Check file content
-                expected = "<arrays>\n# Number of arrays\n9\n# Mapping array-identifiers/array-names\n1 i\n2 mSize\n3 j\n4 kSize\n5 k\n6 nSize\n7 c\n8 a\n9 b\n</arrays>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                        # Check file content
+                        expected = "<arrays>\n# Number of arrays\n9\n# Mapping array-identifiers/array-names\n1 i\n2 mSize\n3 j\n4 kSize\n5 k\n6 nSize\n7 c\n8 a\n9 b\n</arrays>\n\n"
+                        with open(fileName, 'r') as f:
+                                content = f.read()
+                        self.assertEqual(content, expected)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        import os
+                        os.remove(fileName)
 
-                # Erase file
+        def test_read_os(self):
+                # Store all file content
                 import os
-                os.remove(fileName)
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                arraysFile = dirPath + "/tests/arrays_test.expected.scop"
+                with open(arraysFile, 'r') as f:
+                        content = f.readlines()
+
+                # Read from file
+                arrays, index = Arrays.read_os(content, 0)
+
+                # Check index value
+                self.assertEqual(index, len(content))
+
+                # Check Arrays object content
+                try:
+                        # Write to file
+                        outputFile = dirPath + "/tests/arrays_test.out.scop"
+                        with open(outputFile, 'w') as f:
+                                arrays.write_os(f)
+
+                        # Check file content
+                        with open(arraysFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Remove test file
+                        os.remove(outputFile)
 
 
 #

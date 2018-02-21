@@ -39,7 +39,7 @@ class Global(object):
                         index = index + 1
 
                 # Process mandatory field: language
-                language = content[index]
+                language = content[index].strip()
                 index = index + 1
 
                 # Process context
@@ -123,23 +123,59 @@ class TestGlobal(unittest.TestCase):
 
                 g = Global(lang, context, params)
 
-                # Generate file
+                try:
+                        # Generate file
+                        import os
+                        dirPath = os.path.dirname(os.path.realpath(__file__))
+                        outputFile = dirPath + "/tests/global_test.out.scop"
+                        expectedFile = dirPath + "/tests/global_test.expected.scop"
+                        with open(outputFile, 'w') as f:
+                                g.write_os(f)
+
+                        # Check file content
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        os.remove(outputFile)
+
+        def test_read_os(self):
+                # Store all file content
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))
-                outputFile = dirPath + "/tests/global_test.out.scop"
-                expectedFile = dirPath + "/tests/global_test.expected.scop"
-                with open(outputFile, 'w') as f:
-                        g.write_os(f)
+                globalFile = dirPath + "/tests/global_test.expected.scop"
+                with open(globalFile, 'r') as f:
+                        content = f.readlines()
 
-                # Check file content
-                with open(expectedFile, 'r') as f:
-                        expectedContent = f.read()
-                with open(outputFile, 'r') as f:
-                        outputContent = f.read()
-                self.assertEqual(outputContent, expectedContent)
+                # Read from file
+                g, index = Global.read_os(content, 0)
 
-                # Erase file
-                os.remove(outputFile)
+                # Check index value
+                self.assertEqual(index, len(content))
+
+                # Check Global object content
+                try:
+                        # Write to file
+                        outputFile = dirPath + "/tests/global_test2.out.scop"
+                        with open(outputFile, 'w') as f:
+                                g.write_os(f)
+
+                        # Check file content
+                        with open(globalFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Remove test file
+                        os.remove(outputFile)
 
 
 #

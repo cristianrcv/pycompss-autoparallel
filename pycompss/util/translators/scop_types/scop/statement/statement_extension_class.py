@@ -35,7 +35,49 @@ class StatementExtension(object):
 
         @staticmethod
         def read_os(content, index):
-                pass
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process body header
+                ptype = None
+                if content[index].startswith('<'):
+                        ptype = content[index][1:-2]
+                        index = index + 1
+
+                # Skip empty lines and annotations
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n'):
+                        index = index + 1
+
+                # Skip iters size
+                # iters_size = int(content[index].strip())
+                index = index + 1
+
+                # Skip empty lines and annotations
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n'):
+                        index = index + 1
+
+                # Process iterators
+                iters = content[index].split()
+                index = index + 1
+
+                # Skip empty lines and annotations
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n'):
+                        index = index + 1
+
+                # Process expression
+                expr = content[index].strip()
+                index = index + 1
+
+                # Skip footer, empty lines, and any annotation
+                while index < len(content) and (content[index].startswith('</') or content[index].startswith('#') or content[index] == '\n'):
+                        index = index + 1
+
+                # Build statement extension
+                se = StatementExtension(iters, expr)
+
+                # Return structure
+                return se, index
 
         def write_os(self, f):
                 # Print header
@@ -89,20 +131,56 @@ class TestStatementExtension(unittest.TestCase):
                 expr = "c[i][j] += a[i][k]*b[k][j];"
                 extension = StatementExtension(iterators, expr)
 
-                # Generate file
-                fileName = "extension_test.out"
-                with open(fileName, 'w') as f:
-                        extension.write_os(f)
+                try:
+                        # Generate file
+                        fileName = "extension_test.out"
+                        with open(fileName, 'w') as f:
+                                extension.write_os(f)
 
-                # Check file content
-                expected = "<body>\n# Number of original iterators\n3\n# List of original iterators\ni j k \n# Statement body expression\nc[i][j] += a[i][k]*b[k][j];\n</body>\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                        # Check file content
+                        expected = "<body>\n# Number of original iterators\n3\n# List of original iterators\ni j k \n# Statement body expression\nc[i][j] += a[i][k]*b[k][j];\n</body>\n"
+                        with open(fileName, 'r') as f:
+                                content = f.read()
+                        self.assertEqual(content, expected)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        import os
+                        os.remove(fileName)
 
-                # Erase file
+        def test_read_os(self):
+                # Store all file content
                 import os
-                os.remove(fileName)
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                sExtFile = dirPath + "/tests/statement_extension_test.expected.scop"
+                with open(sExtFile, 'r') as f:
+                        content = f.readlines()
+
+                # Read from file
+                ext, index = StatementExtension.read_os(content, 0)
+
+                # Check index value
+                self.assertEqual(index, len(content))
+
+                # Check StatementExtension object content
+                try:
+                        # Write to file
+                        outputFile = dirPath + "/tests/statement_extension_test.out.scop"
+                        with open(outputFile, 'w') as f:
+                                ext.write_os(f)
+
+                        # Check file content
+                        with open(sExtFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Remove test file
+                        os.remove(outputFile)
 
 
 #

@@ -78,7 +78,41 @@ class Relation(object):
 
         @staticmethod
         def read_os(content, index):
-                pass
+                # Skip header and any annotation
+                while content[index].startswith('#') or content[index] == '\n':
+                        index = index + 1
+
+                # Process mandatory field: type
+                type_ind = content[index].strip()
+                index = index + 1
+                relType = RelationType[type_ind]
+
+                # Process mandatory fields: dimensions
+                dims = content[index].split()
+                index = index + 1
+                rows = int(dims[0])
+                cols = int(dims[1])
+                oDims = int(dims[2])
+                iDims = int(dims[3])
+                lDims = int(dims[4])
+                params = int(dims[5])
+
+                # Process constraint matrix
+                cMatrix = []
+                for i in range(rows):
+                        row_vals = content[index].split()
+                        index = index + 1
+                        cMatrix.append(row_vals)
+
+                # Skip empty lines and any annotation
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n'):
+                        index = index + 1
+
+                # Build relation
+                rel = Relation(relType, rows, cols, oDims, iDims, lDims, params, cMatrix)
+
+                # Return structure
+                return rel, index
 
         def write_os(self, f):
                 # Print type
@@ -146,20 +180,56 @@ class TestRelation(unittest.TestCase):
                 matrix = [[1, -1], [1, -1]]
                 relation = Relation(relType, rows, cols, od, ind, ld, params, matrix)
 
-                # Generate file
-                fileName = "relation_test.out"
-                with open(fileName, 'w') as f:
-                        relation.write_os(f)
+                try:
+                        # Generate file
+                        fileName = "relation_test.out"
+                        with open(fileName, 'w') as f:
+                                relation.write_os(f)
 
-                # Check file content
-                expected = "DOMAIN\n9 8 3 0 0 3\n1\t-1\t\n1\t-1\t\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                        # Check file content
+                        expected = "DOMAIN\n9 8 3 0 0 3\n1\t-1\t\n1\t-1\t\n\n"
+                        with open(fileName, 'r') as f:
+                                content = f.read()
+                        self.assertEqual(content, expected)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        import os
+                        os.remove(fileName)
 
-                # Erase file
+        def test_read_os(self):
+                # Store all file content
                 import os
-                os.remove(fileName)
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                relationFile = dirPath + "/tests/relation_test.expected.scop"
+                with open(relationFile, 'r') as f:
+                        content = f.readlines()
+
+                # Read from file
+                rel, index = Relation.read_os(content, 0)
+
+                # Check index value
+                self.assertEqual(index, len(content))
+
+                # Check Relation object content
+                try:
+                        # Write to file
+                        outputFile = dirPath + "/tests/relation_test.out.scop"
+                        with open(outputFile, 'w') as f:
+                                rel.write_os(f)
+
+                        # Check file content
+                        with open(relationFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Remove test file
+                        os.remove(outputFile)
 
 
 #

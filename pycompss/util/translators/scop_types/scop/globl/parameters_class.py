@@ -39,6 +39,10 @@ class Parameters(object):
                         p, index = Parameter.read_os(content, index)
                         params.append(p)
 
+                # Skip empty lines and any annotation
+                while index < len(content) and (content[index].startswith('#') or content[index] == '\n'):
+                        index = index + 1
+
                 # Build Parameters
                 parameters = Parameters(params)
 
@@ -83,20 +87,56 @@ class TestParameters(unittest.TestCase):
                 p1 = Parameter(t, val)
                 params = Parameters([p1])
 
-                # Generate file
-                fileName = "parameters_test.out"
-                with open(fileName, 'w') as f:
-                        params.write_os(f)
+                try:
+                        # Generate file
+                        fileName = "parameters_test.out"
+                        with open(fileName, 'w') as f:
+                                params.write_os(f)
 
-                # Check file content
-                expected = "1\n<strings>\nmSize kSize nSize\n</strings>\n\n"
-                with open(fileName, 'r') as f:
-                        content = f.read()
-                self.assertEqual(content, expected)
+                        # Check file content
+                        expected = "1\n<strings>\nmSize kSize nSize\n</strings>\n\n"
+                        with open(fileName, 'r') as f:
+                                content = f.read()
+                        self.assertEqual(content, expected)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        import os
+                        os.remove(fileName)
 
-                # Erase file
+        def test_read_os(self):
+                # Store all file content
                 import os
-                os.remove(fileName)
+                dirPath = os.path.dirname(os.path.realpath(__file__))
+                parametersFile = dirPath + "/tests/parameters_test.expected.scop"
+                with open(parametersFile, 'r') as f:
+                        content = f.readlines()
+
+                # Read from file
+                pars, index = Parameters.read_os(content, 0)
+
+                # Check index value
+                self.assertEqual(index, len(content))
+
+                # Check Parameters object content
+                try:
+                        # Write to file
+                        outputFile = dirPath + "/tests/parameters_test.out.scop"
+                        with open(outputFile, 'w') as f:
+                                pars.write_os(f)
+
+                        # Check file content
+                        with open(parametersFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Remove test file
+                        os.remove(outputFile)
 
 
 #

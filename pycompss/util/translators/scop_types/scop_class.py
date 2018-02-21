@@ -60,10 +60,6 @@ class Scop(object):
                         statements.append(statement)
 
                 # Process extensions
-                index = 108
-                print("INIT EXTS WITH: " + str(content))
-                print("INIT EXTS WITH: " + str(index))
-
                 from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
                 extensions, index = Extensions.read_os(content, index)
 
@@ -119,18 +115,24 @@ class TestScop(unittest.TestCase):
         @staticmethod
         def generate_empty_scop():
                 from pycompss.util.translators.scop_types.scop.global_class import Global
+                from pycompss.util.translators.scop_types.scop.globl.context_class import Context
+                from pycompss.util.translators.scop_types.scop.globl.context_class import ContextType
+                from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
                 from pycompss.util.translators.scop_types.scop.statement_class import Statement
                 from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
+                from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
 
                 # Generate global
-                g = Global()
+                g_c = Context(ContextType.CONTEXT, 0, 0, 0, 0, 0, 0)
+                g_pars = Parameters([])
+                g = Global(None, g_c, g_pars)
 
                 # Generate statements
-                s1 = Statement()
-                statements = [s1]
+                statements = []
 
                 # Generate extensions
-                e = Extensions()
+                e_arrays = Arrays([])
+                e = Extensions(None, e_arrays, None)
 
                 # Generate SCOP
                 scop = Scop(g, statements, e)
@@ -155,21 +157,21 @@ class TestScop(unittest.TestCase):
                 # Generate statements
                 from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation, RelationType
                 from pycompss.util.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
-                s1_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
-                s1_scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
-                s1_a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
-                s1_a2 = Relation(RelationType.WRITE, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
-                s1_a3 = Relation(RelationType.MAY_WRITE, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_domain = Relation(RelationType.DOMAIN, 2, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
+                s1_scattering = Relation(RelationType.SCATTERING, 2, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_a1 = Relation(RelationType.READ, 2, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_a2 = Relation(RelationType.WRITE, 2, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s1_a3 = Relation(RelationType.MAY_WRITE, 2, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
                 s1_access = [s1_a1, s1_a2, s1_a3]
                 s1_ext1 = StatementExtension(["i", "j", "k"], "c[i][j] += a[i][k]*b[k][j];")
                 s1_extensions = [s1_ext1]
                 s1 = Statement(s1_domain, s1_scattering, s1_access, s1_extensions)
 
-                s2_domain = Relation(RelationType.DOMAIN, 9, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
-                s2_scattering = Relation(RelationType.SCATTERING, 7, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
-                s2_a1 = Relation(RelationType.READ, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
-                s2_a2 = Relation(RelationType.WRITE, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
-                s2_a3 = Relation(RelationType.MAY_WRITE, 3, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_domain = Relation(RelationType.DOMAIN, 2, 8, 3, 0, 0, 3, [[1, 1], [1, -1]])
+                s2_scattering = Relation(RelationType.SCATTERING, 2, 15, 7, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_a1 = Relation(RelationType.READ, 2, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_a2 = Relation(RelationType.WRITE, 2, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
+                s2_a3 = Relation(RelationType.MAY_WRITE, 2, 11, 3, 3, 0, 3, [[0, -1], [0, 0]])
                 s2_access = [s2_a1, s2_a2, s2_a3]
                 s2_ext1 = StatementExtension(["i", "j", "k"], "c[i][j] += a[i][k]*b[k][j];")
                 s2_extensions = [s2_ext1]
@@ -222,47 +224,53 @@ class TestScop(unittest.TestCase):
                 # Generate empty SCOP
                 scop = TestScop.generate_empty_scop()
 
-                # Generate file
-                import os
-                dirPath = os.path.dirname(os.path.realpath(__file__))
-                outputFile = dirPath + "/tests/test1.out.scop"
-                expectedFile = dirPath + "/tests/empty.scop"
-                with open(outputFile, 'w') as f:
-                        scop.write_os(f)
+                try:
+                        # Generate file
+                        import os
+                        dirPath = os.path.dirname(os.path.realpath(__file__))
+                        outputFile = dirPath + "/tests/test1.out.scop"
+                        expectedFile = dirPath + "/tests/empty.scop"
+                        with open(outputFile, 'w') as f:
+                                scop.write_os(f)
 
-                # Check file content
-                with open(expectedFile, 'r') as f:
-                        expectedContent = f.read()
-                with open(outputFile, 'r') as f:
-                        outputContent = f.read()
-                self.assertEqual(outputContent, expectedContent)
-
-                # Erase file
-                os.remove(outputFile)
+                        # Check file content
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        os.remove(outputFile)
 
         def test_write_os_full(self):
                 # Generate full SCOP
                 scop = TestScop.generate_full_scop()
 
-                # Generate file
-                import os
-                dirPath = os.path.dirname(os.path.realpath(__file__))
-                outputFile = dirPath + "/tests/test2.out.scop"
-                expectedFile = dirPath + "/tests/full.scop"
-                with open(outputFile, 'w') as f:
-                        scop.write_os(f)
+                try:
+                        # Generate file
+                        import os
+                        dirPath = os.path.dirname(os.path.realpath(__file__))
+                        outputFile = dirPath + "/tests/test2.out.scop"
+                        expectedFile = dirPath + "/tests/full.scop"
+                        with open(outputFile, 'w') as f:
+                                scop.write_os(f)
 
-                # Check file content
-                with open(expectedFile, 'r') as f:
-                        expectedContent = f.read()
-                with open(outputFile, 'r') as f:
-                        outputContent = f.read()
-                self.assertEqual(outputContent, expectedContent)
+                        # Check file content
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Erase file
+                        os.remove(outputFile)
 
-                # Erase file
-                os.remove(outputFile)
-
-        def ttest_read_os_empty(self):
+        def test_read_os_empty(self):
                 # Read from OpenScop
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))
@@ -272,10 +280,29 @@ class TestScop(unittest.TestCase):
                 # Build expected content
                 scopExp = TestScop.generate_empty_scop()
 
-                # Check loaded content
-                self.assertEqual(scop, scopExp)
+                # Check scops are equal
+                outputFile = dirPath + "/tests/empty.out.scop"
+                expectedFile = dirPath + "/tests/empty.expected.scop"
+                try:
+                        with open(outputFile, 'w') as f:
+                                scop.write_os(f)
+                        with open(expectedFile, 'w') as f:
+                                scopExp.write_os(f)
 
-        def ttest_read_os_full(self):
+                        # Check file content
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Clean files
+                        os.remove(outputFile)
+                        os.remove(expectedFile)
+
+        def test_read_os_full(self):
                 # Read from OpenScop
                 import os
                 dirPath = os.path.dirname(os.path.realpath(__file__))
@@ -285,8 +312,27 @@ class TestScop(unittest.TestCase):
                 # Build expected content
                 scopExp = TestScop.generate_full_scop()
 
-                # Check loaded content
-                self.assertEqual(scop, scopExp)
+                # Check scops are equal
+                outputFile = dirPath + "/tests/full.out.scop"
+                expectedFile = dirPath + "/tests/full.expected.scop"
+                try:
+                        with open(outputFile, 'w') as f:
+                                scop.write_os(f)
+                        with open(expectedFile, 'w') as f:
+                                scopExp.write_os(f)
+
+                        # Check file content
+                        with open(expectedFile, 'r') as f:
+                                expectedContent = f.read()
+                        with open(outputFile, 'r') as f:
+                                outputContent = f.read()
+                        self.assertEqual(outputContent, expectedContent)
+                except Exception:
+                        raise
+                finally:
+                        # Clean files
+                        os.remove(outputFile)
+                        os.remove(expectedFile)
 
 
 #
