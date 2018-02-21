@@ -174,7 +174,7 @@ class Py2Scop(object):
                         for_level = for_level + 1
 
                 # Child recursion
-                for field, value in ast.iter_fields(node):
+                for _, value in ast.iter_fields(node):
                         if isinstance(value, list):
                                 for item in value:
                                         if isinstance(item, ast.AST):
@@ -199,11 +199,8 @@ class Py2Scop(object):
                 Raise:
                 """
 
-                from pycompss.util.translators.scop_types.scop.global_class import Global
-                from pycompss.util.translators.scop_types.scop.statement_class import Statement
-                from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
-
                 # Generate global
+                from pycompss.util.translators.scop_types.scop.global_class import Global
                 from pycompss.util.translators.scop_types.scop.globl.context_class import Context
                 from pycompss.util.translators.scop_types.scop.globl.context_class import ContextType
                 from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
@@ -240,7 +237,8 @@ class Py2Scop(object):
                 statements_scop = Py2Scop._get_statements(tree, None, param_vars_list, all_vars_list)
 
                 # Generate extensions
-                from pycompss.util.translators.scop_types.scop.extensions.scatnames_class import Scatnames
+                from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
+                # from pycompss.util.translators.scop_types.scop.extensions.scatnames_class import Scatnames
                 from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
                 from pycompss.util.translators.scop_types.scop.extensions.coordinates_class import Coordinates
                 scatnames_scop = None
@@ -275,7 +273,7 @@ class Py2Scop(object):
                         global_params.append(node.id)
 
                 # Child recursion
-                for field, value in ast.iter_fields(node):
+                for _, value in ast.iter_fields(node):
                         if isinstance(value, list):
                                 for item in value:
                                         if isinstance(item, ast.AST):
@@ -307,7 +305,7 @@ class Py2Scop(object):
                         iter_vars.append(node.target.id)
 
                 # Child recursion
-                for field, value in ast.iter_fields(node):
+                for _, value in ast.iter_fields(node):
                         if isinstance(value, list):
                                 for item in value:
                                         if isinstance(item, ast.AST):
@@ -340,7 +338,7 @@ class Py2Scop(object):
                                 array_vars.append(node.value.id)
 
                 # Child recursion
-                for field, value in ast.iter_fields(node):
+                for _, value in ast.iter_fields(node):
                         if isinstance(value, list):
                                 for item in value:
                                         if isinstance(item, ast.AST):
@@ -382,7 +380,7 @@ class Py2Scop(object):
                         for_fathers.append(node)
 
                 # Child recursion
-                for field, value in ast.iter_fields(node):
+                for _, value in ast.iter_fields(node):
                         if isinstance(value, list):
                                 for item in value:
                                         if isinstance(item, ast.AST):
