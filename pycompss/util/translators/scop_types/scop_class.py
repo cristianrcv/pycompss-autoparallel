@@ -118,7 +118,6 @@ class TestScop(unittest.TestCase):
                 from pycompss.util.translators.scop_types.scop.globl.context_class import Context
                 from pycompss.util.translators.scop_types.scop.globl.context_class import ContextType
                 from pycompss.util.translators.scop_types.scop.globl.parameters_class import Parameters
-                from pycompss.util.translators.scop_types.scop.statement_class import Statement
                 from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
                 from pycompss.util.translators.scop_types.scop.extensions.arrays_class import Arrays
 

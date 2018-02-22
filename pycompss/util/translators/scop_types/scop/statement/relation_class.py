@@ -99,7 +99,7 @@ class Relation(object):
 
                 # Process constraint matrix
                 cMatrix = []
-                for i in range(rows):
+                for _ in range(rows):
                         row_vals = content[index].split()
                         index = index + 1
                         cMatrix.append(row_vals)

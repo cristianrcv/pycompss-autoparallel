@@ -50,7 +50,7 @@ class Statement(object):
                 # Process mandatory fields: relations
                 from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation
                 rels = []
-                for i in range(num_relations):
+                for _ in range(num_relations):
                         r, index = Relation.read_os(content, index)
                         rels.append(r)
 
@@ -65,7 +65,7 @@ class Statement(object):
                 # Process mandatory fields: extensions
                 from pycompss.util.translators.scop_types.scop.statement.statement_extension_class import StatementExtension
                 exts = []
-                for i in range(num_extensions):
+                for _ in range(num_extensions):
                         ext, index = StatementExtension.read_os(content, index)
                         exts.append(ext)
 

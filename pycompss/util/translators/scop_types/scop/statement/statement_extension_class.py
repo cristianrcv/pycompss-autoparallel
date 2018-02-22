@@ -39,14 +39,8 @@ class StatementExtension(object):
                 while content[index].startswith('#') or content[index] == '\n':
                         index = index + 1
 
-                # Process body header
-                ptype = None
-                if content[index].startswith('<'):
-                        ptype = content[index][1:-2]
-                        index = index + 1
-
-                # Skip empty lines and annotations
-                while index < len(content) and (content[index].startswith('#') or content[index] == '\n'):
+                # Skip body header, empty lines and annotations
+                while index < len(content) and (content[index].startswith('<') or content[index].startswith('#') or content[index] == '\n'):
                         index = index + 1
 
                 # Skip iters size
