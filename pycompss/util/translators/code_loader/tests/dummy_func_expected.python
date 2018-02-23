@@ -1,4 +1,4 @@
-        @staticmethod
-        def dummy_func():
-                # A dummy function
-                print ("A dummy function")
+    @staticmethod
+    def dummy_func():
+        # A dummy function
+        print("A dummy function")

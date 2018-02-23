@@ -7,15 +7,15 @@ from __future__ import print_function
 
 
 def unmodified_header():
-        print("This code should remain the same")
+    print("This code should remain the same")
 
 
 def test_func():
-        print("Hello World")
+    print("Hello World")
 
 
 def unmodified_footer():
-        print("This code should remain the same")
+    print("This code should remain the same")
 
 
 #
@@ -23,4 +23,4 @@ def unmodified_footer():
 #
 
 if __name__ == '__main__':
-        unittest.main()
+    unittest.main()
