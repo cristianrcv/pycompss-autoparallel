@@ -100,6 +100,9 @@ ENV/
 # mypy
 .mypy_cache/
 
+# Idea files
+.idea/
+
 # Token files
 .*_PROJECT_TOKEN
 
