@@ -226,7 +226,7 @@ class Py2Scop(object):
         param_vars_list = list(param_vars_set)
 
         # TODO: WTF is that 5
-        lang = "P"
+        lang = "p"
         context_scop = Context(ContextType.CONTEXT, 0, 5, 0, 0, 0, len(param_vars_list))
         params_scop = Parameters([Parameter("strings", param_vars_list)])
         global_scop = Global(lang, context_scop, params_scop)
