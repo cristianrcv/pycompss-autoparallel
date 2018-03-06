@@ -5,57 +5,47 @@ from pycompss.api.task import task
 from pycompss.api.parameter import *
 
 @task()
-def S1(zT3,zT4,zT5,i,j,k):
-	c[i][j] += a[i][k]*b[k][j];
+def S1(c, i, j, a, k, b):
+    c[i][j] += a[i][k]*b[k][j];
 
-def matmul(mSize, nSize, kSize, bSize, debug):
-        # Initialize
-        a = initialize(mSize, nSize, bSize, True)
-        b = initialize(nSize, kSize, bSize, True)
-        c = initialize(mSize, kSize, bSize, False)
+@parallel()                                                                                                                                                                                                                                                                    
+def matmul(m_size, n_size, k_size, b_size, debug):
+    # Initialize
+    a = initialize(m_size, n_size, b_size, True)
+    b = initialize(n_size, k_size, b_size, True)
+    c = initialize(m_size, k_size, b_size, False)
 
-        # Debug
-        if debug:
-                print "Matrix A:"
-                print a
-                print "Matrix B:"
-                print b
-                print "Matrix C:"
-                print c
+    # Debug
+    if debug:
+        print "Matrix A:"
+        print a
+        print "Matrix B:"
+        print b
+        print "Matrix C:"
+        print c
 
-        # Perform computation
-        # c = a*b
-        # Start of CLooG code
-        if ((kSize >= 1) and (mSize >= 1) and (nSize >= 1)):
-                lbp=0
-                ubp=int(math.floor(float(mSize-1)/float(32)))
-                # parallel for
-                for t1 in range(lbp, ubp):
-                        lbp=0
-                        ubp=int(math.floor(float(kSize-1)/float(32)))
-                        for t2 in range(0, int(math.floor(float(kSize-1)/float(32)))):
-                                lbp=0
-                                ubp=int(math.floor(float(nSize-1)/float(32)))
-                                for t3 in range(0, int(math.floor(float(nSize-1)/float(32)))):
-                                        lbp=32*t1
-                                        ubp=min(mSize-1,32*t1+31)
-                                        for t4 in range(32*t1, min(mSize-1,32*t1+31)):
-                                                lbp=32*t3
-                                                ubp=min(nSize-1,32*t3+31)
-                                                for t5 in range(32*t3, min(nSize-1,32*t3+31)):
-                                                        lbp=32*t2
-                                                        ubp=min(kSize-1,32*t2+31)
-                                                        # parallel for
-                                                        for t6 in range(lbv, ubv):
-                                                                S1(t1,t2,t3,t4,t6,t5)
-        compss_barrier()
-        # End of CLooG code
+    # Perform computation
+    # c = a*b
+    # Start of CLooG code
+    if ((k_size >= 1) and (m_size >= 1) and (n_size >= 1)):
+        lbp=0
+        ubp=k_size-1
+        # parallel for PRIVATE(lbv,ubv,t2,t3) REDUCTION()
+        for t1 in range(lbp, ubp):
+            lbp=0
+            ubp=n_size-1
+            for t2 in range(0, n_size-1):
+                lbv=0
+                ubv=m_size-1
+                # parallel for PRIVATE() REDUCTION()
+                for t3 in range(lbv, ubv):
+                    S1(t3,t1,t2)
+    # End of CLooG code
 
-        # Debug
-        if debug:
-                print "Matrix C:"
-                print c
+    # Debug
+    if debug:
+        print "Matrix C:"
+        print c
 
-        # Result
-        return c
-
+    # Result
+    return c
