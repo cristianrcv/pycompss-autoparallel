@@ -6,14 +6,14 @@ def S1(i,j,k):
 if ((kSize >= 1) and (mSize >= 1) and (nSize >= 1)):
         lbp=0
         ubp=mSize-1
-        # parallel for IN() INOUT() NO_DEPS(lbv,ubv,t2,t3)
+        # parallel for PRIVATE(lbv,ubv,t2,t3) REDUCTION()
         for t1 in range(lbp, ubp):
                 lbp=0
                 ubp=nSize-1
                 for t2 in range(0, nSize-1):
                         lbv=0
                         ubv=kSize-1
-                        # parallel for IN() INOUT() NO_DEPS()
+                        # parallel for PRIVATE() REDUCTION()
                         for t3 in range(lbv, ubv):
                                 S1(t1,t3,t2)
 # End of CLooG code
