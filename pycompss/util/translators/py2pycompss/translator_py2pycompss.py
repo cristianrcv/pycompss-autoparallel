@@ -122,6 +122,12 @@ class Py2PyCOMPSs(object):
             raise Py2PyCOMPSsException(
                 "[ERROR] The number of generated parallel FORs is > than the original number of main FORs")
 
+        # Remove the parallel decorator
+        for decorator in func_ast.decorator_list:
+            if isinstance(decorator, _ast.Call):
+                if decorator.func.id == "parallel":
+                    func_ast.decorator_list.remove(decorator)
+
         # Debug
         # if __debug__:
         # print("OUTPUT IMPORTS:")
