@@ -542,8 +542,8 @@ class Py2Scop(object):
         accesses_scop.extend(Py2Scop._process_accesses(statement_loop.value, iter_vars, param_vars, all_vars))
 
         # Extensions
-        import ast
-        e_scop = StatementExtension(iter_vars, ast.dump(statement_loop))
+        import astor
+        e_scop = StatementExtension(iter_vars, astor.to_source(statement_loop))
         extensions_scop = [e_scop]
 
         # Create and return statement

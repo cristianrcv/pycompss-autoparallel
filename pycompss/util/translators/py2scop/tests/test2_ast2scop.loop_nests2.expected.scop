@@ -74,7 +74,8 @@ READ
 # List of original iterators
 i1 j1 
 # Statement body expression
-Assign(targets=[Subscript(value=Subscript(value=Name(id='c', ctx=Load()), slice=Index(value=Name(id='i1', ctx=Load())), ctx=Load()), slice=Index(value=Name(id='j1', ctx=Load())), ctx=Store())], value=BinOp(left=Subscript(value=Subscript(value=Name(id='c', ctx=Load()), slice=Index(value=Name(id='i1', ctx=Load())), ctx=Load()), slice=Index(value=Name(id='j1', ctx=Load())), ctx=Load()), op=Add(), right=BinOp(left=Subscript(value=Subscript(value=Name(id='a', ctx=Load()), slice=Index(value=Name(id='i1', ctx=Load())), ctx=Load()), slice=Index(value=Name(id='j1', ctx=Load())), ctx=Load()), op=Mult(), right=Subscript(value=Subscript(value=Name(id='b', ctx=Load()), slice=Index(value=Name(id='i1', ctx=Load())), ctx=Load()), slice=Index(value=BinOp(left=Name(id='M', ctx=Load()), op=Sub(), right=Name(id='j1', ctx=Load()))), ctx=Load()))))
+c[i1][j1] = c[i1][j1] + a[i1][j1] * b[i1][M - j1]
+
 </body>
 
 # =============================================== Statement 2
@@ -112,7 +113,8 @@ SCATTERING
 # List of original iterators
 i1 j2 k1 
 # Statement body expression
-Assign(targets=[Name(id='c', ctx=Store())], value=BinOp(left=Name(id='c', ctx=Load()), op=Add(), right=BinOp(left=Name(id='a', ctx=Load()), op=Mult(), right=Name(id='b', ctx=Load()))))
+c[i1][j2] = c[i1][j2] + a[i1][k1] * b[k1][j2]
+
 </body>
 
 # =============================================== Statement 3
@@ -146,7 +148,7 @@ SCATTERING
 # List of original iterators
 i1 j2 
 # Statement body expression
-Assign(targets=[Name(id='c', ctx=Store())], value=BinOp(left=Name(id='c', ctx=Load()), op=Add(), right=BinOp(left=Name(id='a', ctx=Load()), op=Mult(), right=Name(id='b', ctx=Load()))))
+c[i1][j2] = c[i1][j2] + a[i1][j2] * b[i1][j2]
 </body>
 
 # =============================================== Extensions

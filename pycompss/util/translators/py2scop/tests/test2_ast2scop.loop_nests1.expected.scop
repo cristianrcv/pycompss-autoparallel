@@ -78,7 +78,8 @@ READ
 # List of original iterators
 i j k 
 # Statement body expression
-Assign(targets=[Subscript(value=Subscript(value=Name(id='c', ctx=Load()), slice=Index(value=Name(id='i', ctx=Load())), ctx=Load()), slice=Index(value=Name(id='j', ctx=Load())), ctx=Store())], value=BinOp(left=Subscript(value=Subscript(value=Name(id='c', ctx=Load()), slice=Index(value=Name(id='i', ctx=Load())), ctx=Load()), slice=Index(value=Name(id='j', ctx=Load())), ctx=Load()), op=Add(), right=BinOp(left=Subscript(value=Subscript(value=Name(id='a', ctx=Load()), slice=Index(value=Name(id='i', ctx=Load())), ctx=Load()), slice=Index(value=Name(id='k', ctx=Load())), ctx=Load()), op=Mult(), right=Subscript(value=Subscript(value=Name(id='b', ctx=Load()), slice=Index(value=Name(id='k', ctx=Load())), ctx=Load()), slice=Index(value=Name(id='j', ctx=Load())), ctx=Load()))))
+c[i][j] = c[i][j] + a[i][k] * b[k][j]
+
 </body>
 
 # =============================================== Extensions
