@@ -40,12 +40,6 @@ class parallel(object):
 
         new_func = func
         try:
-            # Get the source code of the function
-            func_source = self._get_py(func)
-            if __debug__:
-                logger.debug("[decorator] Func source code")
-                # logger.debug(str(func_source))
-
             # Process python code to scop
             base_scop_file = ".tmp_gen_scop.scop"
             scop_files = self._py2scop(func, base_scop_file)
@@ -66,7 +60,7 @@ class parallel(object):
 
             # Merges and adds PyCOMPSs annotations
             pycompss_file = ".tmp_gen_pycompss.py"
-            self._py2pycompss(func_source, py_files, pycompss_file)
+            self._py2pycompss(func, py_files, pycompss_file)
             if __debug__:
                 logger.debug("[decorator] Generated PyCOMPSs content")
                 # with open(pycompss_file, 'r') as f:
@@ -229,14 +223,14 @@ class parallel(object):
 
         return output_files
 
-    def _py2pycompss(self, func_source, par_py_files, output):
+    def _py2pycompss(self, func, par_py_files, output):
         """
         Substitutes the given parallel python files into the original
         function code and adds the required PyCOMPSs annotations. The
         result is stored in the given output file
 
         Arguments:
-                - func_source : Python original function
+                - func : Python original function
                 - par_py_files : List of files containing the Python parallelization
                         of each for block in the func_source
                 - output : PyCOMPSs file path
@@ -249,7 +243,7 @@ class parallel(object):
             logger.debug("[decorator] Start py2pycompss")
 
         from pycompss.util.translators.py2pycompss.translator_py2pycompss import Py2PyCOMPSs
-        Py2PyCOMPSs.translate(func_source, par_py_files, output)
+        Py2PyCOMPSs.translate(func, par_py_files, output)
 
         # Finish
         if __debug__:
