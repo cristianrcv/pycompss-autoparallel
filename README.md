@@ -53,6 +53,7 @@ The implementation includes:
 * [Commands](#commands)
     * [Test](#test)
     * [Coverage](#coverage)
+    * [Style](#style)
     * [Clean](#clean)
 * [Contributing](#contributing)
 * [Author](#author)
@@ -163,6 +164,21 @@ echo "YOUR_TOKEN" > .CODECOV_PROJECT_TOKEN
 ./coverage_upload.sh
 ```
 
+
+### Style
+
+This project follows the [PyCodeStyle guide][pycodestyle] (formerly called pep8).
+
+This project tolerates the following relaxations:
+* `E501 line too long` : Code lines can be up to 120 characters
+
+You can verify the code style by running:
+
+```
+pycodestyle .
+```
+
+
 ### Clean
 
 ```
@@ -213,6 +229,7 @@ Licensed under the [Apache 2.0 License][apache-2]
 [nose]: https://nose.readthedocs.io/en/latest/
 [coverage]: https://coverage.readthedocs.io/en/coverage-4.4.2/
 [codacy]: https://github.com/codacy/python-codacy-coverage
+[pycodestyle]: https://pypi.python.org/pypi/pycodestyle
 
 [camus]: https://www.inria.fr/en/teams/camus
 [inria]: https://www.inria.fr/
