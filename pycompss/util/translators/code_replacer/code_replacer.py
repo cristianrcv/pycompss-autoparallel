@@ -21,14 +21,47 @@ logger = logging.getLogger(__name__)
 #
 
 class CodeReplacer(object):
+    """
+    Creates an object to replace the given function
 
-    @staticmethod
-    def replace(func, new_code):
+    Attributes:
+            - func : Python function object to replace
+            - original_file : File containing the original function code
+            - bkp_file : Backup of the original file
+            - new_file : File containing the new parallel function code
+    """
+
+    def __init__(self, func=None):
         """
-        Replaces the func code by the content of new_code
+        Creates a code replacer for the given function
 
         Arguments:
                 - func : function to be replaced
+        Raise:
+                - CodeReplacerException
+        """
+        self.func = func
+
+        # Retrieve original file
+        try:
+            import inspect
+            self.original_file = inspect.getfile(func)
+        except Exception as e:
+            raise CodeReplacerException("[ERROR] Cannot find original file", e)
+
+        # Set backup file
+        import os
+        file_name = os.path.splitext(self.original_file)[0]
+        self.bkp_file = file_name + "_bkp.py"
+        # Set new file
+        self.new_file = file_name + "_autogen.py"
+
+    def replace(self, new_code, keep_generated_files=False):
+        """
+        Replaces the func code by the content of new_code and cleans all the files if an
+        internal error is raised
+
+        Arguments:
                 - new_code : File path containing the new code
         Return:
                 - new_func : pointer to the new function
@@ -37,20 +70,46 @@ class CodeReplacer(object):
         """
 
         if __debug__:
-            logger.debug("[code_replacer] Replacing code of " + str(func) + " by code inside " + str(new_code))
+            logger.debug("[code_replacer] Replacing code of " + str(self.func) + " by code inside " + str(new_code))
+
+        # Wrap the internal replace method to catch exceptions and restore user code
+        try:
+            new_func = self._replace(new_code)
+        except Exception as e:
+            if keep_generated_files:
+                self.restore()
+            else:
+                self.clean()
+            raise CodeReplacerException("[ERROR] Cannot replace func " + str(self.func), e)
+
+        # Finish
+        if __debug__:
+            logger.debug("[code_replacer] New function: " + str(new_func))
+        return new_func
+
+    def _replace(self, new_code):
+        """
+        Replaces the func code by the content of new_code
+
+        Arguments:
+                - new_code : File path containing the new code
+        Return:
+                - new_func : pointer to the new function
+        Raise:
+                - CodeReplacerException
+        """
 
         # Retrieve original content
         try:
-            import inspect
-            original_file = inspect.getfile(func)
-            with open(original_file, 'r') as f:
+            with open(self.original_file, 'r') as f:
                 original_content = f.read()
         except Exception as e:
             raise CodeReplacerException("[ERROR] Cannot load original code from file", e)
 
         # Retrieve function content
         try:
-            func_content = inspect.getsource(func)
+            import inspect
+            func_content = inspect.getsource(self.func)
         except Exception as e:
             raise CodeReplacerException("[ERROR] Cannot retrieve function content", e)
 
@@ -69,49 +128,86 @@ class CodeReplacer(object):
 
         # Backup user file
         try:
-            import os
             from shutil import copyfile
-            bkp_file = os.path.splitext(original_file)[0] + "_bkp.py"
-            copyfile(original_file, bkp_file)
+            copyfile(self.original_file, self.bkp_file)
         except Exception as e:
             raise CodeReplacerException("[ERROR] Cannot backup source file", e)
         if __debug__:
-            logger.debug("[code_replacer] User code backup in file " + str(bkp_file))
+            logger.debug("[code_replacer] User code backup in file " + str(self.bkp_file))
 
         # Create new source file
         try:
-            import os
-            new_file = os.path.splitext(original_file)[0] + "_autogen.py"
-            with open(new_file, 'w') as f:
+            with open(self.new_file, 'w') as f:
                 f.write(new_content)
         except Exception as e:
             raise CodeReplacerException("[ERROR] Cannot create new source file", e)
         if __debug__:
-            logger.debug("[code_replacer] New code generated in file " + str(new_file))
+            logger.debug("[code_replacer] New code generated in file " + str(self.new_file))
 
         # Move new content to original file
         try:
             from shutil import copyfile
-            copyfile(new_file, original_file)
+            copyfile(self.new_file, self.original_file)
         except Exception as e:
             raise CodeReplacerException("[ERROR] Cannot replace original file", e)
 
         # Load new function from new file
         # Similar to: from new_module import func.__name__ as new_func
-        new_module = os.path.splitext(os.path.basename(original_file))[0]
+        import os
+        new_module = os.path.splitext(os.path.basename(self.original_file))[0]
         if __debug__:
-            logger.debug("[code_replacer] Import module " + str(func.__name__) + " from " + str(new_module))
+            logger.debug("[code_replacer] Import module " + str(self.func.__name__) + " from " + str(new_module))
         try:
             import importlib
-            new_func = getattr(importlib.import_module(new_module), func.__name__)
+            new_func = getattr(importlib.import_module(new_module), self.func.__name__)
         except Exception as e:
             raise CodeReplacerException(
-                "[ERROR] Cannot load new function and module " + str(func.__name__) + " from " + str(new_module), e)
-        if __debug__:
-            logger.debug("[code_replacer] New function: " + str(new_func))
+                "[ERROR] Cannot load new function and module " + str(self.func.__name__) + " from " + str(new_module),
+                e)
 
-        # Finish
+        # Return the new function
         return new_func
+
+    def restore(self):
+        """
+        Erases intermediate files
+
+        Arguments:
+        Return:
+        Raise:
+        """
+
+        if __debug__:
+            logger.debug("[code_replacer] Restoring user code")
+
+        import os
+        if os.path.isfile(self.bkp_file):
+            # Restore user file
+            from shutil import copyfile
+            copyfile(self.bkp_file, self.original_file)
+
+            # Clean intermediate files
+            os.remove(self.bkp_file)
+
+    def clean(self):
+        """
+        Erases all the generated files
+
+        Arguments:
+        Return:
+        Raise:
+        """
+
+        # Restore user code
+        self.restore()
+
+        # Clean auto-generated file
+        if __debug__:
+            logger.debug("[code_replacer] Cleaning all files")
+
+        import os
+        if os.path.isfile(self.new_file):
+            os.remove(self.new_file)
 
 
 #
@@ -140,7 +236,7 @@ class CodeReplacerException(Exception):
 class TestCodeReplacer(unittest.TestCase):
 
     def test_code_replacer(self):
-        # Insert function file into pythonpath
+        # Insert function file into PYTHONPATH
         import os
         dir_path = os.path.dirname(os.path.realpath(__file__))
         tests_path = dir_path + "/tests"
@@ -154,9 +250,11 @@ class TestCodeReplacer(unittest.TestCase):
 
         # Import new code
         file_new_code = tests_path + "/new.py"
+        cr = None
         try:
             # Perform replace
-            new_f = CodeReplacer.replace(f, file_new_code)
+            cr = CodeReplacer(f)
+            new_f = cr.replace(file_new_code)
 
             # Check function has been reloaded
             self.assertNotEqual(f, new_f)
@@ -171,29 +269,9 @@ class TestCodeReplacer(unittest.TestCase):
         except Exception:
             raise
         finally:
-            TestCodeReplacer._restore(tests_path, user_file)
-            TestCodeReplacer._clean(tests_path)
-
-    @staticmethod
-    def _restore(tests_path, user_file):
-        bkp_file = tests_path + "/original_bkp.py"
-        try:
-            from shutil import copyfile
-            copyfile(bkp_file, user_file)
-        except Exception as e:
-            print("ERROR: Cannot restore original file")
-            print(str(e))
-
-    @staticmethod
-    def _clean(tests_path):
-        import os
-        bkp_file = tests_path + "/original_bkp.py"
-        if os.path.isfile(bkp_file):
-            os.remove(bkp_file)
-
-        autogen_file = tests_path + "/original_autogen.py"
-        if os.path.isfile(autogen_file):
-            os.remove(autogen_file)
+            # Clean intermediate files
+            if cr is not None:
+                cr.clean()
 
 
 #
