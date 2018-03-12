@@ -13,6 +13,7 @@ import logging
 # Logger definition
 #
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(levelname)s | %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -28,8 +29,8 @@ class Py2Scop(object):
             - func : Python function object to replace
             - func_code : Full code of func
             - func_ast : AST representation of func
-            - for_blocks : List of AST blocks that represent main fors
-            - scops: List of OpenScop code that represent main fors
+            - for_blocks : List of AST blocks that represent main for's
+            - scops: List of OpenScop code that represent main for's
     """
 
     # TODO: 2 consecutive for's as single for block
