@@ -133,6 +133,7 @@ With debug mode enabled:
 
 ```
 export PYTHONPATH=${git_base_dir}
+cd pycompss
 python nose_tests.py -s
 ```
 
@@ -140,6 +141,7 @@ With debug mode disabled:
 
 ```
 export PYTHONPATH=${git_base_dir}
+cd pycompss
 python -O nose_tests.py
 ```
 
