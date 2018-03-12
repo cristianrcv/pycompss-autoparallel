@@ -3,7 +3,10 @@
 # -*- coding: utf-8 -*-
 
 # Imports
-from pycompss.api.parallel import parallel
+from pycompss.api.task import task
+from pycompss.api.parameter import *
+from pycompss.api.api import compss_barrier
+from pycompss.api.api import compss_wait_on
 
 
 # Initializes a matrix with size (n x m) with blocks (bSize x bSize) randomly or not
@@ -23,8 +26,22 @@ def initialize(n_size, m_size, b_size, random):
     return matrix
 
 
+@task(c = INOUT)
+def multiply(a, b, c):
+    #import time
+    #start = time.time()
+
+    import numpy as np
+    #np.show_config()
+
+    c += a*b
+
+    #end = time.time()
+    #tm = end - start
+    #print "TIME: " + str(tm*1000) + " msec"
+
+
 # Performs the matrix multiplication by blocks
-@parallel()
 def matmul(m_size, n_size, k_size, b_size, debug):
     # Initialize
     a = initialize(m_size, n_size, b_size, True)
@@ -45,7 +62,12 @@ def matmul(m_size, n_size, k_size, b_size, debug):
     for i in range(m_size):
         for j in range(k_size):
             for k in range(n_size):
-                c[i][j] += a[i][k] * b[k][j]
+                multiply(a[i][k], b[k][j], c[i][j])
+
+    compss_barrier()
+    #    for i in range(m_size):
+    #        for j in range(k_size):
+    #           print "C" + str(i) + str(j) + "=" + str(compss_wait_on(c[i][j]))
 
     # Debug
     if debug:
@@ -62,10 +84,10 @@ if __name__ == "__main__":
     import time
 
     # Parse arguments
-    m_mat_size = 5
-    n_mat_size = 2
-    k_mat_size = 3
-    block_size = 1
+    m_mat_size = 8
+    n_mat_size = 8
+    k_mat_size = 8
+    block_size = 4
     is_debug = True
 
     # Begin computation
