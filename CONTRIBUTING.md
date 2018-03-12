@@ -104,6 +104,6 @@ This Code of Conduct is adapted from the [Contributor Covenant][homepage], versi
 available at [http://contributor-covenant.org/version/1/4][version]
 
 [version]: http://semver.org/
-[team_email]: <cristian.ramoncortes@bsc.es>
+[team_email]: mailito:cristian.ramoncortes@bsc.es
 [homepage]: http://contributor-covenant.org
 [version]: http://contributor-covenant.org/version/1/4/
