@@ -29,8 +29,8 @@ class Py2Scop(object):
             - func : Python function object to replace
             - func_code : Full code of func
             - func_ast : AST representation of func
-            - for_blocks : List of AST blocks that represent main for's
-            - scops: List of OpenScop code that represent main for's
+            - for_blocks : List of AST blocks that represent main fors
+            - scops: List of OpenScop code that represent main fors
     """
 
     # TODO: 2 consecutive for's as single for block
@@ -1137,35 +1137,4 @@ class TestPy2Scop(unittest.TestCase):
 #
 
 if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', help="Input file containing python code")
-    parser.add_argument('-f', '--func_name', help="Name of the function to load from the input")
-    parser.add_argument('-o', '--output', help="Base name for the output file(s) written in SCOP format")
-    args = parser.parse_args()
-
-    if args.input and args.func_name and args.output:
-        # Import function to replace
-        import importlib
-
-        func_module = importlib.import_module(args.input)
-        func_obj = getattr(func_module, args.func_name)
-
-        # Translate
-        func_translator = Py2Scop(func_obj)
-        outputFiles = func_translator.translate(args.output)
-
-        # Print information
-        print("SCOP files generated:")
-        for of in outputFiles:
-            print(of)
-    elif args.input or args.func_name or args.output:
-        print("ERROR: Invalid arguments.")
-        print(" - Add input, func_name, and output parameters to invoke the main class")
-        print(" - Add no arguments to invoke unit tests")
-        print("Aborting...")
-    else:
-        # Test mode
-        print("PERFORMING ALL TESTS")
-        unittest.main()
+    unittest.main()
