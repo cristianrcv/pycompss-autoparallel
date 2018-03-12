@@ -14,6 +14,7 @@ from functools import wraps
 # Logger definition
 #
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(levelname)s | %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -29,16 +30,111 @@ class parallel(object):
     """
 
     def __init__(self, *args, **kwargs):
+        logger.debug("Init @parallel decorator...")
+
         # Store arguments passed to the decorator
         self.args = args
         self.kwargs = kwargs
-        logger.debug("Init @parallel decorator...")
+
+        # Add a place to store internal translator structures
+        self.translator_py2scop = None
+        self.code_replacer = None
 
     def __call__(self, func):
+        """
+        Parallelizes the annotated function and returns a wrapper to it
+
+        Arguments:
+                - func : Python Function Object to parallelize
+        Return:
+                - parallel_f : Wrapper to the parallel version of the given function (new_func)
+        Raise:
+                - CodeLoaderException
+                - Py2ScopException
+                - Scop2PScop2PyException
+                - Py2PyCOMPSsException
+                - CodeReplacerException
+        """
+
         if __debug__:
             logger.debug("[decorator] Start decorator for function: " + str(func))
 
-        new_func = func
+        # Parallelize code
+        new_func = self._translate(func)
+
+        # Add decorator wrapper
+        @wraps(new_func)
+        def parallel_f(*args, **kwargs):
+            # This is executed only when called.
+            if __debug__:
+                logger.debug("[parallel_f] Executing parallel_f wrapper")
+
+            # Save things
+            if __debug__:
+                logger.debug("[parallel_f] Saving method data")
+            slf = None
+            saved = {}
+            if len(args) > 0:
+                # The 'self' for a method function is passed as args[0]
+                slf = args[0]
+                # Replace and store the attributes
+                for k, v in self.kwargs.items():
+                    if hasattr(slf, k):
+                        saved[k] = getattr(slf, k)
+                        setattr(slf, k, v)
+
+            # Call the method
+            if __debug__:
+                logger.debug("[parallel_f] Calling user method")
+
+            try:
+                ret = new_func(*args, **kwargs)
+            except Exception:
+                raise
+            finally:
+                # Put things back
+                if __debug__:
+                    logger.debug("[parallel_f] Restoring method data")
+                if len(args) > 0:
+                    for k, v in saved.items():
+                        setattr(slf, k, v)
+
+                # Restore user code (according to code_replacer)
+                if __debug__:
+                    logger.debug("[parallel_f] Restoring user code")
+                if self.code_replacer is not None:
+                    self.code_replacer.restore()
+
+            # Return method value
+            return ret
+
+        # Return the wrapper of the parallelized function
+        parallel_f.__doc__ = new_func.__doc__
+        return parallel_f
+
+    def _translate(self, func=None, keep_generated_files=False):
+        """
+        Parallelizes the given function and returns a pointer to the new parallel function
+
+        Arguments:
+                - func : Python Function Object to parallelize
+                - keep_generated_files : Keep auto-generated intermediate files (default False)
+        Return:
+                - new_func : Python Function Object to parallel function
+        Raise:
+                - CodeLoaderException
+                - Py2ScopException
+                - Scop2PScop2PyException
+                - Py2PyCOMPSsException
+                - CodeReplacerException
+        """
+
+        if __debug__:
+            logger.debug("[decorator] Translating function: " + str(func))
+
+        scop_files = None
+        py_files = None
+        pycompss_file = None
         try:
             # Process python code to scop
             base_scop_file = ".tmp_gen_scop.scop"
@@ -67,73 +163,27 @@ class parallel(object):
                 #        logger.debug(f.read())
 
             # Embed code into user file
-            new_func = self._load_generated_code(func, pycompss_file)
+            new_func = self._load_generated_code(func, pycompss_file, keep_generated_files)
         except Exception as e:
             logger.error(e)
             raise
         finally:
             # Clean
             files_to_clean = []
-            if 'scop_files' in locals():
+            if scop_files is not None:
                 for f in scop_files:
                     files_to_clean.append(f)
-            if 'py_files' in locals():
+            if py_files is not None:
                 for f in py_files:
                     files_to_clean.append(f)
-            if 'pycompss_file' in locals():
+            if pycompss_file is not None:
                 files_to_clean.append(pycompss_file)
             self._clean(files_to_clean)
 
-        # Execute parallelized code
-        logger.debug("[decorator] Replaced " + str(func) + " by " + str(new_func))
-
-        @wraps(new_func)
-        def parallel_f(*args, **kwargs):
-            # This is executed only when called.
-            logger.debug("Executing parallel_f wrapper")
-
-            slf = None
-            saved = {}
-            if len(args) > 0:
-                # The 'self' for a method function is passed as args[0]
-                slf = args[0]
-
-                # Replace and store the attributes
-                for k, v in self.kwargs.items():
-                    if hasattr(slf, k):
-                        saved[k] = getattr(slf, k)
-                        setattr(slf, k, v)
-
-            # Call the method
-            if __debug__:
-                logger.debug("Calling user method")
-            ret = new_func(*args, **kwargs)
-
-            # Put things back
-            if len(args) > 0:
-                for k, v in saved.items():
-                    setattr(slf, k, v)
-
-            # Restore user code (according to code_replacer)
-            if __debug__:
-                logger.debug("Restoring user code")
-            try:
-                import inspect
-                original_file = inspect.getfile(new_func)
-                import os
-                bkp_file = os.path.splitext(original_file)[0] + "_bkp.py"
-                from shutil import copyfile
-                copyfile(bkp_file, original_file)
-
-                os.remove(bkp_file)
-            except Exception as e:
-                logger.error(e)
-                raise
-
-            return ret
-
-        parallel_f.__doc__ = new_func.__doc__
-        return parallel_f
+        # Return parallelized code
+        if __debug__:
+            logger.debug("[decorator] Replaced " + str(func) + " by " + str(new_func))
+        return new_func
 
     def _get_py(self, func):
         """
@@ -144,7 +194,7 @@ class parallel(object):
         Return:
                 - func_source : Source code of the function
         Raise:
-                - GetPyException
+                - CodeLoaderException
         """
 
         if __debug__:
@@ -177,8 +227,8 @@ class parallel(object):
             logger.debug("[decorator] Start py2scop")
 
         from pycompss.util.translators.py2scop.translator_py2scop import Py2Scop
-        translator = Py2Scop(func)
-        output_files = translator.translate(base_output)
+        self.translator_py2scop = Py2Scop(func)
+        output_files = self.translator_py2scop.translate(base_output)
 
         # Finish
         if __debug__:
@@ -249,7 +299,7 @@ class parallel(object):
         if __debug__:
             logger.debug("[decorator] Finished py2pycompss")
 
-    def _load_generated_code(self, func, new_code):
+    def _load_generated_code(self, func, new_code, keep_generated_files):
         """
         Replaces the func code by the content of new_code
 
@@ -266,7 +316,8 @@ class parallel(object):
             logger.debug("[decorator] Start load_generated_code")
 
         from pycompss.util.translators.code_replacer.code_replacer import CodeReplacer
-        new_func = CodeReplacer.replace(func, new_code)
+        self.code_replacer = CodeReplacer(func)
+        new_func = self.code_replacer.replace(new_code, keep_generated_files)
 
         # Finish
         if __debug__:
@@ -280,16 +331,17 @@ class parallel(object):
         Arguments:
                 - list_of_files : List of files
         Return:
+        Raise:
         """
 
         if __debug__:
             logger.debug("[decorator] Cleaning...")
 
         import os
-        for file in list_of_files:
+        for f in list_of_files:
             if __debug__:
-                logger.debug("[decorator] Cleaning file " + str(file))
-            os.remove(file)
+                logger.debug("[decorator] Cleaning file " + str(f))
+            os.remove(f)
 
         if __debug__:
             logger.debug("[decorator] Finished cleaning")
@@ -302,7 +354,48 @@ class parallel(object):
 class TestParallelDecorator(unittest.TestCase):
 
     def test_decorator(self):
-        pass
+        # Base variables
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        tests_path = dir_path + "/tests"
+
+        # Insert function file into pythonpath
+        import sys
+        sys.path.insert(0, tests_path)
+
+        # Import function to replace
+        import importlib
+        func_name = "matmul"
+        test_module = importlib.import_module("pycompss.api.tests.test1_matmul")
+        func = getattr(test_module, func_name)
+
+        # Generate parallel code
+        from pycompss.util.translators.code_replacer.code_replacer import CodeReplacerException
+        p = parallel()
+        try:
+            # We don't retrieve new_func because we are not gonna import it (COMPSs is off)
+            p._translate(func, True)
+        except CodeReplacerException as cre:
+            logger.info("Catch CodeReplacerException because COMPSs is not initialized. CONTINUING")
+            if __debug__:
+                logger.debug(cre)
+
+        # Check file content
+        out_file = tests_path + "/test1_matmul_autogen.py"
+        expected_file = tests_path + "/test1_matmul.expected.python"
+        try:
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(out_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase file
+            os.remove(out_file)
+            # Erase PYC file because we are overriding it and python does not know
+            os.remove(tests_path + "/test1_matmul.pyc")
 
 
 #
