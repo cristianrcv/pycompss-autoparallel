@@ -18,19 +18,19 @@ The implementation includes:
 
 ## Table of Contents
 
-* [Dependencies](Dependencies)
-    * [Software Dependencies](#Software Dependencies)
-    * [Included Dependencies inside PLUTO](#Included Dependencies inside PLUTO)
-    * [Python Module Dependencies](#Python Module Dependencies)
-    * [Extra Dependencies](#Extra Dependencies)
-* [Commands](#Commands)
-    * [Test](#Test)
-    * [Coverage](#Coverage)
-    * [Clean](#Clean)
-* [Contributing](#Contributing)
-* [Author](#Author)
-* [Disclaimer](#Disclaimer)
-* [License](#License)
+* [Dependencies](#dependencies)
+    * [Software Dependencies](#software-dependencies)
+    * [Included Dependencies inside PLUTO](#included-dependencies-inside-pluto)
+    * [Python Module Dependencies](#python-module-dependencies)
+    * [Extra Dependencies](#extra-dependencies)
+* [Commands](#commands)
+    * [Test](#test)
+    * [Coverage](#coverage)
+    * [Clean](#clean)
+* [Contributing](#contributing)
+* [Author](#author)
+* [Disclaimer](#disclaimer)
+* [License](#license)
 
 ---
 
@@ -149,7 +149,7 @@ submit a pull request or contact the author if necessary.
 
 ## Author
 
-Cristián Ramón-Cortés Vilarrodona <cristian.ramoncortes@bsc.es> ([Personal WebPage][cristian])
+Cristián Ramón-Cortés Vilarrodona <cristian.ramoncortes(at)bsc.es> ([Personal WebPage][cristian])
 
 This work is supervised by:
 - Rosa M. Badia ([BSC][bsc])
