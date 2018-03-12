@@ -1,14 +1,24 @@
 Python - OpenScop Translator
 =============================
 
-Based on the OpenScop and CLAN documentation, takes a Python code, builds its representation and bulks it on OpenScop format.
+Processes a Python function and writes the [OpenScop][openscop] representation of
+all the main loops found. 
 
 
-### Dependencies
+### Module Dependencies
 
-- The unit tests use the [UnitTest][1] Python module
-- To run all tests you require the [Nose][2] Python module
-- To add code coverage you require [coverage][3] and [codacy-coverage][4] Python modules
+- [Inspect][inspect] Python module
+- [AST][ast] Python module
+- [AST Observe/Rewrite (ASTOR)][astor] Python module
+- [Logging][logging] Python module
+- [UnitTest][unittest] Python module
+
+
+### Extra Dependencies
+
+- To run all tests you require the [Nose][nose] Python module
+- To add code coverage you require [coverage][coverage] and/or
+[codacy-coverage][codacy] Python modules
 
 
 ### Test with debug
@@ -28,7 +38,13 @@ python -O translator_py2scop.py
 ### Run
 
 ```
-python translator_py2scop.py -i <source> -o <output>
+import Py2Scop
+
+func = <Python_function_object>
+base_output = <base_scop_output_file>
+
+translator = Py2Scop(func)
+output_files = translator.translate(base_output)
 ```
 
 
@@ -40,8 +56,12 @@ find . -name "*.pyo" -delete
 ```
 
 
-[1]: https://docs.python.org/2/library/unittest.html
-[2]: https://nose.readthedocs.io/en/latest/
-[3]: https://coverage.readthedocs.io/en/coverage-4.4.2/
-[4]: https://github.com/codacy/python-codacy-coverage
-
+[inspect]: https://docs.python.org/2/library/inspect.html
+[ast]: https://docs.python.org/2/library/ast.html
+[astor]: http://astor.readthedocs.io/en/latest/
+[openscop]: https://github.com/periscop/openscop
+[logging]: https://docs.python.org/2/library/logging.html
+[unittest]: https://docs.python.org/2/library/unittest.html
+[nose]: https://nose.readthedocs.io/en/latest/
+[coverage]: https://coverage.readthedocs.io/en/coverage-4.4.2/
+[codacy]: https://github.com/codacy/python-codacy-coverage

@@ -1,14 +1,21 @@
 Python OpenScop Representation
 =============================
 
-Based on the OpenScop documentation, a Python reprensentation of the OpenScop format.
+A Python Object representation of the [OpenScop][openscop] format. It is based on the 
+OpenScop documentation and allows users read and write Python objects
+from/to an OpenScop file.
 
 
-### Dependencies
+### Module Dependencies
 
-- The unit tests use the [UnitTest][1] Python module
-- To run all tests you require the [Nose][2] Python module
-- To add code coverage you require [coverage][3] and [codacy-coverage][4] Python modules
+- [UnitTest][unittest] Python module
+
+
+### Extra Dependencies
+
+- To run all tests you require the [Nose][nose] Python module
+- To add code coverage you require [coverage][coverage] and/or 
+[codacy-coverage][codacy] Python modules
 
 
 ### Test with debug
@@ -29,7 +36,16 @@ python -O scop_class.py
 
 ```
 import scop
+
+# Constructor
 s = Scop(global, statements, extensions)
+
+# Read from OpenScop file
+s = Scop.read_os('file.scop')
+
+# Write to file
+with open('file.scop', 'w') as f:
+    s.write_os(f)
 ```
 
 
@@ -41,8 +57,8 @@ find . -name "*.pyo" -delete
 ```
 
 
-[1]: https://docs.python.org/2/library/unittest.html
-[2]: https://nose.readthedocs.io/en/latest/
-[3]: https://coverage.readthedocs.io/en/coverage-4.4.2/
-[4]: https://github.com/codacy/python-codacy-coverage
-
+[openscop]: https://github.com/periscop/openscop
+[unittest]: https://docs.python.org/2/library/unittest.html
+[nose]: https://nose.readthedocs.io/en/latest/
+[coverage]: https://coverage.readthedocs.io/en/coverage-4.4.2/
+[codacy]: https://github.com/codacy/python-codacy-coverage

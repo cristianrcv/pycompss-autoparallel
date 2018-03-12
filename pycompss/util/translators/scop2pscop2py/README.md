@@ -1,15 +1,29 @@
-OpenScop - Parallel OpenScop Translator                                                                                                                                                                                                                                        
+OpenScop - Parallel Python Translator                                                                                                                                                                                                                                        
 =============================
 
-Uses the PLUTO tool to generate parallel SCOP code from a source SCOP representation
+Uses the [PLUTO][pluto] to generate a Parallel Python code from an input
+[OpenScop][openscop] file. Notice that the input file must be in a valid OpenScop
+format and that it must fulfill the PLUTO restrictions in order to be automatically
+parallelized.
+
+The generated file is written in Python and annotated with comments in a OMP similar
+fashion (annotations are of the form `# parallel for PRIVATE(lbv,ubv,t3) REDUCTION()`).
+However, the obtained code cannot be directly executed in parallel since annotations
+must be processed by some Runtime. 
 
 
-### Dependencies
+### Module Dependencies
 
-- A valid PLUTO installation
-- The unit tests use the [UnitTest][1] Python module
-- To run all tests you require the [Nose][2] Python module
-- To add code coverage you require [coverage][3] and [codacy-coverage][4] Python modules
+- A valid [PLUTO][pluto] installation
+- Uses the [subprocess][subprocess] Python module
+- [Logging][logging] Python module
+- [UnitTest][unittest] Python module
+
+### Extra Dependencies
+
+- To run all tests you require the [Nose][nose] Python module
+- To add code coverage you require [coverage][coverage] and/or 
+[codacy-coverage][codacy] Python modules
 
 
 ### Test with debug
@@ -41,8 +55,13 @@ find . -name "*.pyc" -delete
 find . -name "*.pyo" -delete
 ```
 
-[1]: https://docs.python.org/2/library/unittest.html
-[2]: https://nose.readthedocs.io/en/latest/
-[3]: https://coverage.readthedocs.io/en/coverage-4.4.2/
-[4]: https://github.com/codacy/python-codacy-coverage
+
+[pluto]: https://github.com/periscop/openscop
+[openscop]: https://github.com/periscop/openscop
+[subprocess]: https://docs.python.org/2/library/subprocess.html
+[logging]: https://docs.python.org/2/library/logging.html
+[unittest]: https://docs.python.org/2/library/unittest.html
+[nose]: https://nose.readthedocs.io/en/latest/
+[coverage]: https://coverage.readthedocs.io/en/coverage-4.4.2/
+[codacy]: https://github.com/codacy/python-codacy-coverage
 
