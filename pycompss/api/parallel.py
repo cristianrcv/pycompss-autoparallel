@@ -49,7 +49,6 @@ class parallel(object):
         Return:
                 - parallel_f : Wrapper to the parallel version of the given function (new_func)
         Raise:
-                - CodeLoaderException
                 - Py2ScopException
                 - Scop2PScop2PyException
                 - Py2PyCOMPSsException
@@ -122,7 +121,6 @@ class parallel(object):
         Return:
                 - new_func : Python Function Object to parallel function
         Raise:
-                - CodeLoaderException
                 - Py2ScopException
                 - Scop2PScop2PyException
                 - Py2PyCOMPSsException
@@ -184,29 +182,6 @@ class parallel(object):
         if __debug__:
             logger.debug("[decorator] Replaced " + str(func) + " by " + str(new_func))
         return new_func
-
-    def _get_py(self, func):
-        """
-        Returns the source code of the given function
-
-        Arguments:
-                - func : Function
-        Return:
-                - func_source : Source code of the function
-        Raise:
-                - CodeLoaderException
-        """
-
-        if __debug__:
-            logger.debug("[decorator] Start get_py")
-
-        from pycompss.util.translators.code_loader.code_loader import CodeLoader
-        func_source = CodeLoader.load(func)
-
-        # Finish
-        if __debug__:
-            logger.debug("[decorator] Finished get_py")
-        return func_source
 
     def _py2scop(self, func, base_output):
         """
