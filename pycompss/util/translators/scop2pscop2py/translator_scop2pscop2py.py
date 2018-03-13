@@ -41,8 +41,9 @@ class Scop2PScop2Py(object):
             logger.debug("[scop2pscop2py] Translating " + str(source) + " into " + str(output))
 
         # PLUTO binary location
-        # TODO: Add installation path and checker
-        PLUTO_DIR = "/opt/pluto/bin/"  # "/opt/COMPSs/Dependencies/pluto/"
+        import os
+        PLUTO_DIR = os.getenv("PLUTO_HOME", "/opt/COMPSs/Dependencies/pluto")
+        PLUTO_DIR = PLUTO_DIR + "/bin/"
         PLC = PLUTO_DIR + "polycc"
 
         # Pluto binary options
