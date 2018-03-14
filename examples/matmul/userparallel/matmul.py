@@ -2,80 +2,76 @@
 
 # -*- coding: utf-8 -*-
 
+# For better print formatting
+from __future__ import print_function
+
 # Imports
+from pycompss.api.constraint import constraint
 from pycompss.api.task import task
 from pycompss.api.parameter import *
-from pycompss.api.api import compss_barrier
-from pycompss.api.api import compss_wait_on
+from pycompss.api.api import compss_barrier, compss_wait_on
+
+import numpy as np
 
 
-# Initializes a matrix with size (n x m) with blocks (bSize x bSize) randomly or not
-def initialize(n_size, m_size, b_size, random):
-    import numpy as np
-
-    matrix = []
-    for i in range(n_size):
-        matrix.append([])
-        for j in range(m_size):
-            if random:
-                block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
-            else:
-                block = np.array(np.zeros((b_size, b_size)), dtype=np.double, copy=False)
-            mb = np.matrix(block, dtype=np.double, copy=False)
-            matrix[i].append(mb)
-    return matrix
+def initialize_variables():
+    for matrix in [A, B]:
+        for i in range(MSIZE):
+            matrix.append([])
+            for _ in range(MSIZE):
+                mb = create_block(BSIZE, False)
+                matrix[i].append(mb)
+    for i in range(MSIZE):
+        C.append([])
+        for _ in range(MSIZE):
+            mb = create_block(BSIZE, True)
+            C[i].append(mb)
 
 
-@task(c = INOUT)
+@constraint(ComputingUnits="${ComputingUnits}")
+@task(returns=list)
+def create_block(b_size, is_random):
+    if is_random:
+        block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
+    else:
+        block = np.array(np.zeros((b_size, b_size)), dtype=np.double, copy=False)
+    mb = np.matrix(block, dtype=np.double, copy=False)
+    return mb
+
+
+def matmul():
+    # Debug
+    if __debug__:
+        print("Matrix A:")
+        print(A)
+        print("Matrix B:")
+        print(B)
+        print("Matrix C:")
+        print(C)
+
+    for i in range(MSIZE):
+        for j in range(MSIZE):
+            for k in range(MSIZE):
+                multiply(A[i][k], B[k][j], C[i][j])
+
+    if __debug__:
+        print(" New Matrix C:")
+        for i in range(MSIZE):
+            for j in range(MSIZE):
+                print("C" + str(i) + str(j) + " = " + str(compss_wait_on(C[i][j])))
+
+
+@constraint(ComputingUnits="${ComputingUnits}")
+@task(c=INOUT)
 def multiply(a, b, c):
-    #import time
-    #start = time.time()
+    # import time
+    # start = time.time()
 
-    import numpy as np
-    #np.show_config()
+    c += a * b
 
-    c += a*b
-
-    #end = time.time()
-    #tm = end - start
-    #print "TIME: " + str(tm*1000) + " msec"
-
-
-# Performs the matrix multiplication by blocks
-def matmul(m_size, n_size, k_size, b_size, debug):
-    # Initialize
-    a = initialize(m_size, n_size, b_size, True)
-    b = initialize(n_size, k_size, b_size, True)
-    c = initialize(m_size, k_size, b_size, False)
-
-    # Debug
-    if debug:
-        print "Matrix A:"
-        print a
-        print "Matrix B:"
-        print b
-        print "Matrix C:"
-        print c
-
-    # Perform computation
-    # c = a*b
-    for i in range(m_size):
-        for j in range(k_size):
-            for k in range(n_size):
-                multiply(a[i][k], b[k][j], c[i][j])
-
-    compss_barrier()
-    #    for i in range(m_size):
-    #        for j in range(k_size):
-    #           print "C" + str(i) + str(j) + "=" + str(compss_wait_on(c[i][j]))
-
-    # Debug
-    if debug:
-        print "Matrix C:"
-        print c
-
-    # Result
-    return c
+    # end = time.time()
+    # tm = end - start
+    # print "TIME: " + str(tm*1000) + " ms"
 
 
 # MAIN CODE
@@ -84,16 +80,48 @@ if __name__ == "__main__":
     import time
 
     # Parse arguments
-    m_mat_size = 8
-    n_mat_size = 8
-    k_mat_size = 8
-    block_size = 4
-    is_debug = True
+    import sys
+
+    args = sys.argv[1:]
+    MSIZE = int(args[0])
+    BSIZE = int(args[1])
+    A = []
+    B = []
+    C = []
+
+    # Log arguments if required
+    if __debug__:
+        print("Running matmul application with:")
+        print(" - MSIZE = " + str(MSIZE))
+        print(" - BSIZE = " + str(BSIZE))
+
+    # Initialize matrices
+    if __debug__:
+        print("Initializing matrices")
+    start_time = time.time()
+    initialize_variables()
+    compss_barrier()
 
     # Begin computation
-    startTime = time.time()
-    result = matmul(m_mat_size, n_mat_size, k_mat_size, block_size, is_debug)
-    endTime = time.time()
+    if __debug__:
+        print("Performing computation")
+    mult_start_time = time.time()
+    matmul()
+    compss_barrier()
+    end_time = time.time()
 
     # Log results and time
-    print "Elapsed Time {} (s)".format(endTime - startTime)
+    if __debug__:
+        print("Post-process results")
+    total_time = end_time - start_time
+    init_time = mult_start_time - start_time
+    mult_time = end_time - mult_start_time
+
+    print("RESULTS -----------------")
+    print("MSIZE " + str(MSIZE))
+    print("BSIZE " + str(MSIZE))
+    print("DEBUG " + str(__debug__))
+    print("TOTAL_TIME " + str(total_time))
+    print("INIT_TIME " + str(init_time))
+    print("MULT_TIME " + str(mult_time))
+    print("-------------------------")
