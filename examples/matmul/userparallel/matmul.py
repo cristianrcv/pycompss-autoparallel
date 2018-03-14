@@ -11,8 +11,6 @@ from pycompss.api.task import task
 from pycompss.api.parameter import *
 from pycompss.api.api import compss_barrier, compss_wait_on
 
-import numpy as np
-
 
 def initialize_variables():
     for matrix in [A, B]:
@@ -31,6 +29,8 @@ def initialize_variables():
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, is_random):
+    import numpy as np
+
     if is_random:
         block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
     else:
@@ -43,17 +43,22 @@ def matmul():
     # Debug
     if __debug__:
         print("Matrix A:")
-        print(A)
+        input_a = compss_wait_on(A)
+        print(input_a)
         print("Matrix B:")
-        print(B)
+        input_b = compss_wait_on(A)
+        print(input_b)
         print("Matrix C:")
-        print(C)
+        input_c = compss_wait_on(A)
+        print(input_c)
 
+    # Matrix multiplication
     for i in range(MSIZE):
         for j in range(MSIZE):
             for k in range(MSIZE):
                 multiply(A[i][k], B[k][j], C[i][j])
 
+    # Debug result
     if __debug__:
         print(" New Matrix C:")
         for i in range(MSIZE):
