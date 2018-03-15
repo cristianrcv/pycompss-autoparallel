@@ -111,3 +111,6 @@ translators/scop2pscop2py/tests/test1_matmul.out.py
 translators/scop2pscop2py/tests/test2_seidel.out.py
 examples/matmul/matmul_autogen.py
 
+# Intermediate execution files
+.tmp_gen*
+
