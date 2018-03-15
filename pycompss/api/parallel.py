@@ -59,7 +59,7 @@ class parallel(object):
             logger.debug("[decorator] Start decorator for function: " + str(func))
 
         # Parallelize code
-        new_func = self._translate(func)
+        new_func = self._translate(func, keep_generated_files=__debug__)
 
         # Add decorator wrapper
         @wraps(new_func)
@@ -166,17 +166,18 @@ class parallel(object):
             logger.error(e)
             raise
         finally:
-            # Clean
-            files_to_clean = []
-            if scop_files is not None:
-                for f in scop_files:
-                    files_to_clean.append(f)
-            if py_files is not None:
-                for f in py_files:
-                    files_to_clean.append(f)
-            if pycompss_file is not None:
-                files_to_clean.append(pycompss_file)
-            self._clean(files_to_clean)
+            if not keep_generated_files:
+                # Clean
+                files_to_clean = []
+                if scop_files is not None:
+                    for f in scop_files:
+                        files_to_clean.append(f)
+                if py_files is not None:
+                    for f in py_files:
+                        files_to_clean.append(f)
+                if pycompss_file is not None:
+                    files_to_clean.append(pycompss_file)
+                self._clean(files_to_clean)
 
         # Return parallelized code
         if __debug__:
