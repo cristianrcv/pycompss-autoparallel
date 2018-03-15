@@ -175,7 +175,7 @@ This project tolerates the following relaxations:
 You can verify the code style by running:
 
 ```
-pycodestyle .
+pycodestyle . --max-line-length=120
 ```
 
 
