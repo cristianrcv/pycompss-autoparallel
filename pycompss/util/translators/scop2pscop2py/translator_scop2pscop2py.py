@@ -76,11 +76,11 @@ class Scop2PScop2Py(object):
             logger.error(stdout)
             logger.error("[scop2pscop2py] Binary error:")
             logger.error(stderr)
-            raise Scop2PScop2PyException("[ERROR] Pluto binary exit value = " + str(exit_value), None)
+            raise Scop2PScop2PyException("[ERROR] Pluto binary exit value = " + str(exit_value), stderr)
 
         # Finish
         if __debug__:
-            logger.debug("[scop2pscop2py] Pluto binary successfull")
+            logger.debug("[scop2pscop2py] Pluto binary successful")
             logger.debug("[scop2pscop2py] Binary output:")
             logger.debug(stdout)
 
