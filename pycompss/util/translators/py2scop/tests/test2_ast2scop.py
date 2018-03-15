@@ -42,11 +42,12 @@ def multi_statements1(a, b, c):
                 c[i1][j2] = c[i1][j2] + a[i1][k1] * b[k1][j2]
             c[i1][j2] = c[i1][j2] + a[i1][j2] * b[i1][j2]
 
+
 # Function callee
 def function_callee(a, b, c):
     for i in range(0, 10, 1):
         c[i] = multiply(c[i], a[i], b[i])
 
+
 def multiply(c, a, b):
     return c + a * b
-
