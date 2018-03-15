@@ -9,22 +9,26 @@ from __future__ import print_function
 from pycompss.api.parallel import parallel
 from pycompss.api.constraint import constraint
 from pycompss.api.task import task
-from pycompss.api.api import compss_barrier, compss_wait_on
+from pycompss.api.api import compss_barrier
+from pycompss.api.api import compss_wait_on
 
 
-def generate_matrix():
-    for i in range(MSIZE):
-        A.append([])
-        for _ in range(MSIZE):
-            A[i].append([])
+def generate_matrix(m_size, b_size):
+    mat = []
+    for i in range(m_size):
+        mat.append([])
+        for _ in range(m_size):
+            mat[i].append([])
 
-    for i in range(MSIZE):
-        mb = create_block(BSIZE, True)
-        A[i][i] = mb
-        for j in range(i + 1, MSIZE):
-            mb = create_block(BSIZE, False)
-            A[i][j] = mb
-            A[j][i] = mb
+    for i in range(m_size):
+        mat[i][i] = create_block(b_size, True)
+        for j in range(i + 1, m_size):
+            mb = create_block(b_size, False)
+            mb = compss_wait_on(mb)  # To break aliasing between future objects
+            mat[i][j] = mb
+            mat[j][i] = mb
+
+    return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
@@ -41,39 +45,39 @@ def create_block(b_size, is_diag):
 
 
 @parallel()
-def cholesky_blocked():
+def cholesky_blocked(a, m_size, b_size):
     import numpy as np
 
     # Debug
     if __debug__:
-        input_a = compss_wait_on(A)
+        a = compss_wait_on(a)
         print("Matrix A:")
-        print(input_a)
+        print(a)
 
     # Debug: task counter
     cont = 0
 
     # Cholesky decomposition
-    for k in range(MSIZE):
+    for k in range(m_size):
         # Diagonal block factorization
-        A[k][k] = potrf(A[k][k])
+        a[k][k] = potrf(a[k][k])
         if __debug__:
             cont += 1
         # Triangular systems
-        for i in range(k + 1, MSIZE):
-            A[i][k] = solve_triangular(A[k][k], A[i][k])
-            A[k][i] = np.zeros((BSIZE, BSIZE))
+        for i in range(k + 1, m_size):
+            a[i][k] = solve_triangular(a[k][k], a[i][k])
+            a[k][i] = np.zeros((b_size, b_size))
             if __debug__:
                 cont += 1
 
-        # update trailing matrix
-        for i in range(k + 1, MSIZE):
-            for j in range(i, MSIZE):
-                A[j][i] = gemm(-1.0, A[j][k], A[i][k], A[j][i], 1.0)
+        # Update trailing matrix
+        for i in range(k + 1, m_size):
+            for j in range(i, m_size):
+                a[j][i] = gemm(-1.0, a[j][k], a[i][k], a[j][i], 1.0)
                 if __debug__:
                     cont += 1
             # TODO: Why not called? Counter?
-            # A[j][i] = syrk(A[j][k], A[j][i])
+            # a[j][i] = syrk(a[j][k], a[j][i])
             if __debug__:
                 cont += 1
 
@@ -83,8 +87,8 @@ def cholesky_blocked():
 
     # Debug result
     if __debug__:
-        res = compss_wait_on(A)
-        res = join_matrix(res)
+        a = compss_wait_on(a)
+        res = join_matrix(a)
         print("New Matrix A:")
         print(res)
 
@@ -149,7 +153,6 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     MSIZE = int(args[0])
     BSIZE = int(args[1])
-    A = []
 
     # Log arguments if required
     if __debug__:
@@ -161,14 +164,14 @@ if __name__ == "__main__":
     if __debug__:
         print("Initializing matrix")
     start_time = time.time()
-    generate_matrix()
+    A = generate_matrix(MSIZE, BSIZE)
     compss_barrier()
 
     # Begin computation
     if __debug__:
         print("Performing computation")
     cholesky_start_time = time.time()
-    cholesky_blocked()
+    cholesky_blocked(A, MSIZE, BSIZE)
     compss_barrier()
     end_time = time.time()
 

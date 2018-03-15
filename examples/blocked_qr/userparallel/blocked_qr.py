@@ -14,34 +14,34 @@ from pycompss.api.api import compss_barrier, compss_wait_on
 # TODO: Extend for non-square matrices. There is no size verifications.
 
 
-def generate_matrix(block_type='random'):
+def generate_matrix(m_size, b_size, block_type='random'):
     mat = []
-    for i in range(MSIZE):
+    for i in range(m_size):
         mat.append([])
-        for j in range(MSIZE):
-            mat[i].append(create_block_wrapper(block_type))
+        for j in range(m_size):
+            mat[i].append(create_block_wrapper(b_size, block_type))
     return mat
 
 
-def generate_identity():
+def generate_identity(m_size, b_size):
     mat = []
-    for i in range(MSIZE):
+    for i in range(m_size):
         mat.append([])
         for j in range(0, i):
-            mat[i].append(create_block_wrapper(block_type='zeros'))
-        mat[i].append(create_block_wrapper(block_type='identity'))
-        for j in range(i + 1, MSIZE):
-            mat[i].append(create_block_wrapper(block_type='zeros'))
+            mat[i].append(create_block_wrapper(b_size, block_type='zeros'))
+        mat[i].append(create_block_wrapper(b_size, block_type='identity'))
+        for j in range(i + 1, m_size):
+            mat[i].append(create_block_wrapper(b_size, block_type='zeros'))
     return mat
 
 
-def create_block_wrapper(block_type='random'):
+def create_block_wrapper(b_size, block_type='random'):
     if block_type == 'zeros':
         block = []
     elif block_type == 'identity':
         block = []
     else:
-        block = create_block(BSIZE)
+        block = create_block(b_size)
     return [block_type, block]
 
 
@@ -52,53 +52,52 @@ def create_block(b_size):
     return np.matrix(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
 
 
-def qr_blocked(overwrite_a=False):
+def qr_blocked(a, m_size, b_size, overwrite_a=False):
     import numpy as np
 
     # Debug
     if __debug__:
-        input_a = compss_wait_on(A)
+        a = compss_wait_on(a)
         print("Matrix A:")
-        print(input_a)
+        print(a)
 
-    q_mat = generate_identity()
+    q = generate_identity(m_size, b_size)
 
     if not overwrite_a:
-        r_mat = copy_blocked()
+        r = copy_blocked(a)
     else:
-        r_mat = A
+        r = a
 
-    for i in range(MSIZE):
-        q_act, r_mat[i][i] = qr(r_mat[i][i], BSIZE, transpose=True)
+    for i in range(m_size):
+        q_act, r[i][i] = qr(r[i][i], b_size, transpose=True)
 
-        for j in range(MSIZE):
-            q_mat[j][i] = dot(q_mat[j][i], q_act, transpose_b=True)
+        for j in range(m_size):
+            q[j][i] = dot(q[j][i], q_act, transpose_b=True)
 
-        for j in range(i + 1, MSIZE):
-            r_mat[i][j] = dot(q_act, r_mat[i][j])
+        for j in range(i + 1, m_size):
+            r[i][j] = dot(q_act, r[i][j])
 
         # Update values of the respective column
-        for j in range(i + 1, MSIZE):
+        for j in range(i + 1, m_size):
             sub_q = [[np.matrix(np.array([0])), np.matrix(np.array([0]))],
                      [np.matrix(np.array([0])), np.matrix(np.array([0]))]]
-            sub_q[0][0], sub_q[0][1], sub_q[1][0], sub_q[1][1], r_mat[i][i], r_mat[j][i] = little_qr(r_mat[i][i],
-                                                                                                     r_mat[j][i], BSIZE,
-                                                                                                     transpose=True)
+            sub_q[0][0], sub_q[0][1], sub_q[1][0], sub_q[1][1], r[i][i], r[j][i] = little_qr(r[i][i], r[j][i], b_size,
+                                                                                             transpose=True)
             # sub_q = blocked_transpose(sub_q)
             # Update values of the row for the value updated in the column
-            for k in range(i + 1, MSIZE):
-                [[r_mat[i][k]], [r_mat[j][k]]] = multiply_blocked(sub_q, [[r_mat[i][k]], [r_mat[j][k]]], BSIZE)
+            for k in range(i + 1, m_size):
+                [[r[i][k]], [r[j][k]]] = multiply_blocked(sub_q, [[r[i][k]], [r[j][k]]], b_size)
 
-            for k in range(MSIZE):
-                [[q_mat[k][i], q_mat[k][j]]] = multiply_blocked([[q_mat[k][i], q_mat[k][j]]], sub_q, BSIZE,
-                                                                transpose_b=True)
+            for k in range(m_size):
+                [[q[k][i], q[k][j]]] = multiply_blocked([[q[k][i], q[k][j]]], sub_q, b_size,
+                                                        transpose_b=True)
 
-    # q_mat = blocked_transpose(q_mat)
+    # q = blocked_transpose(q)
 
     # Debug result
     if __debug__:
-        q_res = join_matrix(compss_wait_on(q_mat), BSIZE)
-        r_res = join_matrix(compss_wait_on(r_mat), BSIZE)
+        q_res = join_matrix(compss_wait_on(q), b_size)
+        r_res = join_matrix(compss_wait_on(r), b_size)
 
         print("Matrix Q:")
         print(q_res)
@@ -106,20 +105,20 @@ def qr_blocked(overwrite_a=False):
         print(r_res)
 
 
-def copy_blocked(transpose=False):
+def copy_blocked(a, transpose=False):
     import numpy as np
 
     res = []
-    for i in range(len(A)):
+    for i in range(len(a)):
         res.append([])
-        for j in range(len(A[0])):
+        for j in range(len(a[0])):
             res[i].append(np.matrix([0]))
-    for i in range(len(A)):
-        for j in range(len(A[0])):
+    for i in range(len(a)):
+        for j in range(len(a[0])):
             if transpose:
-                res[j][i] = A[i][j]
+                res[j][i] = a[i][j]
             else:
-                res[i][j] = [A[i][j][0], A[i][j][1]]
+                res[i][j] = [a[i][j][0], a[i][j][1]]
     return res
 
 
@@ -350,14 +349,14 @@ if __name__ == "__main__":
     if __debug__:
         print("Initializing matrix")
     start_time = time.time()
-    A = generate_matrix()
+    A = generate_matrix(MSIZE, BSIZE)
     compss_barrier()
 
     # Begin computation
     if __debug__:
         print("Performing computation")
     qr_start_time = time.time()
-    qr_blocked()
+    qr_blocked(A, MSIZE, BSIZE)
     compss_barrier()
     end_time = time.time()
 

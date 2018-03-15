@@ -8,22 +8,27 @@ from __future__ import print_function
 # Imports
 from pycompss.api.constraint import constraint
 from pycompss.api.task import task
+from pycompss.api.api import compss_barrier
+from pycompss.api.api import compss_wait_on
 from pycompss.api.parameter import *
-from pycompss.api.api import compss_barrier, compss_wait_on
 
 
-def initialize_variables():
-    for matrix in [A, B]:
-        for i in range(MSIZE):
-            matrix.append([])
-            for _ in range(MSIZE):
-                mb = create_block(BSIZE, False)
-                matrix[i].append(mb)
-    for i in range(MSIZE):
-        C.append([])
-        for _ in range(MSIZE):
-            mb = create_block(BSIZE, True)
-            C[i].append(mb)
+def initialize_variables(m_size, b_size):
+    a = create_matrix(m_size, b_size, True)
+    b = create_matrix(m_size, b_size, True)
+    c = create_matrix(m_size, b_size, False)
+
+    return a, b, c
+
+
+def create_matrix(m_size, b_size, is_random):
+    mat = []
+    for i in range(m_size):
+        mat.append([])
+        for _ in range(m_size):
+            mb = create_block(b_size, is_random)
+            mat[i].append(mb)
+    return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
@@ -39,31 +44,30 @@ def create_block(b_size, is_random):
     return mb
 
 
-def matmul():
+def matmul(a, b, c, m_size):
     # Debug
     if __debug__:
         print("Matrix A:")
-        input_a = compss_wait_on(A)
-        print(input_a)
+        a = compss_wait_on(a)
+        print(a)
         print("Matrix B:")
-        input_b = compss_wait_on(A)
-        print(input_b)
+        b = compss_wait_on(b)
+        print(b)
         print("Matrix C:")
-        input_c = compss_wait_on(A)
-        print(input_c)
+        c = compss_wait_on(c)
+        print(c)
 
     # Matrix multiplication
-    for i in range(MSIZE):
-        for j in range(MSIZE):
-            for k in range(MSIZE):
-                multiply(A[i][k], B[k][j], C[i][j])
+    for i in range(m_size):
+        for j in range(m_size):
+            for k in range(m_size):
+                multiply(a[i][k], b[k][j], c[i][j])
 
     # Debug result
     if __debug__:
-        print(" New Matrix C:")
-        for i in range(MSIZE):
-            for j in range(MSIZE):
-                print("C" + str(i) + str(j) + " = " + str(compss_wait_on(C[i][j])))
+        print("New Matrix C:")
+        c = compss_wait_on(c)
+        print(c)
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
@@ -90,9 +94,6 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     MSIZE = int(args[0])
     BSIZE = int(args[1])
-    A = []
-    B = []
-    C = []
 
     # Log arguments if required
     if __debug__:
@@ -104,14 +105,14 @@ if __name__ == "__main__":
     if __debug__:
         print("Initializing matrices")
     start_time = time.time()
-    initialize_variables()
+    A, B, C = initialize_variables(MSIZE, BSIZE)
     compss_barrier()
 
     # Begin computation
     if __debug__:
         print("Performing computation")
     mult_start_time = time.time()
-    matmul()
+    matmul(A, B, C, MSIZE)
     compss_barrier()
     end_time = time.time()
 
