@@ -47,14 +47,15 @@ def create_block(b_size, is_random):
 def matmul(a, b, c, m_size):
     # Debug
     if __debug__:
+        # TODO: PyCOMPSs BUG sync-INOUT-sync
+        # a = compss_wait_on(a)
+        # b = compss_wait_on(b)
+        # c = compss_wait_on(c)
         print("Matrix A:")
-        a = compss_wait_on(a)
         print(a)
         print("Matrix B:")
-        b = compss_wait_on(b)
         print(b)
         print("Matrix C:")
-        c = compss_wait_on(c)
         print(c)
 
     # Matrix multiplication

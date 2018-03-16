@@ -40,7 +40,8 @@ def lu_blocked(a, m_size, b_size):
 
     # Debug
     if __debug__:
-        a = compss_wait_on(a)
+        # TODO: PyCOMPSs BUG sync-INOUT-sync
+        # a = compss_wait_on(a)
         print("Matrix A:")
         print(a)
 
