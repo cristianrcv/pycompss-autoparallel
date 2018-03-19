@@ -27,6 +27,8 @@ class parallel(object):
     Activates with the @parallel decorator and modifies the user code to make it
     parallel. Preserves the argspec, but includes the __init__ and the
     __call__ methods.
+    Parsed kwargs:
+        - pluto_extra_flags = [] : List of extra flags for the PLUTO binary
     """
 
     def __init__(self, *args, **kwargs):
@@ -35,6 +37,11 @@ class parallel(object):
         # Store arguments passed to the decorator
         self.args = args
         self.kwargs = kwargs
+
+        # Parse optional decorator arguments
+        self.pluto_extra_flags = None
+        if "pluto_extra_flags" in self.kwargs.keys():
+            self.pluto_extra_flags = self.kwargs["pluto_extra_flags"]
 
         # Add a place to store internal translator structures
         self.translator_py2scop = None
@@ -238,7 +245,7 @@ class parallel(object):
             # Generate file name
             of = base_output + str(file_num)
             # Perform PLUTO call
-            Scop2PScop2Py.translate(sf, of)
+            Scop2PScop2Py.translate(sf, of, pluto_extra_flags=self.pluto_extra_flags)
             # Prepare for next iteration
             output_files.append(of)
             file_num = file_num + 1

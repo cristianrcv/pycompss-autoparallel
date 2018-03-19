@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class Scop2PScop2Py(object):
 
     @staticmethod
-    def translate(source, output):
+    def translate(source, output, pluto_extra_flags=None):
         """
         Inputs an OpenScop representation to PLUTO that generates
         its parallel version in Python
@@ -52,9 +52,10 @@ class Scop2PScop2Py(object):
         basic_opts = ["--parallel"]  # ["--tile", "--parallel"]
         adv_opts = []  # ["--rar", "--lastwriter"]
         mode_opts = []  # ["--silent"] # ["--debug"] # ["--moredebug"]
+        usr_opts = pluto_extra_flags if pluto_extra_flags is not None else []
 
         # Construct binary call
-        cmd = [PLC, source] + mandatory_opts + basic_opts + adv_opts + mode_opts
+        cmd = [PLC, source] + mandatory_opts + basic_opts + adv_opts + mode_opts + usr_opts
         if __debug__:
             logger.debug("[scop2pscop2py] Command: " + str(cmd))
 
