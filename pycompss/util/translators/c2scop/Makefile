@@ -2,11 +2,11 @@
 # include and library if they aren't the default values
 # (i.e., /usr/lib and /usr/include).
 
-OPENSCOP_INC = /opt/openscop/include
-OPENSCOP_LIB = /opt/openscop/lib64
+OPENSCOP_INC = /opt/COMPSs/Dependencies/pluto/include/osl
+OPENSCOP_LIB = /opt/COMPSs/Dependencies/pluto/lib64/osl
 
-CLAN_INC = /opt/pluto/include
-CLAN_LIB = /opt/pluto/lib64
+CLAN_INC = /opt/COMPSs/Dependencies/pluto/include
+CLAN_LIB = /opt/COMPSs/Dependencies/pluto/lib64
 
 CC = gcc
 LDLIBS= -losl -lclan
