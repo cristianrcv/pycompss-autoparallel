@@ -231,8 +231,8 @@ class Py2PyCOMPSs(object):
         if isinstance(statement, _ast.Assign):
             # Process targets
             for t in statement.targets:
-                ov = Py2PyCOMPSs._process_write_var(t)
-                out_vars.append(ov)
+                ovs = Py2PyCOMPSs._process_write_vars(t)
+                out_vars.extend(ovs)
                 # TODO: Possible BUG - target will be recognised as INOUT not OUT
                 ivs = Py2PyCOMPSs._process_vars(t)
                 in_vars.extend(ivs)
@@ -241,12 +241,19 @@ class Py2PyCOMPSs(object):
             in_vars.extend(ivs)
         elif isinstance(statement, _ast.AugAssign):
             # Process target
-            iov = Py2PyCOMPSs._process_write_var(statement.target)
-            inout_vars.append(iov)
+            iovs = Py2PyCOMPSs._process_write_vars(statement.target)
+            inout_vars.extend(iovs)
             ivs = Py2PyCOMPSs._process_vars(statement.target)
             in_vars.extend(ivs)
             # Process values
             ivs = Py2PyCOMPSs._process_vars(statement.value)
+            in_vars.extend(ivs)
+        elif isinstance(statement, _ast.Expr):
+            # No target
+            # Process values
+            ivs = []
+            for expr_arg in statement.value.args:
+                ivs.extend(Py2PyCOMPSs._process_vars(expr_arg))
             in_vars.extend(ivs)
         else:
             raise Py2PyCOMPSsException("[ERROR] Unrecognised statement inside task")
@@ -271,7 +278,7 @@ class Py2PyCOMPSs(object):
         return in_vars, out_vars, inout_vars
 
     @staticmethod
-    def _process_write_var(node):
+    def _process_write_vars(node):
         """
         Searches for the name of the write accessed variable
 
@@ -286,9 +293,14 @@ class Py2PyCOMPSs(object):
         # A write variable can only be a subscript or the write variable id itself
         import _ast
         if isinstance(node, _ast.Name):
-            return node.id
+            return [node.id]
         elif isinstance(node, _ast.Subscript):
-            return Py2PyCOMPSs._process_write_var(node.value)
+            return Py2PyCOMPSs._process_write_vars(node.value)
+        elif isinstance(node, _ast.Tuple):
+            write_vars = []
+            for tuple_field in node.elts:
+                write_vars.extend(Py2PyCOMPSs._process_write_vars(tuple_field))
+            return write_vars
         else:
             raise Py2PyCOMPSsException("[ERROR] Unrecognised expression on write operation")
 
@@ -312,13 +324,17 @@ class Py2PyCOMPSs(object):
 
         # Child recursion
         in_vars = []
-        for _, value in ast.iter_fields(node):
-            if isinstance(value, list):
-                for item in value:
-                    if isinstance(item, ast.AST):
-                        in_vars.extend(Py2PyCOMPSs._process_vars(item))
-            elif isinstance(value, ast.AST):
-                in_vars.extend(Py2PyCOMPSs._process_vars(value))
+        for field, value in ast.iter_fields(node):
+            if field == "func":
+                # Skip function names
+                pass
+            else:
+                if isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, ast.AST):
+                            in_vars.extend(Py2PyCOMPSs._process_vars(item))
+                elif isinstance(value, ast.AST):
+                    in_vars.extend(Py2PyCOMPSs._process_vars(value))
         return in_vars
 
     @staticmethod
@@ -537,6 +553,46 @@ class TestPy2PyCOMPSs(unittest.TestCase):
 
         # Check file content
         expected_file = tests_path + "/test1_matmul.expected.pycompss"
+        try:
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(out_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase file
+            os.remove(out_file)
+
+    def test_multiply(self):
+        # Base variables
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        tests_path = dir_path + "/tests"
+
+        # Insert function file into pythonpath
+        import sys
+        sys.path.insert(0, tests_path)
+
+        # Import function to replace
+        import importlib
+        func_name = "matmul"
+        test_module = importlib.import_module("pycompss.util.translators.py2pycompss.tests.test2_multiply_func")
+        func = getattr(test_module, func_name)
+
+        # Create list of parallel py codes
+        src_file0 = tests_path + "/test2_multiply.src.python"
+        par_py_files = [src_file0]
+
+        # Output file
+        out_file = tests_path + "/test2_multiply.out.pycompss"
+
+        # Translate
+        Py2PyCOMPSs.translate(func, par_py_files, out_file)
+
+        # Check file content
+        expected_file = tests_path + "/test2_multiply.expected.pycompss"
         try:
             with open(expected_file, 'r') as f:
                 expected_content = f.read()
