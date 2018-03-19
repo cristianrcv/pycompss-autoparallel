@@ -11,6 +11,8 @@ from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
+import numpy as np
+
 
 def generate_matrix(m_size, b_size):
     mat = []
@@ -26,16 +28,12 @@ def generate_matrix(m_size, b_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size):
-    import numpy as np
-
     block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
     mb = np.matrix(block, dtype=np.double, copy=False)
     return mb
 
 
 def lu_blocked(a, m_size, b_size):
-    import numpy as np
-
     # Debug
     if __debug__:
         # TODO: PyCOMPSs BUG sync-INOUT-sync
@@ -43,24 +41,28 @@ def lu_blocked(a, m_size, b_size):
         print("Matrix A:")
         print(a)
 
+    if len(a) == 0:
+        return
+
+    # Initialization
     p_mat = [[np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size for _ in range(m_size)]
     l_mat = [[None] * m_size for _ in range(m_size)]
     u_mat = [[None] * m_size for _ in range(m_size)]
 
-    for i in range(len(a)):
-        for j in range(i + 1, len(a)):
+    for i in range(m_size):
+        for j in range(i + 1, m_size):
             l_mat[i][j] = np.matrix(np.zeros((b_size, b_size)), dtype=float)
             u_mat[j][i] = np.matrix(np.zeros((b_size, b_size)), dtype=float)
 
-    if len(a) == 0:
-        return
-
+    # First element
     p_mat[0][0], l_mat[0][0], u_mat[0][0] = custom_lu(a[0][0])
+    aux = None
 
     for j in range(1, m_size):
         aux = invert_triangular(l_mat[0][0], lower=True)
         u_mat[0][j] = multiply([1], aux, p_mat[0][0], a[0][j])
 
+    # The rest of elements
     for i in range(1, m_size):
         for j in range(i, m_size):
             for k in range(i, m_size):
@@ -94,7 +96,6 @@ def lu_blocked(a, m_size, b_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def invert_triangular(a, lower=False):
-    import numpy as np
     from scipy.linalg import solve_triangular
 
     dim = len(a)
@@ -105,8 +106,6 @@ def invert_triangular(a, lower=False):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def multiply(inv_list, *args):
-    import numpy as np
-
     # Base case checks
     assert (len(args) > 0)
     input_args = list(args)
@@ -129,8 +128,6 @@ def multiply(inv_list, *args):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def dgemm(alpha, a, b, c):
-    import numpy as np
-
     a += (alpha * np.dot(b, c))
 
     return a
@@ -144,8 +141,6 @@ def custom_lu(a):
 
 
 def join_matrix(mat):
-    import numpy as np
-
     joint_matrix = np.matrix([[]])
     for i in range(0, len(mat)):
         current_row = mat[i][0]
