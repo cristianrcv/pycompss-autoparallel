@@ -32,6 +32,12 @@ def loop_nests1(a, b, c):
                 c[i][j] = c[i][j] + a[i][k] * b[k][j]
 
 
+def loop_nests2(a, b, c):
+    for i in range(0, N, 1):
+        for j in range(i, M, 1):
+                c[i][j] = c[i][j] + a[i][j] * b[i][j]
+
+
 # Multiple statements
 def multi_statements1(a, b, c):
     for i1 in range(0, 2 * N - M + K, 1):
@@ -66,7 +72,7 @@ def func_call4(a, b, c):
 
 def func_call5(a, b, c):
     for i in range(0, 10, 1):
-        c[i], c[i+1] = multiply(c[i], a[i], b[i])
+        c[i], c[i + 1] = multiply(c[i], a[i], b[i])
 
 
 def multiply(c, a, b):

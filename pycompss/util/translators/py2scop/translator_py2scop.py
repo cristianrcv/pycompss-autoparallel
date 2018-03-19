@@ -633,7 +633,7 @@ class Py2Scop(object):
         # Access
         access_rows = array_dims
         access_cols = 1 + array_dims + len(iter_vars) + len(param_vars) + 1
-        access_out_dims = len(iter_vars)
+        access_out_dims = array_dims
         access_in_dims = len(iter_vars)
         access_local_dims = 0
         access_num_pars = len(param_vars)
@@ -1049,6 +1049,32 @@ class TestPy2Scop(unittest.TestCase):
 
     def test_ast2scop_loop_nests1(self):
         func_name = "loop_nests1"
+
+        # Retrieve scop
+        scop = TestPy2Scop._test_ast2scop(func_name)
+
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        test_file = dir_path + "/tests/" + str(func_name) + ".scop"
+        try:
+            # Write scop to file
+            Py2Scop.write_os(scop, test_file)
+
+            # Check scop
+            expected_file = dir_path + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(test_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase generated file
+            os.remove(test_file)
+
+    def test_ast2scop_loop_nests2(self):
+        func_name = "loop_nests2"
 
         # Retrieve scop
         scop = TestPy2Scop._test_ast2scop(func_name)

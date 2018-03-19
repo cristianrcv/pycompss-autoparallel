@@ -156,9 +156,9 @@ class TestRelation(unittest.TestCase):
         rows = 9
         cols = 8
         od = 3
-        ind = 0
+        ind = 2
         ld = 0
-        params = 3
+        params = 1
         matrix = [[1, -1], [1, -1]]
         relation = Relation(rel_type, rows, cols, od, ind, ld, params, matrix)
 
@@ -176,9 +176,9 @@ class TestRelation(unittest.TestCase):
         rows = 9
         cols = 8
         od = 3
-        ind = 0
+        ind = 2
         ld = 0
-        params = 3
+        params = 1
         matrix = [[1, -1], [1, -1]]
         relation = Relation(rel_type, rows, cols, od, ind, ld, params, matrix)
 
@@ -190,7 +190,7 @@ class TestRelation(unittest.TestCase):
                 relation.write_os(f)
 
             # Check file content
-            expected = "DOMAIN\n9 8 3 0 0 3\n1\t-1\t\n1\t-1\t\n\n"
+            expected = "DOMAIN\n9 8 3 2 0 1\n1\t-1\t\n1\t-1\t\n\n"
             with open(file_name, 'r') as f:
                 content = f.read()
             self.assertEqual(content, expected)
