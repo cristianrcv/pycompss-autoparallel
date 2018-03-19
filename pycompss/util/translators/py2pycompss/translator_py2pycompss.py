@@ -194,12 +194,19 @@ class Py2PyCOMPSs(object):
         new_func = rs.visit(func)
         var2subscript = rs.get_var_subscripts()
 
+        # Process direction of parameters
+        in_vars, out_vars, inout_vars = Py2PyCOMPSs._process_parameters_direction(new_func.body[0])
+
+        # Add non-subscript variables to task header
+        import _ast
+        for var in in_vars + out_vars + inout_vars:
+            if var not in var2subscript.keys():
+                var_ast = _ast.Name(id=var)
+                var2subscript[var] = var_ast
+
         # Change function arguments
         original_args = new_func.args.args
         new_func.args.args = var2subscript.keys()
-
-        # Process direction of parameters
-        in_vars, out_vars, inout_vars = Py2PyCOMPSs._process_parameters_direction(new_func.body[0])
 
         # Construct task header
         task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars)
@@ -259,23 +266,29 @@ class Py2PyCOMPSs(object):
             raise Py2PyCOMPSsException("[ERROR] Unrecognised statement inside task")
 
         # Fix duplicate variables and directions
-        out_vars = list(set(out_vars))
-        inout_vars = list(set(inout_vars))
-        in_vars = list(set(in_vars))
+        fixed_in_vars = []
+        fixed_out_vars = []
+        fixed_inout_vars = []
         for iv in in_vars:
-            if iv in out_vars:
-                in_vars.remove(iv)
-                out_vars.remove(iv)
-                inout_vars.append(iv)
-        for iv in in_vars:
-            if iv in inout_vars:
-                in_vars.remove(iv)
+            if iv in out_vars or iv in inout_vars:
+                if iv not in fixed_inout_vars:
+                    fixed_inout_vars.append(iv)
+            else:
+                if iv not in fixed_in_vars:
+                    fixed_in_vars.append(iv)
         for ov in out_vars:
-            if ov in inout_vars:
-                out_vars.remove(ov)
+            if ov in in_vars or ov in inout_vars:
+                if ov not in fixed_inout_vars:
+                    fixed_inout_vars.append(ov)
+            else:
+                if ov not in fixed_out_vars:
+                    fixed_out_vars.append(ov)
+        for iov in inout_vars:
+            if iov not in fixed_inout_vars:
+                fixed_inout_vars.append(iov)
 
         # Return variables
-        return in_vars, out_vars, inout_vars
+        return fixed_in_vars, fixed_out_vars, fixed_inout_vars
 
     @staticmethod
     def _process_write_vars(node):
@@ -325,8 +338,8 @@ class Py2PyCOMPSs(object):
         # Child recursion
         in_vars = []
         for field, value in ast.iter_fields(node):
-            if field == "func":
-                # Skip function names
+            if field == "func" or field == "keywords":
+                # Skip function names and var_args keywords
                 pass
             else:
                 if isinstance(value, list):
