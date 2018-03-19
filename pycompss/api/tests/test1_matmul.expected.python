@@ -32,7 +32,7 @@ from pycompss.api.api import compss_barrier, compss_wait_on, compss_open
 from pycompss.api.task import task
 from pycompss.api.parameter import *
 
-@task(var3 = IN, var2 = IN, var1 = INOUT)
+@task(var2 = IN, var3 = IN, var1 = INOUT)
 def S1(var1, var3, var2):
     var1 += var2 * var3
 
