@@ -44,9 +44,29 @@ def multi_statements1(a, b, c):
 
 
 # Function callee
-def function_callee(a, b, c):
+def func_call1(a, b, c):
+    for i in range(0, 10, 1):
+        multiply()
+
+
+def func_call2(a, b, c):
+    for i in range(0, 10, 1):
+        multiply(c[i], a[i], b[i])
+
+
+def func_call3(a, b, c):
+    for i in range(0, 10, 1):
+        c[i] = multiply()
+
+
+def func_call4(a, b, c):
     for i in range(0, 10, 1):
         c[i] = multiply(c[i], a[i], b[i])
+
+
+def func_call5(a, b, c):
+    for i in range(0, 10, 1):
+        c[i], c[i+1] = multiply(c[i], a[i], b[i])
 
 
 def multiply(c, a, b):

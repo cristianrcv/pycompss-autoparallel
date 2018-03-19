@@ -219,18 +219,12 @@ class Py2Scop(object):
         # Iteration variables
         iter_vars_list = Py2Scop._get_iter_vars(tree)
         iter_vars_set = set(iter_vars_list)  # Erase repeated
-        if 'range' in iter_vars_set:  # Erase keywords
-            iter_vars_set.remove('range')
         # Array variables
         array_vars_list = Py2Scop._get_array_vars(tree)
         array_vars_set = set(array_vars_list)  # Erase repeated
-        if 'range' in array_vars_set:  # Erase keywords
-            array_vars_set.remove('range')
         # All variables
         all_vars_list = Py2Scop._get_all_params(tree)
         all_vars_set = set(all_vars_list)  # Erase repeated
-        if 'range' in all_vars_set:
-            all_vars_set.remove('range')
         all_vars_list = list(all_vars_set)
         # Param variables
         param_vars_set = all_vars_set - iter_vars_set - array_vars_set
@@ -282,13 +276,17 @@ class Py2Scop(object):
             global_params.append(node.id)
 
         # Child recursion
-        for _, value in ast.iter_fields(node):
-            if isinstance(value, list):
-                for item in value:
-                    if isinstance(item, ast.AST):
-                        global_params.extend(Py2Scop._get_all_params(item))
-            elif isinstance(value, ast.AST):
-                global_params.extend(Py2Scop._get_all_params(value))
+        for field, value in ast.iter_fields(node):
+            if field == "func":
+                pass
+            else:
+                # Any other construction
+                if isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, ast.AST):
+                            global_params.extend(Py2Scop._get_all_params(item))
+                elif isinstance(value, ast.AST):
+                    global_params.extend(Py2Scop._get_all_params(value))
 
         # Return
         return global_params
@@ -378,7 +376,7 @@ class Py2Scop(object):
 
         # Process current node
         statements_scop = []
-        if isinstance(node, _ast.Assign) or isinstance(node, _ast.AugAssign):
+        if isinstance(node, _ast.Assign) or isinstance(node, _ast.AugAssign) or isinstance(node, _ast.Expr):
             s_scop = Py2Scop._process_statement(node, for_fathers, param_vars, all_vars)
             statements_scop.append(s_scop)
 
@@ -422,6 +420,10 @@ class Py2Scop(object):
         Raise:
                 - Py2ScopException
         """
+
+        print("PROCESSING")
+        import ast
+        print(ast.dump(statement_loop))
 
         from pycompss.util.translators.scop_types.scop.statement_class import Statement
         from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation
@@ -535,20 +537,27 @@ class Py2Scop(object):
         accesses_scop = []
         # Add write access
         if isinstance(statement_loop, _ast.Assign):
-            # Expr is of the form x = expr
+            # Expr is of the form X1,...,Xn = expr
             if isinstance(statement_loop.targets[0], _ast.Subscript):
-                accesses_scop.append(Py2Scop._process_access(statement_loop.targets[0],
-                                                             RelationType.WRITE, iter_vars,
+                # Single return value
+                accesses_scop.append(Py2Scop._process_access(statement_loop.targets[0], RelationType.WRITE, iter_vars,
                                                              param_vars, all_vars))
+            elif isinstance(statement_loop.targets[0], _ast.Tuple):
+                # Multiple return value
+                for ret_expr in statement_loop.targets[0].elts:
+                    accesses_scop.append(Py2Scop._process_access(ret_expr,RelationType.WRITE, iter_vars,
+                                                                 param_vars, all_vars))
         elif isinstance(statement_loop, _ast.AugAssign):
             # Expr is of the form x += expr
             if isinstance(statement_loop.target, _ast.Subscript):
-                accesses_scop.append(Py2Scop._process_access(statement_loop.target,
-                                                             RelationType.WRITE, iter_vars,
+                accesses_scop.append(Py2Scop._process_access(statement_loop.target, RelationType.WRITE, iter_vars,
                                                              param_vars, all_vars))
-                accesses_scop.append(Py2Scop._process_access(statement_loop.target,
-                                                             RelationType.READ, iter_vars,
+                accesses_scop.append(Py2Scop._process_access(statement_loop.target, RelationType.READ, iter_vars,
                                                              param_vars, all_vars))
+        elif isinstance(statement_loop, _ast.Expr):
+            # Expr is of the form func(). Only READ access so no need to add anything
+            pass
+
         # Add read accesses
         accesses_scop.extend(Py2Scop._process_accesses(statement_loop.value, iter_vars, param_vars, all_vars))
 
@@ -594,6 +603,9 @@ class Py2Scop(object):
         elif isinstance(node, _ast.BinOp):
             accesses.extend(Py2Scop._process_accesses(node.left, iter_vars, param_vars, all_vars))
             accesses.extend(Py2Scop._process_accesses(node.right, iter_vars, param_vars, all_vars))
+        elif isinstance(node, _ast.Call):
+            for call_arg in node.args:
+                accesses.extend(Py2Scop._process_accesses(call_arg, iter_vars, param_vars, all_vars))
 
         return accesses
 
@@ -1067,6 +1079,136 @@ class TestPy2Scop(unittest.TestCase):
 
     def test_ast2scop_multi_statements(self):
         func_name = "multi_statements1"
+
+        # Retrieve scop
+        scop = TestPy2Scop._test_ast2scop(func_name)
+
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        test_file = dir_path + "/tests/" + str(func_name) + ".scop"
+        try:
+            # Write scop to file
+            Py2Scop.write_os(scop, test_file)
+
+            # Check scop
+            expected_file = dir_path + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(test_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase generated file
+            os.remove(test_file)
+
+    def test_ast2scop_func_call1(self):
+        func_name = "func_call1"
+
+        # Retrieve scop
+        scop = TestPy2Scop._test_ast2scop(func_name)
+
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        test_file = dir_path + "/tests/" + str(func_name) + ".scop"
+        try:
+            # Write scop to file
+            Py2Scop.write_os(scop, test_file)
+
+            # Check scop
+            expected_file = dir_path + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(test_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase generated file
+            os.remove(test_file)
+
+    def test_ast2scop_func_call2(self):
+        func_name = "func_call2"
+
+        # Retrieve scop
+        scop = TestPy2Scop._test_ast2scop(func_name)
+
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        test_file = dir_path + "/tests/" + str(func_name) + ".scop"
+        try:
+            # Write scop to file
+            Py2Scop.write_os(scop, test_file)
+
+            # Check scop
+            expected_file = dir_path + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(test_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase generated file
+            os.remove(test_file)
+
+    def test_ast2scop_func_call3(self):
+        func_name = "func_call3"
+
+        # Retrieve scop
+        scop = TestPy2Scop._test_ast2scop(func_name)
+
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        test_file = dir_path + "/tests/" + str(func_name) + ".scop"
+        try:
+            # Write scop to file
+            Py2Scop.write_os(scop, test_file)
+
+            # Check scop
+            expected_file = dir_path + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(test_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase generated file
+            os.remove(test_file)
+
+    def test_ast2scop_func_call4(self):
+        func_name = "func_call4"
+
+        # Retrieve scop
+        scop = TestPy2Scop._test_ast2scop(func_name)
+
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        test_file = dir_path + "/tests/" + str(func_name) + ".scop"
+        try:
+            # Write scop to file
+            Py2Scop.write_os(scop, test_file)
+
+            # Check scop
+            expected_file = dir_path + "/tests/test2_ast2scop." + str(func_name) + ".expected.scop"
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(test_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase generated file
+            os.remove(test_file)
+
+    def test_ast2scop_func_call5(self):
+        func_name = "func_call5"
 
         # Retrieve scop
         scop = TestPy2Scop._test_ast2scop(func_name)
