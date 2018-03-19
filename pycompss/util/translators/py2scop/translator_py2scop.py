@@ -421,10 +421,6 @@ class Py2Scop(object):
                 - Py2ScopException
         """
 
-        print("PROCESSING")
-        import ast
-        print(ast.dump(statement_loop))
-
         from pycompss.util.translators.scop_types.scop.statement_class import Statement
         from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation
         from pycompss.util.translators.scop_types.scop.statement.relation_class import RelationType
