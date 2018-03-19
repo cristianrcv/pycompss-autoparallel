@@ -44,7 +44,7 @@ def create_block(b_size, is_random):
     return mb
 
 
-@parallel()
+@parallel(pluto_extra_flags=[""])
 def matmul(a, b, c, m_size):
     # Debug
     if __debug__:
@@ -71,17 +71,6 @@ def matmul(a, b, c, m_size):
         print("New Matrix C:")
         c = compss_wait_on(c)
         print(c)
-
-
-def multiply(a, b, c):
-    # import time
-    # start = time.time()
-
-    c += a * b
-
-    # end = time.time()
-    # tm = end - start
-    # print "TIME: " + str(tm*1000) + " ms"
 
 
 # MAIN CODE
