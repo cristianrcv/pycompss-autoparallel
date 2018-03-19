@@ -246,7 +246,7 @@ class Py2Scop(object):
         from pycompss.util.translators.scop_types.scop.extensions.coordinates_class import Coordinates
         scatnames_scop = None
         arrays_scop = Arrays(all_vars_list)
-        coordinates_scop = Coordinates("_autogen.py", 0, 0, 0, 0, 8)
+        coordinates_scop = Coordinates("_autogen.py", 0, 0, 0, 0, 4)
         extensions_scop = Extensions(scatnames_scop, arrays_scop, coordinates_scop)
 
         # Generate SCOP
@@ -271,13 +271,13 @@ class Py2Scop(object):
         import _ast
 
         # Process current node
-        global_params = []
         if isinstance(node, _ast.Name):
-            global_params.append(node.id)
+            return [node.id]
 
         # Child recursion
+        global_params = []
         for field, value in ast.iter_fields(node):
-            if field == "func":
+            if field == "func" or field == "keywords":
                 pass
             else:
                 # Any other construction
