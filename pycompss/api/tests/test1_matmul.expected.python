@@ -50,13 +50,13 @@ def matmul(m_size, n_size, k_size, b_size, debug):
     if k_size >= 1 and m_size >= 1 and n_size >= 1:
         lbp = 0
         ubp = k_size - 1
-        for t1 in range(lbp, ubp):
+        for t1 in range(lbp, ubp + 1):
             lbp = 0
             ubp = n_size - 1
-            for t2 in range(0, n_size - 1):
+            for t2 in range(0, n_size - 1 + 1):
                 lbv = 0
                 ubv = m_size - 1
-                for t3 in range(lbv, ubv):
+                for t3 in range(lbv, ubv + 1):
                     S1(c[t3][t1], b[t2][t1], a[t3][t2])
     compss_barrier()
     if debug:

@@ -545,7 +545,7 @@ class Py2Scop(object):
             elif isinstance(statement_loop.targets[0], _ast.Tuple):
                 # Multiple return value
                 for ret_expr in statement_loop.targets[0].elts:
-                    accesses_scop.append(Py2Scop._process_access(ret_expr,RelationType.WRITE, iter_vars,
+                    accesses_scop.append(Py2Scop._process_access(ret_expr, RelationType.WRITE, iter_vars,
                                                                  param_vars, all_vars))
         elif isinstance(statement_loop, _ast.AugAssign):
             # Expr is of the form x += expr
