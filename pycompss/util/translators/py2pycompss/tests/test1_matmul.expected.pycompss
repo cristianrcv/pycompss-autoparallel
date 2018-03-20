@@ -7,7 +7,7 @@ from pycompss.api.parameter import *
 
 
 @task(var2=IN, var3=IN, var1=INOUT)
-def S1(var1, var3, var2):
+def S1(var2, var3, var1):
     var1 += var2 * var3
 
 
@@ -32,7 +32,7 @@ def matmul(m_size, n_size, k_size, b_size, debug):
                 lbv = 0
                 ubv = m_size - 1
                 for t3 in range(lbv, ubv + 1):
-                    S1(c[t3][t1], b[t2][t1], a[t3][t2])
+                    S1(a[t3][t2], b[t2][t1], c[t3][t1])
     compss_barrier()
     if debug:
         print 'Matrix C:'

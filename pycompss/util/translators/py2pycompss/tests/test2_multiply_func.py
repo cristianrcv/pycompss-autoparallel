@@ -3,6 +3,7 @@ def matmul(m_size, n_size, k_size, b_size, debug):
     a = initialize(m_size, n_size, b_size, True)
     b = initialize(n_size, k_size, b_size, True)
     c = initialize(m_size, k_size, b_size, False)
+    d = initialize(m_size, k_size, b_size, False)
 
     # Debug
     if debug:

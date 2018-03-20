@@ -69,7 +69,9 @@ class Py2PyCOMPSs(object):
             output_code = []
             task2new_name = {}
             task2original_args = {}
-            task2new_args2subscripts = {}
+            task2new_args = {}
+            task2ret_args = {}
+            task2vars2subscripts = {}
 
             for statement in par_py_ast.body:
                 if isinstance(statement, _ast.Import):
@@ -83,16 +85,20 @@ class Py2PyCOMPSs(object):
                     task2new_name[task_func_name] = new_name
 
                     # Update task
-                    header, code, original_args, new_args2subscripts = Py2PyCOMPSs._process_task(statement, new_name)
+                    header, code, original_args, new_args, ret_args, new_vars2subscripts = Py2PyCOMPSs._process_task(
+                        statement, new_name)
 
                     output_task_headers.append(header)
                     output_task_functions.append(code)
                     task2original_args[task_func_name] = original_args
-                    task2new_args2subscripts[task_func_name] = new_args2subscripts
+                    task2new_args[task_func_name] = new_args
+                    task2ret_args[task_func_name] = ret_args
+                    task2vars2subscripts[task_func_name] = new_vars2subscripts
                 else:
                     # Generated CLooG code for parallel loop
                     # Check for calls to task methods and replace them. Leave the rest intact
-                    rc = _RewriteCallees(task2new_name, task2original_args, task2new_args2subscripts)
+                    rc = _RewriteCallees(task2new_name, task2original_args, task2new_args, task2ret_args,
+                                         task2vars2subscripts)
                     new_statement = rc.visit(statement)
                     output_code.append(new_statement)
             # Store output code
@@ -201,11 +207,17 @@ class Py2PyCOMPSs(object):
         Return:
                 - task_header : String representing the function task header
                 - new_func : new AST node representing the head of the function
-                - original_func_arguments : List of original arguments
-                - new_arguments2subscript : Dictionary containing the callee modifications of each new argument
+                - original_args : List of original arguments
+                - new_args : List of new arguments
+                - ret_args : List of return variables
+                - var2subscript : Dictionary containing the mapping of new variables to previous subscripts
         Raise:
                 - Py2PyCOMPSsException
         """
+
+        if __debug__:
+            logger.debug("Original task definition")
+            logger.debug(ast.dump(func))
 
         # Rename function
         func.name = new_name
@@ -216,27 +228,35 @@ class Py2PyCOMPSs(object):
         var2subscript = rs.get_var_subscripts()
 
         # Process direction of parameters
-        in_vars, out_vars, inout_vars = Py2PyCOMPSs._process_parameters_direction(new_func.body[0])
+        in_vars, out_vars, inout_vars, return_vars = Py2PyCOMPSs._process_parameters(new_func.body[0])
 
-        # Add non-subscript variables to task header
+        # Rewrite function if it has a return
         import _ast
-        for var in in_vars + out_vars + inout_vars:
-            if var not in var2subscript.keys():
-                var_ast = _ast.Name(id=var)
-                var2subscript[var] = var_ast
+        if len(return_vars) > 0:
+            new_func.body[0] = _ast.Return(value=new_func.body[0].value)
 
-        # Change function arguments
+        # Create new function arguments
+        new_args = []
+        for var in in_vars + out_vars + inout_vars:
+            if var not in new_args:
+                var_ast = _ast.Name(id=var)
+                new_args.append(var_ast)
         original_args = new_func.args.args
-        new_func.args.args = var2subscript.keys()
+        new_func.args.args = new_args
 
         # Construct task header
-        task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars)
+        task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars)
 
         # Return task header and new function
-        return task_header, new_func, original_args, var2subscript
+        if __debug__:
+            logger.debug("New task definition")
+            logger.debug(ast.dump(new_func))
+            logger.debug(return_vars)
+
+        return task_header, new_func, original_args, new_args, return_vars, var2subscript
 
     @staticmethod
-    def _process_parameters_direction(statement):
+    def _process_parameters(statement):
         """
         Processes all the directions of the parameters found in the given statement
 
@@ -246,50 +266,32 @@ class Py2PyCOMPSs(object):
                 - in_vars : List of names of IN variables
                 - out_vars : List of names of OUT variables
                 - inout_vars : List of names of INOUT variables
+                - return_vars : List of names of RETURN variables
         Raise:
                 - Py2PyCOMPSsException
         """
 
         import _ast
 
-        in_vars = []
+        in_vars = Py2PyCOMPSs._get_access_vars(statement)
+
         out_vars = []
         inout_vars = []
+        return_vars = []
 
-        if isinstance(statement, _ast.Assign):
-            # Process targets
-            for t in statement.targets:
-                ovs = Py2PyCOMPSs._process_write_vars(t)
-                out_vars.extend(ovs)
-                # TODO: Possible BUG - target will be recognised as INOUT not OUT
-                ivs = Py2PyCOMPSs._process_vars(t)
-                in_vars.extend(ivs)
-            # Process values
-            ivs = Py2PyCOMPSs._process_vars(statement.value)
-            in_vars.extend(ivs)
-        elif isinstance(statement, _ast.AugAssign):
-            # Process target
-            iovs = Py2PyCOMPSs._process_write_vars(statement.target)
-            inout_vars.extend(iovs)
-            ivs = Py2PyCOMPSs._process_vars(statement.target)
-            in_vars.extend(ivs)
-            # Process values
-            ivs = Py2PyCOMPSs._process_vars(statement.value)
-            in_vars.extend(ivs)
-        elif isinstance(statement, _ast.Expr):
-            # No target
-            # Process values
-            ivs = []
-            for expr_arg in statement.value.args:
-                ivs.extend(Py2PyCOMPSs._process_vars(expr_arg))
-            in_vars.extend(ivs)
+        target_vars = Py2PyCOMPSs._get_target_vars(statement)
+        if isinstance(statement.value, _ast.Call):
+            # Target vars are the return of a function
+            return_vars = target_vars
         else:
-            raise Py2PyCOMPSsException("[ERROR] Unrecognised statement inside task")
+            # Target vars are the result of an expression
+            out_vars = target_vars
 
         # Fix duplicate variables and directions
         fixed_in_vars = []
         fixed_out_vars = []
         fixed_inout_vars = []
+        fixed_return_vars = return_vars
         for iv in in_vars:
             if iv in out_vars or iv in inout_vars:
                 if iv not in fixed_inout_vars:
@@ -309,75 +311,95 @@ class Py2PyCOMPSs(object):
                 fixed_inout_vars.append(iov)
 
         # Return variables
-        return fixed_in_vars, fixed_out_vars, fixed_inout_vars
+        return fixed_in_vars, fixed_out_vars, fixed_inout_vars, fixed_return_vars
 
     @staticmethod
-    def _process_write_vars(node):
+    def _get_access_vars(statement, is_target=False):
         """
-        Searches for the name of the write accessed variable
+        Returns the accessed variable names within the given expression
 
         Arguments:
-                - node : Head AST node of the write access
+                - statement : AST node representing the head of the statement
         Return:
-                - var_name : Name of the write accessed variable (string)
-        Raise:
-                - Py2PyCOMPSsException
-        """
-
-        # A write variable can only be a subscript or the write variable id itself
-        import _ast
-        if isinstance(node, _ast.Name):
-            return [node.id]
-        elif isinstance(node, _ast.Subscript):
-            return Py2PyCOMPSs._process_write_vars(node.value)
-        elif isinstance(node, _ast.List):
-            write_vars = []
-            for list_fields in node.elts:
-                write_vars.extend(Py2PyCOMPSs._process_write_vars(list_fields))
-            return write_vars
-        elif isinstance(node, _ast.Tuple):
-            write_vars = []
-            for tuple_field in node.elts:
-                write_vars.extend(Py2PyCOMPSs._process_write_vars(tuple_field))
-            return write_vars
-        else:
-            raise Py2PyCOMPSsException("[ERROR] Unrecognised expression on write operation")
-
-    @staticmethod
-    def _process_vars(node):
-        """
-        Searches all the accessed variable names
-
-        Arguments:
-                - node : Head AST node
-        Return:
-                - in_vars : List of names of accessed variables (list of strings)
+                - in_vars : List of names of accessed variables
         Raise:
         """
 
         import _ast
 
         # Direct case
-        if isinstance(node, _ast.Name):
-            return [node.id]
+        if isinstance(statement, _ast.Name):
+            if is_target:
+                return []
+            else:
+                return [statement.id]
 
         # Child recursion
         in_vars = []
-        for field, value in ast.iter_fields(node):
+        for field, value in ast.iter_fields(statement):
             if field == "func" or field == "keywords":
                 # Skip function names and var_args keywords
                 pass
             else:
+                children_are_target = is_target or (field == "targets")
                 if isinstance(value, list):
                     for item in value:
                         if isinstance(item, ast.AST):
-                            in_vars.extend(Py2PyCOMPSs._process_vars(item))
+                            in_vars.extend(Py2PyCOMPSs._get_access_vars(item, children_are_target))
                 elif isinstance(value, ast.AST):
-                    in_vars.extend(Py2PyCOMPSs._process_vars(value))
+                    in_vars.extend(Py2PyCOMPSs._get_access_vars(value, children_are_target))
         return in_vars
 
     @staticmethod
-    def _construct_task_header(in_vars, out_vars, inout_vars):
+    def _get_target_vars(statement):
+        """
+        Returns the target variables within given the expression
+
+        Arguments:
+                - statement : AST node representing the head of the statement
+        Return:
+                - target_vars : List of names of target variables
+        Raise:
+        """
+
+        import _ast
+
+        if isinstance(statement, _ast.Assign):
+            # Assign can have more than one target var, process all
+            target_vars = []
+            for t in statement.targets:
+                target_vars.extend(Py2PyCOMPSs._get_target_vars(t))
+            return target_vars
+        elif isinstance(statement, _ast.AugAssign):
+            # Operations on assign have a single target var
+            return Py2PyCOMPSs._get_target_vars(statement.target)
+        elif isinstance(statement, _ast.Expr):
+            # No target on void method call
+            return []
+        elif isinstance(statement, _ast.Name):
+            # Add Id of used variable
+            return [statement.id]
+        elif isinstance(statement, _ast.Subscript):
+            # On array access process value (not indexes)
+            return Py2PyCOMPSs._get_target_vars(statement.value)
+        elif isinstance(statement, _ast.List):
+            # Process all the elements of the list
+            target_vars = []
+            for list_fields in statement.elts:
+                target_vars.extend(Py2PyCOMPSs._get_target_vars(list_fields))
+            return target_vars
+        elif isinstance(statement, _ast.Tuple):
+            # Process all the fields of the tuple
+            target_vars = []
+            for tuple_field in statement.elts:
+                target_vars.extend(Py2PyCOMPSs._get_target_vars(tuple_field))
+            return target_vars
+        else:
+            # Unrecognised statement expression
+            raise Py2PyCOMPSsException("[ERROR] Unrecognised expression on write operation")
+
+    @staticmethod
+    def _construct_task_header(in_vars, out_vars, inout_vars, return_vars):
         """
         Constructs the task header corresponding to the given IN, OUT, and INOUT variables
 
@@ -385,12 +407,16 @@ class Py2PyCOMPSs(object):
                 - in_vars : List of names of IN variables
                 - out_vars : List of names of OUT variables
                 - inout_vars : List of names of INOUT variables
+                - return_vars : List of names of RETURN variables
         Return:
                 - task_header : String representing the PyCOMPSs task header
         Raise:
         """
+
         # Construct task header
         task_header = "@task("
+
+        # Add parameters information
         first = True
         for iv in in_vars:
             if not first:
@@ -410,6 +436,14 @@ class Py2PyCOMPSs(object):
             else:
                 first = False
             task_header += iov + "=INOUT"
+
+        # Add return information
+        if len(return_vars) > 0:
+            if not first:
+                task_header += ", "
+            task_header += "returns=" + str(len(return_vars))
+
+        # Close task header
         task_header += ")"
 
         return task_header
@@ -466,26 +500,32 @@ class _RewriteCallees(ast.NodeTransformer):
     Attributes:
             - task2new_name : Dictionary mapping the function variable original and new names
             - task2original_args : Dictionary mapping the function name to its original arguments
-            - task2new_args2subscripts : Dictionary mapping the function name to its arg-subscript dictionary
+            - task2new_args : Dictionary mapping the function name to its new arguments
+            - task2ret_vars : Dictionary mapping the function name to its return values
+            - task2vars2subscripts : Dictionary mapping the function name to its vars-subscripts dictionary
     """
 
-    def __init__(self, task2new_name, task2original_args, task2new_args2subscripts):
+    def __init__(self, task2new_name, task2original_args, task2new_args, task2ret_vars, task2vars2subscripts):
         self.task2new_name = task2new_name
         self.task2original_args = task2original_args
-        self.task2new_args2subscripts = task2new_args2subscripts
+        self.task2new_args = task2new_args
+        self.task2ret_vars = task2ret_vars
+        self.task2vars2subscripts = task2vars2subscripts
 
     def visit_Call(self, node):
         original_name = node.func.id
+
         if original_name in self.task2new_name.keys():
             # It is a call to a task, we must replace it by the new callee
-            import copy
-            new_node = copy.deepcopy(node)
+            if __debug__:
+                logger.debug("Original task call")
+                logger.debug(ast.dump(node))
 
             # Replace function name
             import _ast
-            new_node.func = _ast.Name(id=self.task2new_name[original_name])
+            node.func = _ast.Name(id=self.task2new_name[original_name])
 
-            # Map function arguments to callee arguments
+            # Map function arguments to call arguments
             func_args = self.task2original_args[original_name]
             func_args2callee_args = {}
             for i in range(len(node.args)):
@@ -493,16 +533,58 @@ class _RewriteCallees(ast.NodeTransformer):
                 callee_arg = node.args[i]
                 func_args2callee_args[func_arg] = callee_arg
 
-            # Modify new arguments subscripts by callee parameters
-            args2subscripts = self.task2new_args2subscripts[original_name]
-            new_subscripts = []
-            for subscript in args2subscripts.values():
+            # Transform function variables to call arguments on all var2subscript
+            vars2subscripts = self.task2vars2subscripts[original_name]
+            vars2new_subscripts = {}
+            for var, subscript in vars2subscripts.items():
                 ran = _RewriteArgNames(func_args2callee_args)
-                new_subscript = ran.visit(subscript)
-                new_subscripts.append(new_subscript)
+                vars2new_subscripts[var] = ran.visit(subscript)
 
-            # Change the node args by the subscripts expressions
-            new_node.args = new_subscripts
+            # if __debug__:
+            #    print("Vars to subscripts:")
+            #    for k, v in vars2new_subscripts.items():
+            #        print(str(k) + " -> " + str(ast.dump(v)))
+
+            # Transform all the new arguments into its subscript
+            transformed_new_args = []
+            new_args = self.task2new_args[original_name]
+            for arg in new_args:
+                transformed_new_args.append(vars2new_subscripts[arg.id])
+
+            # if __debug__:
+            #    print("New function arguments")
+            #    for new_arg in transformed_new_args:
+            #        print(ast.dump(new_arg))
+
+            # Change the function args by the subscript expressions
+            node.args = transformed_new_args
+
+            # Transform all the new return variables into its subscript
+            transformed_return_vars = []
+            return_vars = self.task2ret_vars[original_name]
+            for ret_var in return_vars:
+                transformed_return_vars.append(vars2new_subscripts[ret_var])
+
+            # if __debug__:
+            #    print("New function return variables")
+            #    for ret_var in transformed_return_vars:
+            #        print(ast.dump(ret_var))
+
+            # Change the function call by an assignment if there are return variables
+            import copy
+            copied_node = copy.deepcopy(node)
+            if len(transformed_return_vars) > 0:
+                if len(transformed_return_vars) == 1:
+                    target = transformed_return_vars[0]
+                else:
+                    target = _ast.Tuple(elts=transformed_return_vars)
+                new_node = _ast.Assign(targets=[target], value=copied_node)
+            else:
+                new_node = copied_node
+
+            if __debug__:
+                logger.debug("New task call")
+                logger.debug(ast.dump(new_node))
 
             return ast.copy_location(new_node, node)
         else:
