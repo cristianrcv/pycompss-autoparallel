@@ -5,17 +5,21 @@ from pycompss.api.api import compss_barrier, compss_wait_on, compss_open
 from pycompss.api.task import task
 from pycompss.api.parameter import *
 
-@task(var2 = IN, var3 = IN, var4 = IN, var1 = INOUT)
+
+@task(var2=IN, var3=IN, var4=IN, var1=INOUT)
 def S1(var4, var1, var3, var2):
     var1 = multiply(var2, var3, var4)
 
-@task(var1 = IN, var2 = IN, var3 = IN)
+
+@task(var1=IN, var2=IN, var3=IN)
 def S2(var1, var3, var2):
     multiply(var1, var2, var3)
 
-@task(var3 = IN, var4 = IN, var5 = IN, var1 = INOUT, var2 = INOUT)
+
+@task(var3=IN, var4=IN, var5=IN, var1=INOUT, var2=INOUT)
 def S3(var5, var4, var1, var3, var2):
     var1, var2 = multiply(var3, var4, var5)
+
 
 def matmul(m_size, n_size, k_size, b_size, debug):
     a = initialize(m_size, n_size, b_size, True)
