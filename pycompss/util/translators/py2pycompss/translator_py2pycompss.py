@@ -230,6 +230,13 @@ class Py2PyCOMPSs(object):
         # Process direction of parameters
         in_vars, out_vars, inout_vars, return_vars = Py2PyCOMPSs._process_parameters(new_func.body[0])
 
+        # Add non subscript variables to var2subscript
+        import _ast
+        for var in in_vars + out_vars + inout_vars + return_vars:
+            if var not in var2subscript.keys():
+                var_ast = _ast.Name(id=var)
+                var2subscript[var] = var_ast
+
         # Rewrite function if it has a return
         import _ast
         if len(return_vars) > 0:
