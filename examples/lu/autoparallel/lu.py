@@ -48,15 +48,11 @@ def lu_blocked(a, m_size, b_size):
 
     # Initialization
     p_mat = [[np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size for _ in range(m_size)]
-    l_mat = [[None] * m_size for _ in range(m_size)]
-    u_mat = [[None] * m_size for _ in range(m_size)]
-
-    for i in range(m_size):
-        for j in range(i + 1, m_size):
-            l_mat[i][j] = np.matrix(np.zeros((b_size, b_size)), dtype=float)
-            u_mat[j][i] = np.matrix(np.zeros((b_size, b_size)), dtype=float)
+    l_mat = [[np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size for _ in range(m_size)]
+    u_mat = [[np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size for _ in range(m_size)]
 
     # First element
+    a[0][0] = compss_wait_on(a[0][0])  # Because it is no longer a task
     p_mat[0][0], l_mat[0][0], u_mat[0][0] = custom_lu(a[0][0])
     aux = None
 

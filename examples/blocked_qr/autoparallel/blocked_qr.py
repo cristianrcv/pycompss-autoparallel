@@ -11,6 +11,8 @@ from pycompss.api.constraint import constraint
 from pycompss.api.task import task
 from pycompss.api.api import compss_barrier, compss_wait_on
 
+import numpy as np
+
 
 # TODO: Extend for non-square matrices. There is no size verifications.
 
@@ -49,14 +51,11 @@ def create_block_wrapper(b_size, block_type='random'):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size):
-    import numpy as np
     return np.matrix(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
 
 
 @parallel()
 def qr_blocked(a, m_size, b_size, overwrite_a=False):
-    import numpy as np
-
     # Debug
     if __debug__:
         # TODO: PyCOMPSs BUG sync-INOUT-sync
@@ -70,6 +69,7 @@ def qr_blocked(a, m_size, b_size, overwrite_a=False):
         r = copy_blocked(a)
     else:
         r = a
+    q_act = None
 
     for i in range(m_size):
         q_act, r[i][i] = qr(r[i][i], b_size, transpose=True)
@@ -109,8 +109,6 @@ def qr_blocked(a, m_size, b_size, overwrite_a=False):
 
 
 def copy_blocked(a, transpose=False):
-    import numpy as np
-
     res = []
     for i in range(len(a)):
         res.append([])
@@ -131,7 +129,6 @@ def qr(mat, b_size, mode='reduced', transpose=False):
 
 
 def qr_task(mat, b_size, block_type, mode='reduced', transpose=False):
-    import numpy as np
     from numpy.linalg import qr
 
     if block_type == 'random':
@@ -166,8 +163,6 @@ def dot(a, b, transpose_result=False, transpose_b=False):
 
 
 def dot_task(a, b, transpose_result=False, transpose_b=False):
-    import numpy as np
-
     if transpose_b:
         b = np.transpose(b)
     if transpose_result:
@@ -182,8 +177,6 @@ def transpose_block(a):
 
 
 def transpose_block_task(mat):
-    import numpy as np
-
     return np.transpose(mat)
 
 
@@ -194,8 +187,6 @@ def little_qr(a, b, b_size, transpose=False):
 
 
 def little_qr_task(a_mat, a_block_type, b_mat, b_block_type, b_size, transpose=False):
-    import numpy as np
-
     ent_a = [a_block_type, a_mat]
     ent_b = [b_block_type, b_mat]
     for mat in [ent_a, ent_b]:
@@ -243,8 +234,6 @@ def multiply_single_block(a, b, c, b_size, transpose_b=False):
 
 def multiply_single_block_task(a_mat, a_block_type, b_mat, b_block_type, c_mat, c_block_type, b_size,
                                transpose_b=False):
-    import numpy as np
-
     a_fun = [a_block_type, a_mat]
     b_fun = [b_block_type, b_mat]
     if c_block_type == 'zeros':
@@ -273,9 +262,6 @@ def multiply_single_block_task(a_mat, a_block_type, b_mat, b_block_type, c_mat, 
 
 
 def split_matrix(mat, m_size):
-    import numpy as np
-
-    splitted_matrix = []
     b_size = len(mat) / m_size
     splitted_matrix = [[None for _ in range(m_size)] for _ in range(m_size)]
     for i in range(m_size):
@@ -285,8 +271,6 @@ def split_matrix(mat, m_size):
 
 
 def blocked_transpose(mat):
-    import numpy as np
-
     res = []
     for i in range(len(mat)):
         res.append([])
@@ -299,8 +283,6 @@ def blocked_transpose(mat):
 
 
 def join_matrix(mat, b_size):
-    import numpy as np
-
     joint_matrix = np.matrix([[]])
     for i in range(0, len(mat)):
         if mat[i][0][0] == 'zeros':

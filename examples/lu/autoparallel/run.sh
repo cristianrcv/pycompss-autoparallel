@@ -5,8 +5,8 @@
 
   export ComputingUnits=1
 
-  DEBUG_FLAGS=""
-  TOOLS_FLAGS=""
+  DEBUG_FLAGS="-d"
+  TOOLS_FLAGS="-g"
 
   runcompss \
           ${DEBUG_FLAGS} \

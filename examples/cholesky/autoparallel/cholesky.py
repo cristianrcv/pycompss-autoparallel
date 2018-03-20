@@ -12,6 +12,8 @@ from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
+import numpy as np
+
 
 def generate_matrix(m_size, b_size):
     mat = []
@@ -34,8 +36,6 @@ def generate_matrix(m_size, b_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, is_diag):
-    import numpy as np
-
     block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
     mb = np.matrix(block, dtype=np.double, copy=False)
     mb = mb + np.transpose(mb)
@@ -46,8 +46,6 @@ def create_block(b_size, is_diag):
 
 @parallel()
 def cholesky_blocked(a, m_size, b_size):
-    import numpy as np
-
     # Debug
     if __debug__:
         # TODO: PyCOMPSs BUG sync-INOUT-sync
@@ -77,10 +75,10 @@ def cholesky_blocked(a, m_size, b_size):
                 a[j][i] = gemm(-1.0, a[j][k], a[i][k], a[j][i], 1.0)
                 if __debug__:
                     cont += 1
-            # TODO: Why not called? Counter?
-            # a[j][i] = syrk(a[j][k], a[j][i])
-            if __debug__:
-                cont += 1
+                # Only for A=B
+                # a[j][i] = syrk(a[j][k], a[j][i])
+                # if __debug__:
+                # cont += 1
 
     # Debug: task counter
     if __debug__:
@@ -129,8 +127,6 @@ def syrk(a, b):
 
 
 def join_matrix(a):
-    import numpy as np
-
     joint_matrix = np.matrix([[]])
     for i in range(0, len(a)):
         current_row = a[i][0]
