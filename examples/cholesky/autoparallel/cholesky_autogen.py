@@ -25,10 +25,14 @@ def generate_matrix(m_size, b_size):
     for i in range(m_size):
         mat[i][i] = create_block(b_size, True)
         for j in range(i + 1, m_size):
-            mb = create_block(b_size, False)
-            mb = compss_wait_on(mb)  # To break aliasing between future objects
-            mat[i][j] = mb
-            mat[j][i] = mb
+            mat[i][j] = create_block(b_size, False)
+
+    # Make it symmetric
+    for i in range(m_size):
+        mat[i][i] = compss_wait_on(mat[i][i])
+        for j in range(i + 1, m_size):
+            mat[i][j] = compss_wait_on(mat[i][j])  # To break aliasing between future objects
+            mat[j][i] = mat[i][j]
 
     return mat
 
@@ -57,41 +61,25 @@ def S1(var2):
     return potrf(var2)
 
 
-@task(cont=INOUT)
-def S2(cont):
-    cont += 1
-
-
 @task(var2=IN, var3=IN, returns=1)
-def S3(var2, var3):
+def S2(var2, var3):
     return solve_triangular(var2, var3)
 
 
 @task(b_size=IN, returns=1)
-def S4(b_size):
+def S3(b_size):
     return np.zeros((b_size, b_size))
 
 
-@task(cont=INOUT)
-def S5(cont):
-    cont += 1
-
-
 @task(var2=IN, var3=IN, var4=IN, returns=1)
-def S6(var2, var3, var4):
+def S4(var2, var3, var4):
     return gemm(-1.0, var2, var3, var4, 1.0)
-
-
-@task(cont=INOUT)
-def S7(cont):
-    cont += 1
 
 
 def cholesky_blocked(a, m_size, b_size):
     if __debug__:
         print('Matrix A:')
         print(a)
-    cont = 0
     if m_size >= 1:
         lbp = 1
         ubp = 2 * m_size - 3
@@ -102,25 +90,20 @@ def cholesky_blocked(a, m_size, b_size):
                 lbv = t3
                 ubv = m_size - 1
                 for t4 in range(lbv, ubv + 1):
-                    a[t4][t3] = S6(a[t4][t2 - t3], a[t3][t2 - t3], a[t4][t3])
-                    S7(cont)
+                    a[t4][t3] = S4(a[t4][t2 - t3], a[t3][t2 - t3], a[t4][t3])
         lbp = 0
         ubp = m_size - 2
         for t2 in range(lbp, ubp + 1):
             lbv = t2 + 1
             ubv = m_size - 1
             for t3 in range(lbv, ubv + 1):
-                a[t3][t2] = S3(a[t2][t2], a[t3][t2])
-                a[t2][t3] = S4(b_size)
-                S5(cont)
+                a[t3][t2] = S2(a[t2][t2], a[t3][t2])
+                a[t2][t3] = S3(b_size)
         lbp = 0
         ubp = m_size - 1
         for t2 in range(lbp, ubp + 1):
             a[t2][t2] = S1(a[t2][t2])
-            S2(cont)
     compss_barrier()
-    if __debug__:
-        print('Number of spawned tasks: ' + str(cont))
     if __debug__:
         a = compss_wait_on(a)
         res = join_matrix(a)
@@ -218,6 +201,7 @@ if __name__ == "__main__":
     cholesky_time = end_time - cholesky_start_time
 
     print("RESULTS -----------------")
+    print("VERSION AUTOPARALLEL")
     print("MSIZE " + str(MSIZE))
     print("BSIZE " + str(MSIZE))
     print("DEBUG " + str(__debug__))

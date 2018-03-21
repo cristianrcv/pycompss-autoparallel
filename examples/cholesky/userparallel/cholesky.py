@@ -24,10 +24,14 @@ def generate_matrix(m_size, b_size):
     for i in range(m_size):
         mat[i][i] = create_block(b_size, True)
         for j in range(i + 1, m_size):
-            mb = create_block(b_size, False)
-            mb = compss_wait_on(mb)  # To break aliasing between future objects
-            mat[i][j] = mb
-            mat[j][i] = mb
+            mat[i][j] = create_block(b_size, False)
+
+    # Make it symmetric
+    for i in range(m_size):
+        mat[i][i] = compss_wait_on(mat[i][i])
+        for j in range(i + 1, m_size):
+            mat[i][j] = compss_wait_on(mat[i][j])  # To break aliasing between future objects
+            mat[j][i] = mat[i][j]
 
     return mat
 
@@ -51,36 +55,22 @@ def cholesky_blocked(a, m_size, b_size):
         print("Matrix A:")
         print(a)
 
-    # Debug: task counter
-    cont = 0
-
     # Cholesky decomposition
     for k in range(m_size):
         # Diagonal block factorization
         a[k][k] = potrf(a[k][k])
-        if __debug__:
-            cont += 1
+
         # Triangular systems
         for i in range(k + 1, m_size):
             a[i][k] = solve_triangular(a[k][k], a[i][k])
             a[k][i] = np.zeros((b_size, b_size))
-            if __debug__:
-                cont += 1
 
         # Update trailing matrix
         for i in range(k + 1, m_size):
             for j in range(i, m_size):
                 a[j][i] = gemm(-1.0, a[j][k], a[i][k], a[j][i], 1.0)
-                if __debug__:
-                    cont += 1
                 # Only for A=B
                 # a[j][i] = syrk(a[j][k], a[j][i])
-                # if __debug__:
-                # cont += 1
-
-    # Debug: task counter
-    if __debug__:
-        print("Number of spawned tasks: " + str(cont))
 
     # Debug result
     if __debug__:
@@ -186,6 +176,7 @@ if __name__ == "__main__":
     cholesky_time = end_time - cholesky_start_time
 
     print("RESULTS -----------------")
+    print("VERSION USERPARALLEL")
     print("MSIZE " + str(MSIZE))
     print("BSIZE " + str(MSIZE))
     print("DEBUG " + str(__debug__))
