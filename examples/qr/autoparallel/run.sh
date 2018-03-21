@@ -14,4 +14,4 @@
           --lang=python \
           --project=../xml/project.xml \
           --resources=../xml/resources.xml \
-          blocked_qr.py $MSIZE $BSIZE
+          qr.py $MSIZE $BSIZE

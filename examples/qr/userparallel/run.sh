@@ -5,8 +5,8 @@
 
   export ComputingUnits=1
 
-  DEBUG_FLAGS="-d"
-  TOOLS_FLAGS="-g"
+  DEBUG_FLAGS=""
+  TOOLS_FLAGS=""
 
   runcompss \
           ${DEBUG_FLAGS} \
@@ -14,4 +14,4 @@
           --lang=python \
           --project=../xml/project.xml \
           --resources=../xml/resources.xml \
-          blocked_qr.py $MSIZE $BSIZE
+          qr.py $MSIZE $BSIZE
