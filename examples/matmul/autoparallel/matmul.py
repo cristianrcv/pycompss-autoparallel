@@ -114,6 +114,7 @@ if __name__ == "__main__":
     mult_time = end_time - mult_start_time
 
     print("RESULTS -----------------")
+    print("VERSION AUTOPARALLEL")
     print("MSIZE " + str(MSIZE))
     print("BSIZE " + str(MSIZE))
     print("DEBUG " + str(__debug__))
