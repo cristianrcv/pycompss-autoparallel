@@ -113,5 +113,4 @@ examples/matmul/matmul_autogen.py
 
 # Intermediate execution files
 .tmp_gen*
-*_autogen.py
 
