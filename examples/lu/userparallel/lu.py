@@ -14,6 +14,10 @@ from pycompss.api.api import compss_wait_on
 import numpy as np
 
 
+############################################
+# MATRIX GENERATION
+############################################
+
 def generate_matrix(m_size, b_size):
     mat = []
     for i in range(m_size):
@@ -21,7 +25,6 @@ def generate_matrix(m_size, b_size):
         for j in range(m_size):
             mb = create_block(b_size)
             mat[i].append(mb)
-
     return mat
 
 
@@ -32,6 +35,10 @@ def create_block(b_size):
     mb = np.matrix(block, dtype=np.double, copy=False)
     return mb
 
+
+############################################
+# MAIN FUNCTION
+############################################
 
 def lu_blocked(a, m_size, b_size):
     # Debug
@@ -46,39 +53,45 @@ def lu_blocked(a, m_size, b_size):
 
     # Initialization
     p_mat = [[np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size for _ in range(m_size)]
-    l_mat = [[np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size for _ in range(m_size)]
-    u_mat = [[np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size for _ in range(m_size)]
+    l_mat = [[None for _ in range(m_size)] for _ in range(m_size)]
+    u_mat = [[None for _ in range(m_size)] for _ in range(m_size)]
+    for i in range(m_size):
+        for j in range(i + 1, m_size):
+            l_mat[i][j] = np.matrix(np.zeros((b_size, b_size)), dtype=float)
+            u_mat[j][i] = np.matrix(np.zeros((b_size, b_size)), dtype=float)
+    aux = [None]
+    aux2 = [None]
 
     # First element
     p_mat[0][0], l_mat[0][0], u_mat[0][0] = custom_lu(a[0][0])
-    aux = None
 
     for j in range(1, m_size):
-        aux = invert_triangular(l_mat[0][0], lower=True)
-        u_mat[0][j] = multiply([1], aux, p_mat[0][0], a[0][j])
+        aux[0] = invert_triangular(l_mat[0][0], lower=True)
+        u_mat[0][j] = multiply([1], aux[0], p_mat[0][0], a[0][j])
 
     # The rest of elements
     for i in range(1, m_size):
         for j in range(i, m_size):
             for k in range(i, m_size):
-                aux = invert_triangular(u_mat[i - 1][i - 1], lower=False)
-                a[j][k] = dgemm(-1, a[j][k], multiply([], a[j][i - 1], aux), u_mat[i - 1][k])
+                aux[0] = invert_triangular(u_mat[i - 1][i - 1], lower=False)
+                aux2[0] = multiply([], a[j][i - 1], aux[0])
+                a[j][k] = dgemm(-1, a[j][k], aux2[0], u_mat[i - 1][k])
 
         p_mat[i][i], l_mat[i][i], u_mat[i][i] = custom_lu(a[i][i])
 
         for j in range(0, i):
-            aux = invert_triangular(u_mat[j][j], lower=False)
-            l_mat[i][j] = multiply([0], p_mat[i][i], a[i][j], aux)
+            aux[0] = invert_triangular(u_mat[j][j], lower=False)
+            l_mat[i][j] = multiply([0], p_mat[i][i], a[i][j], aux[0])
 
         for j in range(i + 1, m_size):
-            invert_triangular(l_mat[i][i], lower=True)
-            u_mat[i][j] = multiply([1], aux, p_mat[i][i], a[i][j])
+            aux[0] = invert_triangular(l_mat[i][i], lower=True)
+            u_mat[i][j] = multiply([1], aux[0], p_mat[i][i], a[i][j])
 
     # Debug result
     if __debug__:
-        p_res = join_matrix(compss_wait_on(p_mat))
-        l_res = join_matrix(compss_wait_on(l_mat))
-        u_res = join_matrix(compss_wait_on(u_mat))
+        p_res = compss_wait_on(p_mat)  # join_matrix(compss_wait_on(p_mat))
+        l_res = compss_wait_on(l_mat)  # join_matrix(compss_wait_on(l_mat))
+        u_res = compss_wait_on(u_mat)  # join_matrix(compss_wait_on(u_mat))
 
         print("Matrix P:")
         print(p_res)
@@ -88,66 +101,78 @@ def lu_blocked(a, m_size, b_size):
         print(u_res)
 
 
+############################################
+# MATHEMATICAL FUNCTIONS
+############################################
+
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
-def invert_triangular(a, lower=False):
+def invert_triangular(mat, lower=False):
     from scipy.linalg import solve_triangular
 
-    dim = len(a)
-    identity = np.matrix(np.identity(dim))
-    return solve_triangular(a, identity, lower=lower)
+    print(mat)
+
+    dim = len(mat)
+    iden = np.matrix(np.identity(dim))
+    return solve_triangular(mat, iden, lower=lower)
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def multiply(inv_list, *args):
-    # Base case checks
-    assert (len(args) > 0)
-    input_args = list(args)
-    if len(input_args) == 1:
-        return input_args[0]
+    assert len(args) > 0
 
-    # Complex cases
+    input_args = list(args)
     if len(inv_list) > 0:
         from numpy.linalg import inv
         for elem in inv_list:
             input_args[elem] = inv(args[elem])
 
+    if len(input_args) == 1:
+        return input_args[0]
+
     result = np.dot(input_args[0], input_args[1])
     for i in range(2, len(input_args)):
         result = np.dot(result, input_args[i])
-
     return result
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def dgemm(alpha, a, b, c):
-    a += (alpha * np.dot(b, c))
-
-    return a
+    mat = a + (alpha * np.dot(b, c))
+    return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=3)
-def custom_lu(a):
+def custom_lu(mat):
     from scipy.linalg import lu
-    return lu(a)
 
+    return lu(mat)
+
+
+############################################
+# BLOCK HANDLING FUNCTIONS
+############################################
 
 def join_matrix(mat):
-    joint_matrix = np.matrix([[]])
+    joint_mat = np.matrix([[]])
     for i in range(0, len(mat)):
         current_row = mat[i][0]
         for j in range(1, len(mat[i])):
             current_row = np.bmat([[current_row, mat[i][j]]])
         if i == 0:
-            joint_matrix = current_row
+            joint_mat = current_row
         else:
-            joint_matrix = np.bmat([[joint_matrix], [current_row]])
+            joint_mat = np.bmat([[joint_mat], [current_row]])
 
-    return np.matrix(joint_matrix)
+    return np.matrix(joint_mat)
 
+
+############################################
+# MAIN
+############################################
 
 if __name__ == "__main__":
     # Import libraries
@@ -189,8 +214,9 @@ if __name__ == "__main__":
     lu_time = end_time - lu_start_time
 
     print("RESULTS -----------------")
+    print("VERSION USERPARALLEL")
     print("MSIZE " + str(MSIZE))
-    print("BSIZE " + str(MSIZE))
+    print("BSIZE " + str(BSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))

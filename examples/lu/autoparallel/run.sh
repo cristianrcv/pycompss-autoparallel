@@ -1,12 +1,12 @@
 #!/bin/bash
 
   MSIZE=4
-  BSIZE=4
+  BSIZE=8
 
   export ComputingUnits=1
 
-  DEBUG_FLAGS="-d"
-  TOOLS_FLAGS="-g"
+  DEBUG_FLAGS=""
+  TOOLS_FLAGS=""
 
   runcompss \
           ${DEBUG_FLAGS} \

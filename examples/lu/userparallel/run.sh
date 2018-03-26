@@ -1,7 +1,7 @@
 #!/bin/bash
 
   MSIZE=4
-  BSIZE=4
+  BSIZE=8
 
   export ComputingUnits=1
 
