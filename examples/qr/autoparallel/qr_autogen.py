@@ -70,19 +70,19 @@ from pycompss.api.task import task
 from pycompss.api.parameter import *
 
 
-@task(var2=IN, returns=2)
-def S1(var2):
-    return qr(var2, transpose=True)
+@task(var3=IN, returns=2)
+def S1(var3):
+    return qr(var3, transpose=True)
 
 
-@task(var2=IN, q_act=IN, returns=1)
-def S2(var2, q_act):
-    return dot(var2, q_act, transpose_b=True)
+@task(var2=IN, var3=IN, returns=1)
+def S2(var2, var3):
+    return dot(var2, var3, transpose_b=True)
 
 
-@task(q_act=IN, var2=IN, returns=1)
-def S3(q_act, var2):
-    return dot(q_act, var2)
+@task(var2=IN, var3=IN, returns=1)
+def S3(var2, var3):
+    return dot(var2, var3)
 
 
 @task(var7=IN, var8=IN, b_size=IN, returns=6)
@@ -119,30 +119,66 @@ def qr_blocked(a, m_size, b_size, overwrite_a=False):
         r = copy_blocked(a)
     else:
         r = a
-    q_act = None
+    q_act = [None]
     q_sub = [[np.matrix(np.array([0])), np.matrix(np.array([0]))], [np.
         matrix(np.array([0])), np.matrix(np.array([0]))]]
+    q_sub_len = len(q_sub)
     if m_size >= 1:
-        lbp = 0
-        ubp = m_size - 2
-        for t1 in range(0, m_size - 2 + 1):
-            q_act, r[t1][t1] = S1(r[t1][t1])
+        if q_sub_len >= 1:
             lbp = 0
-            ubp = t1
-            for t2 in range(0, t1 + 1):
-                q[t2][t1] = S2(q[t2][t1], q_act)
-            lbp = t1 + 1
-            ubp = m_size - 1
-            for t2 in range(t1 + 1, m_size - 1 + 1):
-                q[t2][t1] = S2(q[t2][t1], q_act)
-                r[t1][t2] = S3(q_act, r[t1][t2])
-                q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][t1
-                    ], r[t2][t1] = S4(r[t1][t1], r[t2][t1], b_size)
-        q_act, r[t1][t1] = S1(r[t1][t1])
+            ubp = m_size - 2
+            for t1 in range(0, m_size - 2 + 1):
+                q_act[0], r[t1][t1] = S1(r[t1][t1])
+                lbp = 0
+                ubp = t1
+                for t2 in range(0, t1 + 1):
+                    q[t2][t1] = S2(q[t2][t1], q_act[0])
+                lbp = t1 + 1
+                ubp = m_size - 1
+                for t2 in range(t1 + 1, m_size - 1 + 1):
+                    q[t2][t1] = S2(q[t2][t1], q_act[0])
+                    r[t1][t2] = S3(q_act[0], r[t1][t2])
+                    q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][
+                        t1], r[t2][t1] = S4(r[t1][t1], r[t2][t1], b_size)
+                    lbp = 0
+                    ubp = t1
+                    for t3 in range(lbp, ubp + 1):
+                        lbv = 0
+                        ubv = q_sub_len - 1
+                        for t4 in range(lbv, ubv + 1):
+                            S7(q[t3][t1], q_sub[t4][0], q[t3][t1])
+                            S8(q[t3][t2], q_sub[t4][1], q[t3][t2])
+                    lbp = t1 + 1
+                    ubp = m_size - 1
+                    for t3 in range(lbp, ubp + 1):
+                        lbv = 0
+                        ubv = q_sub_len - 1
+                        for t4 in range(lbv, ubv + 1):
+                            S5(q_sub[t4][0], r[t1][t3], r[t1][t3])
+                            S6(q_sub[t4][1], r[t2][t3], r[t2][t3])
+                            S7(q[t3][t1], q_sub[t4][0], q[t3][t1])
+                            S8(q[t3][t2], q_sub[t4][1], q[t3][t2])
+        if q_sub_len <= 0:
+            lbp = 0
+            ubp = m_size - 2
+            for t1 in range(0, m_size - 2 + 1):
+                q_act[0], r[t1][t1] = S1(r[t1][t1])
+                lbp = 0
+                ubp = t1
+                for t2 in range(0, t1 + 1):
+                    q[t2][t1] = S2(q[t2][t1], q_act[0])
+                lbp = t1 + 1
+                ubp = m_size - 1
+                for t2 in range(t1 + 1, m_size - 1 + 1):
+                    q[t2][t1] = S2(q[t2][t1], q_act[0])
+                    r[t1][t2] = S3(q_act[0], r[t1][t2])
+                    q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][
+                        t1], r[t2][t1] = S4(r[t1][t1], r[t2][t1], b_size)
+        q_act[0], r[t1][t1] = S1(r[t1][t1])
         lbp = 0
         ubp = m_size - 1
         for t2 in range(0, m_size - 1 + 1):
-            q[t2][t1] = S2(q[t2][t1], q_act)
+            q[t2][t1] = S2(q[t2][t1], q_act[0])
     compss_barrier()
     if __debug__:
         q_res = join_matrix(compss_wait_on(q))

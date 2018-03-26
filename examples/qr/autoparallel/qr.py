@@ -80,18 +80,19 @@ def qr_blocked(a, m_size, b_size, overwrite_a=False):
         r = a
 
     # Initialize intermediate iteration variables
-    q_act = None
+    q_act = [None]
     q_sub = [[np.matrix(np.array([0])), np.matrix(np.array([0]))], [np.matrix(np.array([0])), np.matrix(np.array([0]))]]
+    q_sub_len = len(q_sub)
 
     # Main loop
     for i in range(m_size):
-        q_act, r[i][i] = qr(r[i][i], transpose=True)
+        q_act[0], r[i][i] = qr(r[i][i], transpose=True)
 
         for j in range(m_size):
-            q[j][i] = dot(q[j][i], q_act, transpose_b=True)
+            q[j][i] = dot(q[j][i], q_act[0], transpose_b=True)
 
         for j in range(i + 1, m_size):
-            r[i][j] = dot(q_act, r[i][j])
+            r[i][j] = dot(q_act[0], r[i][j])
 
         # Update values of the respective column
         for j in range(i + 1, m_size):
@@ -101,13 +102,13 @@ def qr_blocked(a, m_size, b_size, overwrite_a=False):
             # Update values of the row for the value updated in the column
             for k in range(i + 1, m_size):
                 # Multiply each block
-                for mul_i in range(len(q_sub)):
+                for mul_i in range(q_sub_len):
                     multiply_single_block(q_sub[mul_i][0], r[i][k], r[i][k], transpose_b=False)
                     multiply_single_block(q_sub[mul_i][1], r[j][k], r[j][k], transpose_b=False)
 
             for k in range(m_size):
                 # Multiply each block
-                for mul_i in range(len(q_sub)):
+                for mul_i in range(q_sub_len):
                     multiply_single_block(q[k][i], q_sub[mul_i][0], q[k][i], transpose_b=True)
                     multiply_single_block(q[k][j], q_sub[mul_i][1], q[k][j], transpose_b=True)
 
