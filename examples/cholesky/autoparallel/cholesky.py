@@ -61,6 +61,7 @@ def cholesky_blocked(a, m_size, b_size):
     for k in range(m_size):
         # Diagonal block factorization
         a[k][k] = potrf(a[k][k])
+
         # Triangular systems
         for i in range(k + 1, m_size):
             a[i][k] = solve_triangular(a[k][k], a[i][k])
