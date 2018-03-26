@@ -271,7 +271,7 @@ if __name__ == "__main__":
     print("RESULTS -----------------")
     print("VERSION USERPARALLEL")
     print("MSIZE " + str(MSIZE))
-    print("BSIZE " + str(MSIZE))
+    print("BSIZE " + str(BSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))

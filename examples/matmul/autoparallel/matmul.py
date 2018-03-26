@@ -13,6 +13,10 @@ from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
 
+############################################
+# MATRIX GENERATION
+############################################
+
 def initialize_variables(m_size, b_size):
     a = create_matrix(m_size, b_size, True)
     b = create_matrix(m_size, b_size, True)
@@ -44,6 +48,10 @@ def create_block(b_size, is_random):
     return mb
 
 
+############################################
+# MAIN FUNCTION
+############################################
+
 @parallel(pluto_extra_flags=[""])
 def matmul(a, b, c, m_size):
     # Debug
@@ -73,7 +81,10 @@ def matmul(a, b, c, m_size):
         print(c)
 
 
-# MAIN CODE
+############################################
+# MAIN
+############################################
+
 if __name__ == "__main__":
     # Import libraries
     import time
@@ -116,7 +127,7 @@ if __name__ == "__main__":
     print("RESULTS -----------------")
     print("VERSION AUTOPARALLEL")
     print("MSIZE " + str(MSIZE))
-    print("BSIZE " + str(MSIZE))
+    print("BSIZE " + str(BSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))

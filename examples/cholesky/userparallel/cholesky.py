@@ -14,6 +14,10 @@ from pycompss.api.api import compss_wait_on
 import numpy as np
 
 
+############################################
+# MATRIX GENERATION
+############################################
+
 def generate_matrix(m_size, b_size):
     mat = []
     for i in range(m_size):
@@ -47,6 +51,10 @@ def create_block(b_size, is_diag):
     return mb
 
 
+############################################
+# MAIN FUNCTION
+############################################
+
 def cholesky_blocked(a, m_size, b_size):
     # Debug
     if __debug__:
@@ -79,6 +87,10 @@ def cholesky_blocked(a, m_size, b_size):
         print("New Matrix A:")
         print(res)
 
+
+############################################
+# MATHEMATICAL FUNCTIONS
+############################################
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
@@ -122,6 +134,10 @@ def syrk(a, b):
     return b
 
 
+############################################
+# BLOCK HANDLING FUNCTIONS
+############################################
+
 def join_matrix(a):
     joint_matrix = np.matrix([[]])
     for i in range(0, len(a)):
@@ -135,6 +151,10 @@ def join_matrix(a):
 
     return np.matrix(joint_matrix)
 
+
+############################################
+# MAIN
+############################################
 
 if __name__ == "__main__":
     # Import libraries
@@ -178,7 +198,7 @@ if __name__ == "__main__":
     print("RESULTS -----------------")
     print("VERSION USERPARALLEL")
     print("MSIZE " + str(MSIZE))
-    print("BSIZE " + str(MSIZE))
+    print("BSIZE " + str(BSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))

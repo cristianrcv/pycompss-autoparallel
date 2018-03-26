@@ -13,6 +13,10 @@ from pycompss.api.api import compss_wait_on
 from pycompss.api.parameter import *
 
 
+############################################
+# MATRIX GENERATION
+############################################
+
 def initialize_variables(m_size, b_size):
     a = create_matrix(m_size, b_size, True)
     b = create_matrix(m_size, b_size, True)
@@ -44,6 +48,10 @@ def create_block(b_size, is_random):
     return mb
 
 
+############################################
+# MAIN FUNCTION
+############################################
+
 def matmul(a, b, c, m_size):
     # Debug
     if __debug__:
@@ -71,6 +79,10 @@ def matmul(a, b, c, m_size):
         print(c)
 
 
+############################################
+# MATHEMATICAL FUNCTIONS
+############################################
+
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(c=INOUT)
 def multiply(a, b, c):
@@ -84,7 +96,10 @@ def multiply(a, b, c):
     # print "TIME: " + str(tm*1000) + " ms"
 
 
-# MAIN CODE
+############################################
+# MAIN
+############################################
+
 if __name__ == "__main__":
     # Import libraries
     import time
@@ -127,7 +142,7 @@ if __name__ == "__main__":
     print("RESULTS -----------------")
     print("VERSION USERPARALLEL")
     print("MSIZE " + str(MSIZE))
-    print("BSIZE " + str(MSIZE))
+    print("BSIZE " + str(BSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))
