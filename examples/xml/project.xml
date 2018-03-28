@@ -5,10 +5,6 @@
     <ComputeNode Name="localhost">
         <InstallDir>/opt/COMPSs/</InstallDir>
         <WorkingDir>/tmp/WorkerLocalhost/</WorkingDir>
-        <Application>
-                <!-- This should not be required since it will be an implicit modification on the user code -->
-                <Pythonpath>~/git/pycompss-pluto/translators/python2pycompss</Pythonpath>
-        </Application>
     </ComputeNode>
 </Project>
 
