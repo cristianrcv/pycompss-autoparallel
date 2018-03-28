@@ -51,6 +51,7 @@ The implementation includes:
     * [Python Module Dependencies](#python-module-dependencies)
     * [Extra Dependencies](#extra-dependencies)
 * [Commands](#commands)
+    * [Examples](#examples)
     * [Test](#test)
     * [Coverage](#coverage)
     * [Style](#style)
@@ -127,6 +128,18 @@ control overhead and to produce a very effective code.
 
 
 ## Commands
+
+### Examples
+
+The `examples/` folder contains a folder per example application. 
+
+Each example contains a `README.md` file (describing the application and the generated
+task graphs), and two versions: the `userparallel` and the `autoparallel`. Each
+version contains its own `run.sh` script to run it locally using 4 cores.
+
+The `examples/` folder contains a `run.sh` script to run all the available 
+applications locally using 4 cores.  
+
 
 ### Test
 
