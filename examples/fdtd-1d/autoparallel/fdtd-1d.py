@@ -43,19 +43,19 @@ def create_block(index, n_size):
 ############################################
 
 @parallel()
-def fdtd_1d(h, e, t_size, n_size, coef1, coef2):
+def fdtd_1d(e, h, n_size, t_size, coef1, coef2):
     # Debug
     if __debug__:
         # TODO: PyCOMPSs BUG sync-INOUT-sync
+        # e = compss_wait_on(e)ç
         # h = compss_wait_on(h)
-        # e = compss_wait_on(e)
-        print("Matrix H:")
-        print(h)
         print("Matrix E:")
         print(e)
+        print("Matrix H:")
+        print(h)
 
     # FDTD
-    for _ in range(t_size):
+    for _ in range(1, t_size + 1):
         for i in range(1, n_size):
             e[i] = compute_e(e[i], coef1, h[i], h[i - 1])
         for i in range(n_size):
@@ -106,16 +106,16 @@ if __name__ == "__main__":
     import sys
 
     args = sys.argv[1:]
-    TSIZE = int(args[0])
-    NSIZE = int(args[1])
+    NSIZE = int(args[0])
+    TSIZE = int(args[1])
     COEF1 = 0.5
     COEF2 = 0.7
 
     # Log arguments if required
     if __debug__:
         print("Running fdtd-1d application with:")
-        print(" - TSIZE = " + str(TSIZE))
         print(" - NSIZE = " + str(NSIZE))
+        print(" - TSIZE = " + str(TSIZE))
         print(" - COEF1 = " + str(COEF1))
         print(" - COEF2 = " + str(COEF2))
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     if __debug__:
         print("Performing computation")
     fdtd_start_time = time.time()
-    fdtd_1d(H, E, TSIZE, NSIZE, COEF1, COEF2)
+    fdtd_1d(E, H, NSIZE, TSIZE, COEF1)
     compss_barrier()
     end_time = time.time()
 
@@ -143,8 +143,8 @@ if __name__ == "__main__":
 
     print("RESULTS -----------------")
     print("VERSION AUTOPARALLEL")
-    print("TSIZE " + str(TSIZE))
     print("NSIZE " + str(NSIZE))
+    print("TSIZE " + str(TSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))

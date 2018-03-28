@@ -1,7 +1,7 @@
 #!/bin/bash
 
-  TSIZE=8
   NSIZE=4
+  TSIZE=8
 
   export ComputingUnits=1
 
@@ -14,4 +14,4 @@
           --lang=python \
           --project=../xml/project.xml \
           --resources=../xml/resources.xml \
-          fdtd-1d.py $TSIZE $NSIZE
+          fdtd-1d.py $NSIZE $TSIZE
