@@ -139,7 +139,7 @@ if __name__ == "__main__":
     jacobi_time = end_time - jacobi_start_time
 
     print("RESULTS -----------------")
-    print("VERSION USERPARALLEL")
+    print("VERSION AUTOPARALLEL")
     print("NSIZE " + str(NSIZE))
     print("TSIZE " + str(TSIZE))
     print("DEBUG " + str(__debug__))

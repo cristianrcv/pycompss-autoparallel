@@ -57,8 +57,10 @@ def fdtd_1d(e, h, n_size, t_size, coef1, coef2):
     # FDTD
     for _ in range(1, t_size + 1):
         for i in range(1, n_size):
+            # e[i] -= coef1 * (h[i] - h[i - 1])
             e[i] = compute_e(e[i], coef1, h[i], h[i - 1])
         for i in range(n_size):
+            # h[i] -= coef2 * (e[i + 1] - e[i])
             h[i] = compute_h(h[i], coef2, e[i + 1], e[i])
 
     # Debug result

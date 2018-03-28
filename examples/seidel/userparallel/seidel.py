@@ -131,5 +131,5 @@ if __name__ == "__main__":
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))
-    print("FLOYD_TIME " + str(seidel_time))
+    print("SEIDEL_TIME " + str(seidel_time))
     print("-------------------------")

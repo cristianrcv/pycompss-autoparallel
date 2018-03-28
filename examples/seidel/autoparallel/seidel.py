@@ -57,6 +57,8 @@ def seidel(a, n_size, t_size):
     for _ in range(t_size):
         for i in range(1, n_size - 1):
             for j in range(1, n_size - 1):
+                # a[i][j] = (float(a[i - 1][j - 1] + a[i - 1][j] + a[i - 1][j + 1] + a[i][j - 1] + a[i][j]
+                # + a[i][j + 1] + a[i + 1][j - 1] + a[i + 1][j] + a[i + 1][j + 1]))/float(9)
                 a[i][j] = compute_distance(a[i - 1][j - 1], a[i - 1][j], a[i - 1][j + 1], a[i][j - 1], a[i][j],
                                            a[i][j + 1], a[i + 1][j - 1], a[i + 1][j], a[i + 1][j + 1])
 
@@ -132,5 +134,5 @@ if __name__ == "__main__":
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))
-    print("FLOYD_TIME " + str(seidel_time))
+    print("SEIDEL_TIME " + str(seidel_time))
     print("-------------------------")

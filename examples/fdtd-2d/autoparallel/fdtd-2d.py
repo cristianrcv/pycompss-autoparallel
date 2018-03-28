@@ -72,12 +72,15 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
             ey[0][j] = t
         for i in range(1, nx_size):
             for j in range(ny_size):
+                # ey[i][j] -= coef1 * (hz[i][j] - hz[i - 1][j])
                 ey[i][j] = compute_e(ey[i][j], coef1, hz[i][j], hz[i - 1][j])
         for i in range(nx_size):
             for j in range(1, ny_size):
+                # ex[i][j] -= coef1 * (hz[i][j] - hz[i][j - 1])
                 ex[i][j] = compute_e(ex[i][j], coef1, hz[i][j], hz[i][j - 1])
         for i in range(nx_size):
             for j in range(ny_size):
+                # hz[i][j] -= coef2 * (ex[i][j + 1] - ex[i][j] + ey[i + 1][j] - ey[i][j])
                 hz[i][j] = compute_h(hz[i][j], coef2, ex[i][j + 1], ex[i][j], ey[i + 1][j], ey[i][j])
 
     # Debug result

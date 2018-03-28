@@ -61,6 +61,8 @@ def floyd(d, n_size):
     for k in range(n_size):
         for y in range(n_size):
             for x in range(n_size):
+                # if d[y][k] + d[k][x] < d[y][x]:
+                # d[y][x] = d[y][k] + d[k][x]
                 d[y][x] = compute_distance(d[y][x], d[y][k], d[k][x])
 
     # Debug result
