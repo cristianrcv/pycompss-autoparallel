@@ -60,39 +60,40 @@ def S2(var2, coef2, var3, var4):
     return compute_h(var2, coef2, var3, var4)
 
 
-def fdtd_1d(h, e, t_size, n_size, coef1, coef2):
+def fdtd_1d(e, h, n_size, t_size, coef1, coef2):
     if __debug__:
-        print('Matrix H:')
-        print(h)
         print('Matrix E:')
         print(e)
+        print('Matrix H:')
+        print(h)
     if n_size >= 1 and t_size >= 1:
         if n_size >= 2:
             h[0] = S2(h[0], coef2, e[0 + 1], e[0])
         if n_size == 1:
-            lbp = 0
-            ubp = 2 * t_size - 2
-            for t1 in range(0, 2 * t_size - 2 + 1):
+            lbp = 2
+            ubp = 2 * t_size
+            for t1 in range(2, 2 * t_size + 1):
                 if t1 % 2 == 0:
                     h[0] = S2(h[0], coef2, e[0 + 1], e[0])
         if n_size >= 2:
-            lbp = 1
-            ubp = 2 * t_size - 2
-            for t1 in range(1, 2 * t_size - 2 + 1):
+            lbp = 3
+            ubp = 2 * t_size
+            for t1 in range(3, 2 * t_size + 1):
                 if t1 % 2 == 0:
                     h[0] = S2(h[0], coef2, e[0 + 1], e[0])
                 lbp = int(math.ceil(float(t1 + 1) / float(2)))
                 ubp = min(int(math.floor(float(t1 + n_size - 1) / float(2))
-                    ), t1)
+                    ), t1 - 1)
                 for t2 in range(lbp, ubp + 1):
                     e[-t1 + 2 * t2] = S1(e[-t1 + 2 * t2], coef1, h[-t1 + 2 *
                         t2], h[-t1 + 2 * t2 - 1])
                     h[0] = S2(h[0], coef2, e[0 + 1], e[0])
-        lbp = 2 * t_size - 1
-        ubp = n_size + 2 * t_size - 3
-        for t1 in range(2 * t_size - 1, n_size + 2 * t_size - 3 + 1):
-            lbp = t1 - t_size + 1
-            ubp = min(int(math.floor(float(t1 + n_size - 1) / float(2))), t1)
+        lbp = 2 * t_size + 1
+        ubp = n_size + 2 * t_size - 1
+        for t1 in range(2 * t_size + 1, n_size + 2 * t_size - 1 + 1):
+            lbp = t1 - t_size
+            ubp = min(int(math.floor(float(t1 + n_size - 1) / float(2))), 
+                t1 - 1)
             for t2 in range(lbp, ubp + 1):
                 e[-t1 + 2 * t2] = S1(e[-t1 + 2 * t2], coef1, h[-t1 + 2 * t2
                     ], h[-t1 + 2 * t2 - 1])
@@ -144,16 +145,16 @@ if __name__ == "__main__":
     import sys
 
     args = sys.argv[1:]
-    TSIZE = int(args[0])
-    NSIZE = int(args[1])
+    NSIZE = int(args[0])
+    TSIZE = int(args[1])
     COEF1 = 0.5
     COEF2 = 0.7
 
     # Log arguments if required
     if __debug__:
         print("Running fdtd-1d application with:")
-        print(" - TSIZE = " + str(TSIZE))
         print(" - NSIZE = " + str(NSIZE))
+        print(" - TSIZE = " + str(TSIZE))
         print(" - COEF1 = " + str(COEF1))
         print(" - COEF2 = " + str(COEF2))
 
@@ -168,7 +169,7 @@ if __name__ == "__main__":
     if __debug__:
         print("Performing computation")
     fdtd_start_time = time.time()
-    fdtd_1d(H, E, TSIZE, NSIZE, COEF1, COEF2)
+    fdtd_1d(E, H, NSIZE, TSIZE, COEF1, COEF2)
     compss_barrier()
     end_time = time.time()
 
@@ -181,8 +182,8 @@ if __name__ == "__main__":
 
     print("RESULTS -----------------")
     print("VERSION AUTOPARALLEL")
-    print("TSIZE " + str(TSIZE))
     print("NSIZE " + str(NSIZE))
+    print("TSIZE " + str(TSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))

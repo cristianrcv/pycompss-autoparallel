@@ -132,7 +132,7 @@ if __name__ == "__main__":
     if __debug__:
         print("Performing computation")
     fdtd_start_time = time.time()
-    fdtd_1d(E, H, NSIZE, TSIZE, COEF1)
+    fdtd_1d(E, H, NSIZE, TSIZE, COEF1, COEF2)
     compss_barrier()
     end_time = time.time()
 

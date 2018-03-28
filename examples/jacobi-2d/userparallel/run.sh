@@ -12,6 +12,6 @@
           ${DEBUG_FLAGS} \
           ${TOOLS_FLAGS} \
           --lang=python \
-          --project=../xml/project.xml \
-          --resources=../xml/resources.xml \
+          --project=../../xml/project.xml \
+          --resources=../../xml/resources.xml \
           jacobi-2d.py $NSIZE $TSIZE

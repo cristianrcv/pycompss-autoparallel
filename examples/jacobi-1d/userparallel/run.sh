@@ -5,13 +5,13 @@
 
   export ComputingUnits=1
 
-  DEBUG_FLAGS="-dg"
-  TOOLS_FLAGS=""
+  DEBUG_FLAGS="-d"
+  TOOLS_FLAGS="-g"
 
   runcompss \
           ${DEBUG_FLAGS} \
           ${TOOLS_FLAGS} \
           --lang=python \
-          --project=../xml/project.xml \
-          --resources=../xml/resources.xml \
+          --project=../../xml/project.xml \
+          --resources=../../xml/resources.xml \
           jacobi-1d.py $NSIZE $TSIZE
