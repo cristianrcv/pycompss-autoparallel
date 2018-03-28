@@ -14,11 +14,11 @@ efficient numerical solutions, e.g. Monte Carlo simulations."
 
 ### Auto Parallel Task Graph
 
-![AutoParallel Task Graph](./autoparallel/complete_graph.pdf)
+![AutoParallel Task Graph](./autoparallel/complete_graph.png)
 
 ### User Parallel Task Graph
 
-![UserParallel Task Graph](./userparallel/complete_graph.pdf)
+![UserParallel Task Graph](./userparallel/complete_graph.png)
 
 Licensed under the [Apache 2.0 License][apache-2]
 
