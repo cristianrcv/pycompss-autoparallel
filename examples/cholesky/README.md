@@ -20,7 +20,5 @@ efficient numerical solutions, e.g. Monte Carlo simulations."
 
 ![UserParallel Task Graph](./userparallel/complete_graph.png)
 
-Licensed under the [Apache 2.0 License][apache-2]
-
 
 [wikipedia-cholesky]: https://en.wikipedia.org/wiki/Cholesky_decomposition
