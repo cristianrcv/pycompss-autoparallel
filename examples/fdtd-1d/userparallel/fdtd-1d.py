@@ -45,7 +45,7 @@ def fdtd_1d(e, h, n_size, t_size, coef1, coef2):
     # Debug
     if __debug__:
         # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # e = compss_wait_on(e)ç
+        # e = compss_wait_on(e)
         # h = compss_wait_on(h)
         print("Matrix E:")
         print(e)

@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     # Log arguments if required
     if __debug__:
-        print("Running fdtd-1d application with:")
+        print("Running fdtd-2d application with:")
         print(" - NXSIZE = " + str(NXSIZE))
         print(" - NYSIZE = " + str(NYSIZE))
         print(" - TSIZE = " + str(TSIZE))
