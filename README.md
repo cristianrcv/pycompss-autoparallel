@@ -146,12 +146,14 @@ Each version of a example application contains:
 - `run.sh`: Script to launch the application locally using 4 cores
 - `*.py`: Python source files of the application
 
-The `autoparallel` versions contain a special `*_autogen.py` file containing
+Some important notes:
+- All the `run.sh` scripts work without parameters. However, advanced users can call
+the scripts with extra parameters that are appended directly to the `runcompss` command. 
+- The `autoparallel` versions contain a special `*_autogen.py` file containing
 the automatically generated code by the COMPSs AutoParallel module. This
 file is only saved for clarity purposes but is re-generated every time
 the application is launched.
-
-The `examples/` folder contains a `run.sh` script to run all the available 
+- The `examples/` folder contains a `run.sh` script to run all the available 
 applications locally using 4 cores. It displays a result table at the end of the
 execution.  
 
