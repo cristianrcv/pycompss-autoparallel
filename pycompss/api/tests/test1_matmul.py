@@ -13,7 +13,7 @@ def initialize(n_size, m_size, b_size, random):
     matrix = []
     for i in range(n_size):
         matrix.append([])
-        for j in range(m_size):
+        for _ in range(m_size):
             if random:
                 block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
             else:

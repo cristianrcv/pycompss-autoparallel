@@ -52,7 +52,7 @@ def multi_statements1(a, b, c):
 # Function callee
 def func_call1(a, b, c):
     for i in range(0, 10, 1):
-        multiply()
+        void_func()
 
 
 def func_call2(a, b, c):
@@ -62,7 +62,7 @@ def func_call2(a, b, c):
 
 def func_call3(a, b, c):
     for i in range(0, 10, 1):
-        c[i] = multiply()
+        c[i] = void_func()
 
 
 def func_call4(a, b, c):
@@ -73,6 +73,10 @@ def func_call4(a, b, c):
 def func_call5(a, b, c):
     for i in range(0, 10, 1):
         c[i], c[i + 1] = multiply(c[i], a[i], b[i])
+
+
+def void_func():
+    return "Hello World"
 
 
 def multiply(c, a, b):

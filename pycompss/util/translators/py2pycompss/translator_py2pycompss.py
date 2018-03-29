@@ -116,7 +116,6 @@ class Py2PyCOMPSs(object):
                 # Substitute code with all parallel loop statements
                 new_body.extend(output_loops_code[loop_index])
                 # Add barrier
-                import ast
                 barrier = ast.parse("compss_barrier()")
                 new_body.append(barrier.body[0])
                 # Mark next loop
@@ -238,7 +237,6 @@ class Py2PyCOMPSs(object):
                 var2subscript[var] = var_ast
 
         # Rewrite function if it has a return
-        import _ast
         if len(return_vars) > 0:
             new_func.body[0] = _ast.Return(value=new_func.body[0].value)
 
