@@ -62,7 +62,10 @@ class Scop2PScop2Py(object):
         # Call binary
         try:
             from subprocess import Popen, PIPE
-            process = Popen(cmd, stdin=None, stdout=PIPE, stderr=PIPE, shell=False)
+            subprocess_env = os.environ.copy()
+            if "LD_PRELOAD" in subprocess_env.keys():
+                del subprocess_env["LD_PRELOAD"]
+            process = Popen(cmd, env=subprocess_env, stdin=None, stdout=PIPE, stderr=PIPE, shell=False)
 
             # Wait for completion and capture output, error and exit value
             stdout, stderr = process.communicate()
