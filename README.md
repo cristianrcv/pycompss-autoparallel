@@ -133,12 +133,27 @@ control overhead and to produce a very effective code.
 
 The `examples/` folder contains a folder per example application. 
 
-Each example contains a `README.md` file (describing the application and the generated
-task graphs), and two versions: the `userparallel` and the `autoparallel`. Each
-version contains its own `run.sh` script to run it locally using 4 cores.
+Each example application contains:
+- `README.md`: Description of the application and the generated
+task graphs.
+- `run.sh`: Script to launch all the versions of the application (internally calls 
+the `run.sh` script of each version of the application). 
+- A folder per version of the application (for instance, `userparallel`
+ or `autoparallel`).
+ 
+Each version of a example application contains:
+- `results`: Folder containing the execution results
+- `run.sh`: Script to launch the application locally using 4 cores
+- `*.py`: Python source files of the application
+
+The `autoparallel` versions contain a special `*_autogen.py` file containing
+the automatically generated code by the COMPSs AutoParallel module. This
+file is only saved for clarity purposes but is re-generated every time
+the application is launched.
 
 The `examples/` folder contains a `run.sh` script to run all the available 
-applications locally using 4 cores.  
+applications locally using 4 cores. It displays a result table at the end of the
+execution.  
 
 
 ### Test
