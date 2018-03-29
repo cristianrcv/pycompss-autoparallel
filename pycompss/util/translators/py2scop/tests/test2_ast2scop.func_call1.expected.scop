@@ -46,7 +46,7 @@ SCATTERING
 # List of original iterators
 i 
 # Statement body expression
-multiply()
+void_func()
 
 </body>
 

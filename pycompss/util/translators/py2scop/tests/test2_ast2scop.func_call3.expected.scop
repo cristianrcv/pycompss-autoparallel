@@ -51,7 +51,7 @@ WRITE
 # List of original iterators
 i 
 # Statement body expression
-c[i] = multiply()
+c[i] = void_func()
 
 </body>
 
