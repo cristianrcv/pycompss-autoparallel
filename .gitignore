@@ -114,3 +114,6 @@ examples/matmul/matmul_autogen.py
 # Intermediate execution files
 .tmp_gen*
 
+# Intermediate trace files
+examples/**/results/local/trace/python/
+
