@@ -7,7 +7,7 @@
 [![Codacy coverage](https://api.codacy.com/project/badge/Coverage/d9a02acdf3ad4213b4932b5441201101)](https://www.codacy.com/app/cristianrcv/pycompss-autoparallel?utm_source=github.com&utm_medium=referral&utm_content=cristianrcv/pycompss-autoparallel&utm_campaign=Badge_Coverage)
 
 <!-- Codecov -->
-[![codecov](https://codecov.io/gh/cristianrcv/pycompss-pluto/branch/master/graph/badge.svg)](https://codecov.io/gh/cristianrcv/pycompss-pluto)
+[![codecov](https://codecov.io/gh/cristianrcv/pycompss-autoparallel/branch/master/graph/badge.svg)](https://codecov.io/gh/cristianrcv/pycompss-autoparallel)
 
 <!-- Maven central packages version -->
 <!-- [![Maven Central](https://maven-badges.herokuapp.com/maven-central/XX)](https://maven-badges.herokuapp.com/maven-central/XX) -->
