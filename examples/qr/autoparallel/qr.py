@@ -25,7 +25,7 @@ def generate_matrix(m_size, b_size, block_type='random'):
     mat = []
     for i in range(m_size):
         mat.append([])
-        for j in range(m_size):
+        for _ in range(m_size):
             mat[i].append(create_block(b_size, block_type=block_type))
     return mat
 
@@ -34,10 +34,10 @@ def generate_identity(m_size, b_size):
     mat = []
     for i in range(m_size):
         mat.append([])
-        for j in range(0, i):
+        for _ in range(0, i):
             mat[i].append(create_block(b_size, block_type='zeros'))
         mat[i].append(create_block(b_size, block_type='identity'))
-        for j in range(i + 1, m_size):
+        for _ in range(i + 1, m_size):
             mat[i].append(create_block(b_size, block_type='zeros'))
     return mat
 

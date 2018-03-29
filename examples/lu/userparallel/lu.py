@@ -22,7 +22,7 @@ def generate_matrix(m_size, b_size):
     mat = []
     for i in range(m_size):
         mat.append([])
-        for j in range(m_size):
+        for _ in range(m_size):
             mb = create_block(b_size)
             mat[i].append(mb)
     return mat
