@@ -94,6 +94,7 @@ def compute_b(coef, a_left, a_center, a_right):
 def copy(b):
     return b
 
+
 ############################################
 # MAIN
 ############################################
