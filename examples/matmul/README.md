@@ -16,11 +16,11 @@ as in applied mathematics, physics, and engineering"
 
 ### Auto Parallel Task Graph
 
-![AutoParallel Task Graph](./autoparallel/complete_graph.png)
+![AutoParallel Task Graph](./autoparallel/results/local/complete_graph.png)
 
 ### User Parallel Task Graph
 
-![UserParallel Task Graph](./userparallel/complete_graph.png)
+![UserParallel Task Graph](./userparallel/results/local/complete_graph.png)
 
 
 [wikipedia-matmul]: https://en.wikipedia.org/wiki/Matrix_multiplication

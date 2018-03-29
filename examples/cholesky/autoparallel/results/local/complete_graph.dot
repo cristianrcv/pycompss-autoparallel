@@ -1,0 +1,179 @@
+digraph {
+  rankdir=TB;
+  labeljust="l";
+  subgraph dependence_graph {
+    ranksep=0.20;
+    node[height=0.75];
+
+1[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+2[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+3[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+4[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+5[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+6[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+7[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+8[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+9[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+10[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
+Synchro1[label="sync", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
+1 -> Synchro1[ label="d1" ];
+2 -> Synchro1[ label="d2" ];
+3 -> Synchro1[ label="d3" ];
+4 -> Synchro1[ label="d4" ];
+5 -> Synchro1[ label="d5" ];
+6 -> Synchro1[ label="d6" ];
+7 -> Synchro1[ label="d7" ];
+8 -> Synchro1[ label="d8" ];
+9 -> Synchro1[ label="d9" ];
+10 -> Synchro1[ label="d10" ];
+Synchro2[label="barrier", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
+Synchro1 -> Synchro2;
+11[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+Synchro2 -> 11[ label="d11" ];
+Synchro2 -> 11[ label="d11" ];
+Synchro2 -> 11[ label="d12" ];
+12[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+Synchro2 -> 12[ label="d14" ];
+Synchro2 -> 12[ label="d11" ];
+Synchro2 -> 12[ label="d15" ];
+13[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+Synchro2 -> 13[ label="d17" ];
+Synchro2 -> 13[ label="d11" ];
+Synchro2 -> 13[ label="d18" ];
+14[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+Synchro2 -> 14[ label="d14" ];
+Synchro2 -> 14[ label="d14" ];
+Synchro2 -> 14[ label="d20" ];
+15[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+Synchro2 -> 15[ label="d17" ];
+Synchro2 -> 15[ label="d14" ];
+Synchro2 -> 15[ label="d22" ];
+16[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+12 -> 16[ label="d16" ];
+12 -> 16[ label="d16" ];
+14 -> 16[ label="d21" ];
+17[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+13 -> 17[ label="d19" ];
+12 -> 17[ label="d16" ];
+15 -> 17[ label="d23" ];
+18[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+Synchro2 -> 18[ label="d17" ];
+Synchro2 -> 18[ label="d17" ];
+Synchro2 -> 18[ label="d26" ];
+19[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+13 -> 19[ label="d19" ];
+13 -> 19[ label="d19" ];
+18 -> 19[ label="d27" ];
+20[shape=circle, style=filled fillcolor="#b30000" fontcolor="#ffffff"];
+17 -> 20[ label="d25" ];
+17 -> 20[ label="d25" ];
+19 -> 20[ label="d28" ];
+21[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+Synchro2 -> 21[ label="d30" ];
+Synchro2 -> 21[ label="d11" ];
+22[shape=circle, style=filled fillcolor="#ff00ae" fontcolor="#000000"];
+23[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+Synchro2 -> 23[ label="d30" ];
+Synchro2 -> 23[ label="d14" ];
+24[shape=circle, style=filled fillcolor="#ff00ae" fontcolor="#000000"];
+25[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+Synchro2 -> 25[ label="d30" ];
+Synchro2 -> 25[ label="d17" ];
+26[shape=circle, style=filled fillcolor="#ff00ae" fontcolor="#000000"];
+27[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+11 -> 27[ label="d13" ];
+12 -> 27[ label="d16" ];
+28[shape=circle, style=filled fillcolor="#ff00ae" fontcolor="#000000"];
+29[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+11 -> 29[ label="d13" ];
+13 -> 29[ label="d19" ];
+30[shape=circle, style=filled fillcolor="#ff00ae" fontcolor="#000000"];
+31[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+16 -> 31[ label="d24" ];
+17 -> 31[ label="d25" ];
+32[shape=circle, style=filled fillcolor="#ff00ae" fontcolor="#000000"];
+33[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+Synchro2 -> 33[ label="d30" ];
+34[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+11 -> 34[ label="d13" ];
+35[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+16 -> 35[ label="d24" ];
+36[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+20 -> 36[ label="d29" ];
+Synchro3[label="barrier", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
+Synchro2 -> Synchro3;
+29 -> Synchro3;
+28 -> Synchro3;
+13 -> Synchro3;
+33 -> Synchro3;
+20 -> Synchro3;
+16 -> Synchro3;
+18 -> Synchro3;
+24 -> Synchro3;
+30 -> Synchro3;
+23 -> Synchro3;
+32 -> Synchro3;
+12 -> Synchro3;
+21 -> Synchro3;
+19 -> Synchro3;
+25 -> Synchro3;
+14 -> Synchro3;
+27 -> Synchro3;
+22 -> Synchro3;
+34 -> Synchro3;
+31 -> Synchro3;
+35 -> Synchro3;
+36 -> Synchro3;
+15 -> Synchro3;
+17 -> Synchro3;
+11 -> Synchro3;
+26 -> Synchro3;
+33 -> Synchro3[ label="d43" ];
+22 -> Synchro3[ label="d32" ];
+24 -> Synchro3[ label="d34" ];
+26 -> Synchro3[ label="d36" ];
+21 -> Synchro3[ label="d31" ];
+34 -> Synchro3[ label="d44" ];
+28 -> Synchro3[ label="d38" ];
+30 -> Synchro3[ label="d40" ];
+23 -> Synchro3[ label="d33" ];
+27 -> Synchro3[ label="d37" ];
+35 -> Synchro3[ label="d45" ];
+32 -> Synchro3[ label="d42" ];
+25 -> Synchro3[ label="d35" ];
+29 -> Synchro3[ label="d39" ];
+31 -> Synchro3[ label="d41" ];
+36 -> Synchro3[ label="d46" ];
+Synchro4[label="barrier", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
+Synchro3 -> Synchro4;  }
+  subgraph legend {
+    rank=sink;
+    node [shape=plaintext, height=0.75];
+    ranksep=0.20;
+    label = "Legend";
+    key [label=<
+      <table border="0" cellpadding="2" cellspacing="0" cellborder="1">
+<tr>
+<td align="right">cholesky.create_block</td>
+<td bgcolor="#0000ff">&nbsp;</td>
+</tr>
+<tr>
+<td align="right">cholesky.S4</td>
+<td bgcolor="#b30000">&nbsp;</td>
+</tr>
+<tr>
+<td align="right">cholesky.S2</td>
+<td bgcolor="#ff0000">&nbsp;</td>
+</tr>
+<tr>
+<td align="right">cholesky.S3</td>
+<td bgcolor="#ff00ae">&nbsp;</td>
+</tr>
+<tr>
+<td align="right">cholesky.S1</td>
+<td bgcolor="#ffffff">&nbsp;</td>
+</tr>
+      </table>
+    >]
+  }
+}
