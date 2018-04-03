@@ -18,9 +18,10 @@ from pycompss.api.api import compss_wait_on
 ############################################
 
 def initialize_variables(nx_size, ny_size):
-    ex = create_matrix(nx_size, ny_size + 1, True)
-    ey = create_matrix(nx_size + 1, ny_size, False)
-    hz = create_matrix(nx_size, ny_size, True)
+    tile_size=8
+    ex = create_matrix(nx_size, ny_size + tile_size, True)
+    ey = create_matrix(nx_size + tile_size, ny_size, False)
+    hz = create_matrix(nx_size + tile_size, ny_size + tile_size, True)
 
     return ex, ey, hz
 
@@ -69,7 +70,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
     # FDTD
     for t in range(1, t_size + 1):
         for j in range(ny_size):
-            ey[0][j] = t
+            ey[0][j] = copy(t)
         for i in range(1, nx_size):
             for j in range(ny_size):
                 # ey[i][j] -= coef1 * (hz[i][j] - hz[i - 1][j])
@@ -113,6 +114,10 @@ def compute_h(h, coef2, ex2, ex1, ey2, ey1):
     # end = time.time()
     # tm = end - start
     # print "TIME: " + str(tm*1000) + " ms"
+
+
+def copy(elem):
+    return elem
 
 
 ############################################
