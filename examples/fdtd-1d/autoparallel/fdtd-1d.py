@@ -27,14 +27,14 @@ def initialize_variables(n_size):
 def create_matrix(n_size):
     mat = []
     for i in range(n_size):
-        mb = create_block(i, n_size)
+        mb = create_entry(i, n_size)
         mat.append(mb)
     return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
-def create_block(index, n_size):
+def create_entry(index, n_size):
     return float(index) / float(n_size)
 
 
