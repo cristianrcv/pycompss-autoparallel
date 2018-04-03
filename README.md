@@ -48,6 +48,7 @@ The implementation includes:
 
 * [Dependencies](#dependencies)
     * [Software Dependencies](#software-dependencies)
+    * [Included Dependencies inside PyCOMPSs](#included-dependencies-inside-pycompss)
     * [Included Dependencies inside PLUTO](#included-dependencies-inside-pluto)
     * [Python Module Dependencies](#python-module-dependencies)
     * [Extra Dependencies](#extra-dependencies)
@@ -87,6 +88,12 @@ sections. Outer (communication-free), inner, or pipelined parallelization is ach
 purely with OpenMP parallel for pragrams.
 
 
+### Included Dependencies inside PyCOMPSs
+
+[DILL][dill]: It is recommended to install the DILL Python package for better 
+serialization
+
+
 ### Included Dependencies inside PLUTO
 
 [OpenSCOP][openscop]: OpenScop is an open specification defining a file format and a set
@@ -115,6 +122,7 @@ control overhead and to produce a very effective code.
 
 - [Inspect][inspect] Python module
 - [AST][ast] Python module
+- [Enum34][enum34] Python module
 - [AST Observe/Rewrite (ASTOR)][astor] Python module
 - Uses the [subprocess][subprocess] Python module (`scop2pscop2py` translator)
 - [Logging][logging] Python module
@@ -250,7 +258,9 @@ Licensed under the [Apache 2.0 License][apache-2]
 [openscop]: http://icps.u-strasbg.fr/people/bastoul/public_html/development/openscop/
 [cloog]: http://www.cloog.org/
 
+[dill]: https://pypi.python.org/pypi/dill
 [inspect]: https://docs.python.org/2/library/inspect.html
+[enum34]: https://pypi.python.org/pypi/enum34
 [ast]: https://docs.python.org/2/library/ast.html
 [astor]: http://astor.readthedocs.io/en/latest/
 [subprocess]: https://docs.python.org/2/library/subprocess.html
