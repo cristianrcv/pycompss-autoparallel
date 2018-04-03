@@ -233,7 +233,7 @@ EVENT_TYPE
 VALUES
 0      End
 1      create_block
-2      S1
+2      multiply
 
 
 EVENT_TYPE

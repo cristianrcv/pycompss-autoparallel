@@ -23,7 +23,6 @@
 
   # Application arguments
   MSIZE=4
-  BSIZE=4
 
   export ComputingUnits=1
 
@@ -37,7 +36,7 @@
           --lang=python \
           --project=../../xml/project.xml \
           --resources=../../xml/resources.xml \
-          matmul.py $MSIZE $BSIZE
+          matmul.py $MSIZE
 
   # Copy results
   if [ -f "${LOG_DIR}/monitor/complete_graph.dot" ]; then

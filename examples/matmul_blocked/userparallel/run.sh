@@ -3,7 +3,7 @@
   # Script global variables
   SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   RESULTS_DIR="${SCRIPT_DIR}"/results/local
-  LOG_DIR=$HOME/.COMPSs/matmul_userparallel
+  LOG_DIR=$HOME/.COMPSs/matmul_blocked_userparallel
 
   rm -rf "${LOG_DIR}"
   rm -rf "${RESULTS_DIR}"
@@ -23,6 +23,7 @@
 
   # Application arguments
   MSIZE=4
+  BSIZE=4
 
   export ComputingUnits=1
 
@@ -36,7 +37,7 @@
           --lang=python \
           --project=../../xml/project.xml \
           --resources=../../xml/resources.xml \
-          matmul.py $MSIZE
+          matmul_blocked.py $MSIZE $BSIZE
 
   # Copy results
   if [ -f "${LOG_DIR}/monitor/complete_graph.dot" ]; then

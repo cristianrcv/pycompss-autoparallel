@@ -17,35 +17,32 @@ from pycompss.api.parameter import *
 # MATRIX GENERATION
 ############################################
 
-def initialize_variables(m_size, b_size):
-    a = create_matrix(m_size, b_size, True)
-    b = create_matrix(m_size, b_size, True)
-    c = create_matrix(m_size, b_size, False)
+def initialize_variables(m_size):
+    a = create_matrix(m_size, True)
+    b = create_matrix(m_size, True)
+    c = create_matrix(m_size, False)
 
     return a, b, c
 
 
-def create_matrix(m_size, b_size, is_random):
+def create_matrix(m_size, is_random):
     mat = []
     for i in range(m_size):
         mat.append([])
         for _ in range(m_size):
-            mb = create_block(b_size, is_random)
+            mb = create_entry(is_random)
             mat[i].append(mb)
     return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
-@task(returns=list)
-def create_block(b_size, is_random):
-    import numpy as np
-
+@task(returns=1)
+def create_entry(is_random):
+    import random
     if is_random:
-        block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
+        return float(100) * random.random()
     else:
-        block = np.array(np.zeros((b_size, b_size)), dtype=np.double, copy=False)
-    mb = np.matrix(block, dtype=np.double, copy=False)
-    return mb
+        return float(0)
 
 
 ############################################
@@ -70,7 +67,7 @@ def matmul(a, b, c, m_size):
     for i in range(m_size):
         for j in range(m_size):
             for k in range(m_size):
-                multiply(a[i][k], b[k][j], c[i][j])
+                c[i][j] = multiply(a[i][k], b[k][j], c[i][j])
 
     # Debug result
     if __debug__:
@@ -84,12 +81,12 @@ def matmul(a, b, c, m_size):
 ############################################
 
 @constraint(ComputingUnits="${ComputingUnits}")
-@task(c=INOUT)
+@task(returns=1)
 def multiply(a, b, c):
     # import time
     # start = time.time()
 
-    c += a * b
+    return c + a * b
 
     # end = time.time()
     # tm = end - start
@@ -109,19 +106,17 @@ if __name__ == "__main__":
 
     args = sys.argv[1:]
     MSIZE = int(args[0])
-    BSIZE = int(args[1])
 
     # Log arguments if required
     if __debug__:
         print("Running matmul application with:")
         print(" - MSIZE = " + str(MSIZE))
-        print(" - BSIZE = " + str(BSIZE))
 
     # Initialize matrices
     if __debug__:
         print("Initializing matrices")
     start_time = time.time()
-    A, B, C = initialize_variables(MSIZE, BSIZE)
+    A, B, C = initialize_variables(MSIZE)
     compss_barrier()
 
     # Begin computation
@@ -142,7 +137,6 @@ if __name__ == "__main__":
     print("RESULTS -----------------")
     print("VERSION USERPARALLEL")
     print("MSIZE " + str(MSIZE))
-    print("BSIZE " + str(BSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))
