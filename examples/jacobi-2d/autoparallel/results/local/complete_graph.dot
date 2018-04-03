@@ -466,51 +466,51 @@ Synchro2[label="barrier", shape=octagon, style=filled fillcolor="#ff0000" fontco
 Synchro1 -> Synchro2;
 167 -> Synchro2;
 170 -> Synchro2;
-134 -> Synchro2;
+136 -> Synchro2;
 161 -> Synchro2;
-152 -> Synchro2;
-146 -> Synchro2;
+153 -> Synchro2;
+149 -> Synchro2;
 160 -> Synchro2;
 140 -> Synchro2;
-135 -> Synchro2;
-138 -> Synchro2;
+141 -> Synchro2;
+144 -> Synchro2;
 132 -> Synchro2;
 172 -> Synchro2;
-147 -> Synchro2;
+150 -> Synchro2;
 163 -> Synchro2;
-157 -> Synchro2;
-155 -> Synchro2;
+158 -> Synchro2;
+156 -> Synchro2;
 130 -> Synchro2;
-145 -> Synchro2;
-137 -> Synchro2;
+148 -> Synchro2;
+143 -> Synchro2;
 173 -> Synchro2;
 177 -> Synchro2;
-151 -> Synchro2;
-141 -> Synchro2;
+152 -> Synchro2;
+137 -> Synchro2;
 162 -> Synchro2;
 169 -> Synchro2;
 178 -> Synchro2;
-154 -> Synchro2;
-133 -> Synchro2;
+155 -> Synchro2;
+134 -> Synchro2;
 164 -> Synchro2;
 176 -> Synchro2;
-142 -> Synchro2;
-158 -> Synchro2;
-156 -> Synchro2;
+145 -> Synchro2;
+159 -> Synchro2;
+157 -> Synchro2;
 171 -> Synchro2;
-143 -> Synchro2;
+146 -> Synchro2;
 139 -> Synchro2;
-150 -> Synchro2;
+135 -> Synchro2;
 165 -> Synchro2;
 166 -> Synchro2;
-136 -> Synchro2;
+142 -> Synchro2;
 174 -> Synchro2;
-159 -> Synchro2;
+138 -> Synchro2;
 168 -> Synchro2;
-149 -> Synchro2;
-148 -> Synchro2;
-144 -> Synchro2;
-153 -> Synchro2;
+133 -> Synchro2;
+151 -> Synchro2;
+147 -> Synchro2;
+154 -> Synchro2;
 129 -> Synchro2;
 131 -> Synchro2;
 175 -> Synchro2;
@@ -652,7 +652,7 @@ Synchro2 -> Synchro3;  }
     key [label=<
       <table border="0" cellpadding="2" cellspacing="0" cellborder="1">
 <tr>
-<td align="right">jacobi-2d.create_block</td>
+<td align="right">jacobi-2d.create_entry</td>
 <td bgcolor="#0000ff">&nbsp;</td>
 </tr>
 <tr>

@@ -29,7 +29,7 @@ def create_matrix(n_size, is_zero):
     for i in range(n_size):
         mat.append([])
         for j in range(n_size):
-            mb = create_block(j, n_size, is_zero)
+            mb = create_entry(j, n_size, is_zero)
             mat[i].append(mb)
 
     return mat
@@ -37,7 +37,7 @@ def create_matrix(n_size, is_zero):
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
-def create_block(index, n_size, is_zero):
+def create_entry(index, n_size, is_zero):
     if is_zero:
         return float(0)
     else:

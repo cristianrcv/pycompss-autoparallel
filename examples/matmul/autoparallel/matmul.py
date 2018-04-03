@@ -67,7 +67,8 @@ def matmul(a, b, c, m_size):
     for i in range(m_size):
         for j in range(m_size):
             for k in range(m_size):
-                c[i][j] += a[i][k] * b[k][j]
+                # c[i][j] += a[i][k] * b[k][j]
+                c[i][j] = multiply(a[i][k], b[k][j], c[i][j])
 
     # Debug result
     if __debug__:
@@ -79,6 +80,18 @@ def matmul(a, b, c, m_size):
 ############################################
 # MATHEMATICAL FUNCTIONS
 ############################################
+
+@constraint(ComputingUnits="${ComputingUnits}")
+@task(returns=1)
+def multiply(a, b, c):
+    # import time
+    # start = time.time()
+
+    return c + a * b
+
+    # end = time.time()
+    # tm = end - start
+    # print "TIME: " + str(tm*1000) + " ms"
 
 
 ############################################
