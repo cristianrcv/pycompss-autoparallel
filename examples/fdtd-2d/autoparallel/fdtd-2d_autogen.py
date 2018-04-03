@@ -18,9 +18,10 @@ from pycompss.api.api import compss_wait_on
 ############################################
 
 def initialize_variables(nx_size, ny_size):
-    ex = create_matrix(nx_size, ny_size + 1, True)
-    ey = create_matrix(nx_size + 1, ny_size, False)
-    hz = create_matrix(nx_size, ny_size, True)
+    tile_size=8
+    ex = create_matrix(nx_size, ny_size + tile_size, True)
+    ey = create_matrix(nx_size + tile_size, ny_size, False)
+    hz = create_matrix(nx_size + tile_size, ny_size + tile_size, True)
 
     return ex, ey, hz
 
@@ -59,9 +60,9 @@ from pycompss.api.task import task
 from pycompss.api.parameter import *
 
 
-@task(t=IN, var1=OUT)
-def S1(t, var1):
-    var1 = t
+@task(t=IN, returns=1)
+def S1(t):
+    return copy(t)
 
 
 @task(var2=IN, coef1=IN, var3=IN, var4=IN, returns=1)
@@ -91,7 +92,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
         if nx_size >= 2 and ny_size >= 2:
             hz[0][0] = S4(hz[0][0], coef2, ex[0][0 + 1], ex[0][0], ey[0 + 1
                 ][0], ey[0][0])
-            S1(1, ey[0][0])
+            ey[0][0] = S1(1)
             lbp = 2
             ubp = nx_size
             for t3 in range(2, nx_size + 1):
@@ -106,7 +107,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 if t1 % 2 == 0:
                     hz[0][0] = S4(hz[0][0], coef2, ex[0][0 + 1], ex[0][0],
                         ey[0 + 1][0], ey[0][0])
-                    S1(t1 / 2, ey[0][0])
+                    ey[0][0] = S1(t1 / 2)
                     lbp = int(math.ceil(float(t1 + 2) / float(2)))
                     ubp = int(math.floor(float(t1 + 2 * nx_size - 2) /
                         float(2)))
@@ -120,7 +121,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
         if nx_size == 1 and ny_size >= 2:
             hz[0][0] = S4(hz[0][0], coef2, ex[0][0 + 1], ex[0][0], ey[0 + 1
                 ][0], ey[0][0])
-            S1(1, ey[0][0])
+            ey[0][0] = S1(1)
         if nx_size == 1 and ny_size == 1:
             lbp = 2
             ubp = 2 * t_size
@@ -128,7 +129,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 if t1 % 2 == 0:
                     hz[0][0] = S4(hz[0][0], coef2, ex[0][0 + 1], ex[0][0],
                         ey[0 + 1][0], ey[0][0])
-                    S1(t1 / 2, ey[0][0])
+                    ey[0][0] = S1(t1 / 2)
         if nx_size <= 0:
             lbp = 2
             ubp = 2 * t_size + ny_size - 1
@@ -137,7 +138,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2)
                     )), t1 - 1)
                 for t2 in range(lbp, ubp + 1):
-                    S1(t1 - t2, ey[0][0])
+                    ey[0][0] = S1(t1 - t2)
         if nx_size >= 2 and ny_size >= 2:
             lbp = 3
             ubp = 2 * t_size
@@ -145,7 +146,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 if t1 % 2 == 0:
                     hz[0][0] = S4(hz[0][0], coef2, ex[0][0 + 1], ex[0][0],
                         ey[0 + 1][0], ey[0][0])
-                    S1(t1 / 2, ey[0][0])
+                    ey[0][0] = S1(t1 / 2)
                     lbp = int(math.ceil(float(t1 + 2) / float(2)))
                     ubp = int(math.floor(float(t1 + 2 * nx_size - 2) /
                         float(2)))
@@ -164,7 +165,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                         ey[0 + 1][0], ey[0][0])
                     ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
                         [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
-                    S1(t1 - t2, ey[0][0])
+                    ey[0][0] = S1(t1 - t2)
                     lbp = t1 - t2 + 1
                     ubp = t1 - t2 + nx_size - 1
                     for t3 in range(t1 - t2 + 1, t1 - t2 + nx_size - 1 + 1):
@@ -186,7 +187,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                         ey[0 + 1][0], ey[0][0])
                     ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
                         [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
-                    S1(t1 - t2, ey[0][0])
+                    ey[0][0] = S1(t1 - t2)
                     lbp = t1 - t2 + 1
                     ubp = t1 - t2 + nx_size - 1
                     for t3 in range(t1 - t2 + 1, t1 - t2 + nx_size - 1 + 1):
@@ -203,7 +204,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 if t1 % 2 == 0:
                     hz[0][0] = S4(hz[0][0], coef2, ex[0][0 + 1], ex[0][0],
                         ey[0 + 1][0], ey[0][0])
-                    S1(t1 / 2, ey[0][0])
+                    ey[0][0] = S1(t1 / 2)
                 lbp = int(math.ceil(float(t1 + 1) / float(2)))
                 ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2)
                     )), t1 - 1)
@@ -212,7 +213,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                         ey[0 + 1][0], ey[0][0])
                     ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
                         [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
-                    S1(t1 - t2, ey[0][0])
+                    ey[0][0] = S1(t1 - t2)
         if nx_size == 1:
             lbp = 2 * t_size + 1
             ubp = 2 * t_size + ny_size - 1
@@ -225,7 +226,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                         ey[0 + 1][0], ey[0][0])
                     ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
                         [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
-                    S1(t1 - t2, ey[0][0])
+                    ey[0][0] = S1(t1 - t2)
     compss_barrier()
     if __debug__:
         print('New Matrix Hz:')
@@ -258,6 +259,10 @@ def compute_h(h, coef2, ex2, ex1, ey2, ey1):
     # end = time.time()
     # tm = end - start
     # print "TIME: " + str(tm*1000) + " ms"
+
+
+def copy(elem):
+    return elem
 
 
 ############################################

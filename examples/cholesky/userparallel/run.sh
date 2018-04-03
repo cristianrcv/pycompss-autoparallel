@@ -3,7 +3,8 @@
   # Script global variables
   SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   RESULTS_DIR="${SCRIPT_DIR}"/results/local
-  LOG_DIR=$HOME/.COMPSs/cholesky_userparallel
+  APP_NAME=cholesky_userparallel
+  LOG_DIR=$HOME/.COMPSs/${APP_NAME}
 
   rm -rf "${LOG_DIR}"
   rm -rf "${RESULTS_DIR}"
@@ -46,5 +47,8 @@
     dot -Tpng "${RESULTS_DIR}"/complete_graph.dot > "${RESULTS_DIR}"/complete_graph.png
   fi
   if [ -d "${LOG_DIR}/trace/" ]; then
-    cp -r "${LOG_DIR}"/trace "${RESULTS_DIR}"
+    mkdir -p "${RESULTS_DIR}"/trace
+    cp "${LOG_DIR}"/trace/*.prv "${RESULTS_DIR}"/trace/${APP_NAME}.prv
+    cp "${LOG_DIR}"/trace/*.pcf "${RESULTS_DIR}"/trace/${APP_NAME}.pcf
+    cp "${LOG_DIR}"/trace/*.row "${RESULTS_DIR}"/trace/${APP_NAME}.row
   fi

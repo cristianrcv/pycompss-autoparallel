@@ -17,9 +17,10 @@ from pycompss.api.api import compss_wait_on
 ############################################
 
 def initialize_variables(nx_size, ny_size):
-    ex = create_matrix(nx_size, ny_size + 1, True)
-    ey = create_matrix(nx_size + 1, ny_size, False)
-    hz = create_matrix(nx_size, ny_size, True)
+    tile_size=1
+    ex = create_matrix(nx_size, ny_size + tile_size, True)
+    ey = create_matrix(nx_size + tile_size, ny_size, False)
+    hz = create_matrix(nx_size + tile_size, ny_size + tile_size, True)
 
     return ex, ey, hz
 
