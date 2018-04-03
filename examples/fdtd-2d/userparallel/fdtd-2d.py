@@ -30,16 +30,16 @@ def create_matrix(nx_size, ny_size, is_zero):
         mat.append([])
         for j in range(ny_size):
             if i == 0:
-                mb = create_block(j, ny_size, is_zero)
+                mb = create_entry(j, ny_size, is_zero)
             else:
-                mb = create_block(j, ny_size, True)
+                mb = create_entry(j, ny_size, True)
             mat[i].append(mb)
     return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
-def create_block(index, ny_size, is_zero):
+def create_entry(index, ny_size, is_zero):
     if is_zero:
         return float(0)
     else:
