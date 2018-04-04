@@ -19,7 +19,7 @@
   fi
 
   # COMPSs parameters
-  DEBUG_FLAGS="-d"
+  DEBUG_FLAGS="--summary -d"
   TOOLS_FLAGS="-g"
 
   # Application arguments
