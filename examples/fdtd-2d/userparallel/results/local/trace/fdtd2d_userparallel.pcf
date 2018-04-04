@@ -235,6 +235,7 @@ VALUES
 1      create_entry
 2      compute_e
 3      compute_h
+4      copy
 
 
 EVENT_TYPE
