@@ -15,8 +15,8 @@
   num_nodes=${2:-2}
   execution_time=${3:-10}
   cpus_per_node=${4:-48}
-  tracing=${5:-true}
-  graph=${6:-true}
+  tracing=${5:-false}
+  graph=${6:-false}
   log_level=${7:-off}
 
   nsize=${8:-1000}
