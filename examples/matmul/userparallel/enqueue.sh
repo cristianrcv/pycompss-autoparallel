@@ -7,7 +7,7 @@
   LOCAL_PYTHONPATH=${SCRIPT_DIR}
 
   # Script arguments
-  if [ $# -ne 0 ] && [ $# -ne 8 ]; then
+  if [ $# -ne 0 ] && [ $# -ne 9 ]; then
     echo "ERROR: Incorrect number of parameters"
     exit 1
   fi
@@ -19,7 +19,8 @@
   graph=${6:-false}
   log_level=${7:-off}
 
-  msize=${8:-1024}
+  msize=${8:-16}
+  bsize=${9:-1024}
 
   # Setup Execution environment
   if [ ! -d "${WORK_DIR}" ]; then
@@ -44,7 +45,8 @@
     --node_memory=50000 \
     --pythonpath="${LOCAL_PYTHONPATH}" \
     --qos=debug \
-    "$EXEC_FILE" "$msize"
+    "$EXEC_FILE" "$msize" "$bsize"
 
-  # Params: job_dependency num_nodes execution_time cpus_per_node tracing graph log_level MSIZE
-  # Example: ./enqueue.sh None 2 10 48 false false off 1024
+  # Params: job_dependency num_nodes execution_time cpus_per_node tracing graph log_level MSIZE BSIZE
+  # Example: ./enqueue.sh None 2 10 48 false false off 16 1024
+

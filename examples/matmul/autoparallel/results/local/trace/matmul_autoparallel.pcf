@@ -232,8 +232,8 @@ EVENT_TYPE
 0    8000000    Task
 VALUES
 0      End
-1      create_entry
-2      multiply
+1      create_block
+2      S1
 
 
 EVENT_TYPE

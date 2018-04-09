@@ -25,7 +25,8 @@
   log_level=${3:-off}
 
   # Application variables
-  MSIZES=(1024)
+  MSIZES=(16)
+  BSIZES=(1024)
   NUM_NODES=(2)
   EXEC_TIMES=(10)
 
@@ -34,6 +35,7 @@
   job_dependency=None
   for i in "${!MSIZES[@]}"; do
     msize=${MSIZES[$i]}
+    bsize=${BSIZES[$i]}
     num_nodes=${NUM_NODES[$i]}
     execution_time=${EXEC_TIMES[$i]}
 
@@ -41,7 +43,7 @@
       echo "--- Enqueueing ${app_version}"
       (
       cd "$app_version"
-      ./enqueue.sh "${job_dependency}" "${num_nodes}" "${execution_time}" "${cpus_per_node}" "${tracing}" "${graph}" "${log_level}" "${msize}"
+      ./enqueue.sh "${job_dependency}" "${num_nodes}" "${execution_time}" "${cpus_per_node}" "${tracing}" "${graph}" "${log_level}" "${msize}" "${bsize}"
       wait_and_get_jobID
       )
     done
