@@ -12,6 +12,8 @@ from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
+import numpy as np
+
 
 ############################################
 # MATRIX GENERATION
@@ -38,10 +40,10 @@ def create_matrix(n_size):
 @task(returns=1)
 def create_entry(n_size, is_zero):
     if is_zero:
-        return float(0)
+        return np.float(0)
     else:
         import random
-        return n_size * random.random()
+        return np.float(n_size * random.random())
 
 
 ############################################
@@ -52,24 +54,32 @@ def create_entry(n_size, is_zero):
 def floyd(d, n_size):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # d = compss_wait_on(d)
-        print("Matrix d:")
+        d = compss_wait_on(d)
+        print("Matrix D:")
         print(d)
+
+    # Compute expected result
+    if __debug__:
+        import copy
+        d_seq = copy.deepcopy(d)
+        d_expected = seq_floyd(d_seq, n_size)
 
     # Floyd
     for k in range(n_size):
         for y in range(n_size):
             for x in range(n_size):
-                # if d[y][k] + d[k][x] < d[y][x]:
-                # d[y][x] = d[y][k] + d[k][x]
                 d[y][x] = compute_distance(d[y][x], d[y][k], d[k][x])
 
     # Debug result
     if __debug__:
-        print("New Matrix D:")
         d = compss_wait_on(d)
+
+        print("New Matrix D:")
         print(d)
+
+    # Check result
+    if __debug__:
+        check_result(d, d_expected)
 
 
 ############################################
@@ -90,6 +100,29 @@ def compute_distance(distance, path1, path2):
     # end = time.time()
     # tm = end - start
     # print "TIME: " + str(tm*1000) + " ms"
+
+
+############################################
+# RESULT CHECK FUNCTIONS
+############################################
+
+def seq_floyd(d, n_size):
+    for k in range(n_size):
+        for y in range(n_size):
+            for x in range(n_size):
+                new_distance = d[y][k] + d[k][x]
+                if new_distance < d[y][x]:
+                    d[y][x] = new_distance
+
+    return d
+
+
+def check_result(result, result_expected):
+    is_ok = np.allclose(result, result_expected)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################
