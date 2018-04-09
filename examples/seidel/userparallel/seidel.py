@@ -11,6 +11,8 @@ from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
+import numpy as np
+
 
 ############################################
 # MATRIX GENERATION
@@ -27,7 +29,7 @@ def create_matrix(n_size):
     for i in range(n_size):
         mat.append([])
         for j in range(n_size):
-            mb = create_entry(i, j)
+            mb = create_entry(i, j, n_size)
             mat[i].append(mb)
 
     return mat
@@ -35,8 +37,8 @@ def create_matrix(n_size):
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
-def create_entry(i, j):
-    return float(i * i + j * j)
+def create_entry(i, j, n_size):
+    return np.float(np.float(i * (j + 2) + 2) / np.float(n_size))
 
 
 ############################################
@@ -46,10 +48,16 @@ def create_entry(i, j):
 def seidel(a, n_size, t_size):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # a = compss_wait_on(a)
+        a = compss_wait_on(a)
+
         print("Matrix A:")
         print(a)
+
+    # Compute expected result
+    if __debug__:
+        import copy
+        a_seq = copy.deepcopy(a)
+        a_expected = seq_seidel(a_seq, n_size, t_size)
 
     # Seidel
     for _ in range(t_size):
@@ -60,9 +68,14 @@ def seidel(a, n_size, t_size):
 
     # Debug result
     if __debug__:
-        print("New Matrix A:")
         a = compss_wait_on(a)
+
+        print("New Matrix A:")
         print(a)
+
+    # Check result
+    if __debug__:
+        check_result(a, a_expected)
 
 
 ############################################
@@ -74,11 +87,34 @@ def compute_distance(a_tl, a_tc, a_tr, a_cl, a_cc, a_cr, a_bl, a_bc, a_br):
     # import time
     # start = time.time()
 
-    return (float(a_tl + a_tc + a_tr + a_cl + a_cc + a_cr + a_bl + a_bc + a_br)) / float(9)
+    return np.float((np.float(a_tl + a_tc + a_tr + a_cl + a_cc + a_cr + a_bl + a_bc + a_br)) / np.float(9))
 
     # end = time.time()
     # tm = end - start
     # print "TIME: " + str(tm*1000) + " ms"
+
+
+############################################
+# RESULT CHECK FUNCTIONS
+############################################
+
+def seq_seidel(a, n_size, t_size):
+    for _ in range(t_size):
+        for i in range(1, n_size - 1):
+            for j in range(1, n_size - 1):
+                a[i][j] = np.float(np.float(
+                    a[i - 1][j - 1] + a[i - 1][j] + a[i - 1][j + 1] + a[i][j - 1] + a[i][j] + a[i][j + 1] + a[i + 1][
+                        j - 1] + a[i + 1][j] + a[i + 1][j + 1]) / np.float(9))
+
+    return a
+
+
+def check_result(a, a_expected):
+    is_ok = np.allclose(a, a_expected)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################
