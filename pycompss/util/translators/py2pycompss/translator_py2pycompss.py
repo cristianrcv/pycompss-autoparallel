@@ -137,16 +137,16 @@ class Py2PyCOMPSs(object):
 
         # Debug
         # if __debug__:
-        # print("OUTPUT IMPORTS:")
+        # logger.debug("OUTPUT IMPORTS:")
         # for oi in output_imports:
-        # print(astor.dump_tree(oi))
-        # print("OUTPUT TASKS:")
+        # logger.debug(astor.dump_tree(oi))
+        # logger.debug("OUTPUT TASKS:")
         # import itertools
         # for task_def, task_func in itertools.izip(output_task_headers, output_task_functions):
-        # print(task_def)
-        # print(astor.dump_tree(task_func))
-        # print("OUTPUT CODE:")
-        # print(astor.dump_tree(func_ast.body))
+        # logger.debug(task_def)
+        # logger.debug(astor.dump_tree(task_func))
+        # logger.debug("OUTPUT CODE:")
+        # logger.debug(astor.dump_tree(func_ast.body))
 
         # Print content to PyCOMPSs file
         with open(output, 'w') as f:
@@ -531,24 +531,25 @@ class _RewriteCallees(ast.NodeTransformer):
             node.func = _ast.Name(id=self.task2new_name[original_name])
 
             # Map function arguments to call arguments
+            import copy
             func_args = self.task2original_args[original_name]
             func_args2callee_args = {}
             for i in range(len(node.args)):
                 func_arg = func_args[i].id
-                callee_arg = node.args[i]
+                callee_arg = copy.deepcopy(node.args[i])
                 func_args2callee_args[func_arg] = callee_arg
 
             # Transform function variables to call arguments on all var2subscript
-            vars2subscripts = self.task2vars2subscripts[original_name]
+            vars2subscripts = copy.deepcopy(self.task2vars2subscripts[original_name])
             vars2new_subscripts = {}
             for var, subscript in vars2subscripts.items():
                 ran = _RewriteArgNames(func_args2callee_args)
                 vars2new_subscripts[var] = ran.visit(subscript)
 
             # if __debug__:
-            #    print("Vars to subscripts:")
+            #    logger.debug("Vars to subscripts:")
             #    for k, v in vars2new_subscripts.items():
-            #        print(str(k) + " -> " + str(ast.dump(v)))
+            #        logger.debug(str(k) + " -> " + str(ast.dump(v)))
 
             # Transform all the new arguments into its subscript
             transformed_new_args = []
@@ -557,9 +558,9 @@ class _RewriteCallees(ast.NodeTransformer):
                 transformed_new_args.append(vars2new_subscripts[arg.id])
 
             # if __debug__:
-            #    print("New function arguments")
+            #    logger.debug("New function arguments")
             #    for new_arg in transformed_new_args:
-            #        print(ast.dump(new_arg))
+            #        logger.debug(ast.dump(new_arg))
 
             # Change the function args by the subscript expressions
             node.args = transformed_new_args
@@ -571,9 +572,9 @@ class _RewriteCallees(ast.NodeTransformer):
                 transformed_return_vars.append(vars2new_subscripts[ret_var])
 
             # if __debug__:
-            #    print("New function return variables")
+            #    logger.debug("New function return variables")
             #    for ret_var in transformed_return_vars:
-            #        print(ast.dump(ret_var))
+            #        logger.debug(ast.dump(ret_var))
 
             # Change the function call by an assignment if there are return variables
             import copy
