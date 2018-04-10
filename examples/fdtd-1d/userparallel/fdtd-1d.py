@@ -11,6 +11,8 @@ from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
+import numpy as np
+
 
 ############################################
 # MATRIX GENERATION
@@ -18,7 +20,7 @@ from pycompss.api.api import compss_wait_on
 
 def initialize_variables(n_size):
     h = create_matrix(n_size)
-    e = create_matrix(n_size + 1)
+    e = create_matrix(n_size)
 
     return h, e
 
@@ -34,7 +36,7 @@ def create_matrix(n_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def create_entry(index, n_size):
-    return float(index) / float(n_size)
+    return np.float(np.float(index) / np.float(n_size))
 
 
 ############################################
@@ -44,26 +46,37 @@ def create_entry(index, n_size):
 def fdtd_1d(e, h, n_size, t_size, coef1, coef2):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # e = compss_wait_on(e)
-        # h = compss_wait_on(h)
+        e = compss_wait_on(e)
+        h = compss_wait_on(h)
         print("Matrix E:")
         print(e)
         print("Matrix H:")
         print(h)
 
+    # Compute expected result
+    if __debug__:
+        import copy
+        e_seq = copy.deepcopy(e)
+        h_seq = copy.deepcopy(h)
+        h_expected = seq_fdtd_1d(e_seq, h_seq, n_size, t_size, coef1, coef2)
+
     # FDTD
-    for _ in range(1, t_size + 1):
+    for _ in range(t_size):
         for i in range(1, n_size):
             e[i] = compute_e(e[i], coef1, h[i], h[i - 1])
-        for i in range(n_size):
+        for i in range(n_size - 1):
             h[i] = compute_h(h[i], coef2, e[i + 1], e[i])
 
     # Debug result
     if __debug__:
-        print("New Matrix H:")
         h = compss_wait_on(h)
+
+        print("New Matrix H:")
         print(h)
+
+    # Check result
+    if __debug__:
+        check_result(h, h_expected)
 
 
 ############################################
@@ -96,6 +109,28 @@ def compute_h(h, coef2, e2, e1):
 
 
 ############################################
+# RESULT CHECK FUNCTIONS
+############################################
+
+def seq_fdtd_1d(e, h, n_size, t_size, coef1, coef2):
+    for _ in range(t_size):
+        for i in range(1, n_size):
+            e[i] -= coef1 * (h[i] - h[i - 1])
+        for i in range(n_size - 1):
+            h[i] -= coef2 * (e[i + 1] - e[i])
+
+    return h
+
+
+def check_result(result, result_expected):
+    is_ok = np.allclose(result, result_expected)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
+
+
+############################################
 # MAIN
 ############################################
 
@@ -109,8 +144,8 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     NSIZE = int(args[0])
     TSIZE = int(args[1])
-    COEF1 = 0.5
-    COEF2 = 0.7
+    COEF1 = np.float(0.5)
+    COEF2 = np.float(0.7)
 
     # Log arguments if required
     if __debug__:
