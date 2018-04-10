@@ -5,10 +5,10 @@
 #include <sys/time.h>
 #include <assert.h>
 
-#define N 1000000
-#define T 10000
+#define N 4
+#define T 8
 double h[N];
-double e[N+1];
+double e[N];
 #define coeff1 0.5
 #define coeff2 0.7
 
@@ -56,14 +56,15 @@ int main()
     double t_start, t_end;
 
     init_array();
+    print_array();
 
 	IF_TIME(t_start = rtclock());
 
 #pragma scop
-    for (t=1; t<=T; t++){
-	    for (i=1; i<=N-1; i++)
+    for (t=0; t<T; t++){
+	    for (i=1; i<N; i++)
 		    e[i] = e[i] - coeff1*(h[i]-h[i-1]);
-	    for (i=0; i<=N-1; i++)
+	    for (i=0; i<N-1; i++)
 		    h[i] = h[i] - coeff2*(e[i+1]-e[i]);
     }
 #pragma endscop
@@ -71,6 +72,7 @@ int main()
     IF_TIME(t_end = rtclock());
     IF_TIME(fprintf(stderr, "%0.6lfs\n", t_end - t_start));
 
+    print_array();
     if (fopen(".test", "r")) {
         print_array();
     }
