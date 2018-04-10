@@ -18,16 +18,16 @@ class Coordinates(object):
             - start_col : Start column of the scop tag in the original source file
             - end_line : End line of the scop tag in the original source file
             - end_col : End column of the scop tag in the original source file
-            - ident : Identation value in the original source file
+            - indent : Indentation value in the original source file
     """
 
-    def __init__(self, file_name=None, start_line=-1, start_col=-1, end_line=-1, end_col=-1, ident=-1):
+    def __init__(self, file_name=None, start_line=-1, start_col=-1, end_line=-1, end_col=-1, indent=-1):
         self.file_name = file_name
         self.start_line = start_line
         self.start_col = start_col
         self.end_line = end_line
         self.end_col = end_col
-        self.ident = ident
+        self.indent = indent
 
     def get_file_name(self):
         return self.file_name
@@ -44,8 +44,8 @@ class Coordinates(object):
     def get_end_column(self):
         return self.end_col
 
-    def get_identation(self):
-        return self.ident
+    def get_indentation(self):
+        return self.indent
 
     @staticmethod
     def read_os(content, index):
@@ -77,8 +77,8 @@ class Coordinates(object):
         while content[index].startswith('#') or content[index] == '\n':
             index = index + 1
 
-        # Process mandatory field: identation
-        identation = content[index].strip()
+        # Process mandatory field: indentation
+        indentation = content[index].strip()
         index = index + 1
 
         # Skip empty lines, any annotation, and footer
@@ -87,7 +87,7 @@ class Coordinates(object):
             index = index + 1
 
         # Build Coordinates
-        c = Coordinates(file_name, start_line, start_col, end_line, end_col, identation)
+        c = Coordinates(file_name, start_line, start_col, end_line, end_col, indentation)
 
         # Return structure
         return c, index
@@ -108,9 +108,9 @@ class Coordinates(object):
         print("# Ending line and column", file=f)
         print(str(self.end_line) + " " + str(self.end_col), file=f)
 
-        # Print identation
-        print("# Identation", file=f)
-        print(str(self.ident), file=f)
+        # Print indentation
+        print("# Indentation", file=f)
+        print(str(self.indent), file=f)
 
         # Print footer
         print("</coordinates>", file=f)
@@ -131,7 +131,7 @@ class TestCoordinates(unittest.TestCase):
         self.assertEqual(c.get_start_column(), -1)
         self.assertEqual(c.get_end_line(), -1)
         self.assertEqual(c.get_end_column(), -1)
-        self.assertEqual(c.get_identation(), -1)
+        self.assertEqual(c.get_indentation(), -1)
 
     def test_full(self):
         file_name = "example2_src_matmul.cc"
@@ -139,15 +139,15 @@ class TestCoordinates(unittest.TestCase):
         sc = 0
         el = 80
         ec = 0
-        ident = 4
-        c = Coordinates(file_name, sl, sc, el, ec, ident)
+        indent = 4
+        c = Coordinates(file_name, sl, sc, el, ec, indent)
 
         self.assertEqual(c.get_file_name(), file_name)
         self.assertEqual(c.get_start_line(), sl)
         self.assertEqual(c.get_start_column(), sc)
         self.assertEqual(c.get_end_line(), el)
         self.assertEqual(c.get_end_column(), ec)
-        self.assertEqual(c.get_identation(), ident)
+        self.assertEqual(c.get_indentation(), indent)
 
     def test_write_os(self):
         fn = "example2_src_matmul.cc"
@@ -155,8 +155,8 @@ class TestCoordinates(unittest.TestCase):
         sc = 0
         el = 80
         ec = 0
-        ident = 4
-        c = Coordinates(fn, sl, sc, el, ec, ident)
+        indent = 4
+        c = Coordinates(fn, sl, sc, el, ec, indent)
 
         file_name = "coordinates_test.out"
         try:
@@ -166,7 +166,7 @@ class TestCoordinates(unittest.TestCase):
 
             # Check file content
             expected = "<coordinates>\n# File name\nexample2_src_matmul.cc\n# Starting line and column\n72 0\n# " \
-                       "Ending line and column\n80 0\n# Identation\n4\n</coordinates>\n\n"
+                       "Ending line and column\n80 0\n# Indentation\n4\n</coordinates>\n\n"
             with open(file_name, 'r') as f:
                 content = f.read()
             self.assertEqual(content, expected)
