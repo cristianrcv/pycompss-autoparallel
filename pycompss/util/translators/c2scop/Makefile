@@ -17,7 +17,7 @@ compile: translator_c2scop.c
 	@echo "Compiling Translator"
 	$(CC) translator_c2scop.c -o translator_c2scop $(CFLAGS) $(LDLIBS)
 
-tests: test1 test2
+tests: test1 test2 test3
 
 test1: compile
 	@echo "Executing Translator for Test 1: Matmul"
@@ -31,7 +31,13 @@ test2: compile
 	diff ./tests/test2_seidel.out.scop ./tests/test2_seidel.expected.scop
 	@echo "PASS"
 
+test3: compile
+	@echo "Executing Translator for Test 3: FDTD-1D"
+	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(OPENSCOP_LIB):$(CLAN_LIB); ./translator_c2scop ./tests/test3_fdtd-1d.src.c ./tests/test3_fdtd-1d.out.scop
+	diff ./tests/test3_fdtd-1d.out.scop ./tests/test3_fdtd-1d.expected.scop
+	@echo "PASS"
+
 clean:
 	@echo "Cleaning folder"
-	-rm -f translator_c2scop core ./tests/test1_matmul.out.scop ./tests/test2_seidel.out.scop
+	-rm -f translator_c2scop core ./tests/test1_matmul.out.scop ./tests/test2_seidel.out.scop ./tests/test3_fdtd-1d.out.scop
 
