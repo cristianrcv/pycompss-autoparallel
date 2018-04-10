@@ -58,10 +58,14 @@ def create_block(b_size, is_diag):
 def cholesky_blocked(a, m_size, b_size):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # a = compss_wait_on(a)
+        a = compss_wait_on(a)
         print("Matrix A:")
         print(a)
+
+    # Compute expected result
+    if __debug__:
+        from numpy.linalg import cholesky as cholesky_numpy
+        res_expected = cholesky_numpy(join_matrix(a))
 
     # Cholesky decomposition
     for k in range(m_size):
@@ -84,8 +88,13 @@ def cholesky_blocked(a, m_size, b_size):
     if __debug__:
         a = compss_wait_on(a)
         res = join_matrix(a)
+
         print("New Matrix A:")
         print(res)
+
+    # Check result
+    if __debug__:
+        check_result(res, res_expected)
 
 
 ############################################
@@ -150,6 +159,14 @@ def join_matrix(a):
             joint_matrix = np.bmat([[joint_matrix], [current_row]])
 
     return np.matrix(joint_matrix)
+
+
+def check_result(result, result_expected):
+    is_ok = np.allclose(result, result_expected)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################
