@@ -43,10 +43,14 @@ def create_block(b_size):
 def lu_blocked(a, m_size, b_size):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # a = compss_wait_on(a)
+        a = compss_wait_on(a)
         print("Matrix A:")
         print(a)
+
+    # Compute expected result
+    if __debug__:
+        input_a = join_matrix(a)
+        res_expected = np.zeros((m_size * b_size, m_size * b_size))
 
     if len(a) == 0:
         return
@@ -89,9 +93,9 @@ def lu_blocked(a, m_size, b_size):
 
     # Debug result
     if __debug__:
-        p_res = compss_wait_on(p_mat)  # join_matrix(compss_wait_on(p_mat))
-        l_res = compss_wait_on(l_mat)  # join_matrix(compss_wait_on(l_mat))
-        u_res = compss_wait_on(u_mat)  # join_matrix(compss_wait_on(u_mat))
+        p_res = join_matrix(compss_wait_on(p_mat))
+        l_res = join_matrix(compss_wait_on(l_mat))
+        u_res = join_matrix(compss_wait_on(u_mat))
 
         print("Matrix P:")
         print(p_res)
@@ -99,6 +103,10 @@ def lu_blocked(a, m_size, b_size):
         print(l_res)
         print("Matrix U:")
         print(u_res)
+
+    # Check result
+    if __debug__:
+        check_result(input_a, p_res, l_res, u_res, res_expected)
 
 
 ############################################
@@ -168,6 +176,15 @@ def join_matrix(mat):
             joint_mat = np.bmat([[joint_mat], [current_row]])
 
     return np.matrix(joint_mat)
+
+
+def check_result(input_a, p_res, l_res, u_res, result_expected):
+    result = input_a - np.dot(np.dot(p_res, l_res), u_res)
+    is_ok = np.allclose(result, result_expected)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################
