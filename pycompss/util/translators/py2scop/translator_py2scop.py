@@ -116,12 +116,12 @@ class Py2Scop(object):
         self.scops = []
         try:
             if self.for_blocks is not None:
-                for fb in self.for_blocks:
+                for fb_index, fb in enumerate(self.for_blocks):
                     if __debug__:
                         logger.debug("[py2scop] Translating " + str(fb))
                         # import ast
                         # logger.debug(ast.dump(fb))
-                    self.scops.append(Py2Scop._ast2scop(fb))
+                    self.scops.append(Py2Scop._ast2scop(fb, fb_index))
         except Exception as e:
             raise Py2ScopException("ERROR: Cannot generate SCOPs from ForBlocks", e)
 
@@ -188,8 +188,7 @@ class Py2Scop(object):
             if isinstance(value, list):
                 for item in value:
                     if isinstance(item, ast.AST):
-                        for_blocks = Py2Scop._ast_extract_for_blocks(item,
-                                                                     for_level, for_blocks)
+                        for_blocks = Py2Scop._ast_extract_for_blocks(item, for_level, for_blocks)
             elif isinstance(value, ast.AST):
                 for_blocks = Py2Scop._ast_extract_for_blocks(value, for_level, for_blocks)
 
@@ -198,13 +197,14 @@ class Py2Scop(object):
 
     # TRANSLATION FROM AST TO SCOP
     @staticmethod
-    def _ast2scop(tree):
+    def _ast2scop(tree, tree_id):
         """
         Inputs a AST loop block representation and returns its SCOP
         representation
 
         Arguments:
                 - tree : AST loop block representation
+                - tree_id : Main for index
         Return:
                 - scop : SCOP object representing the loop block
         Raise:
@@ -237,7 +237,7 @@ class Py2Scop(object):
         global_scop = Global(lang, context_scop, params_scop)
 
         # Generate statements
-        statements_scop = Py2Scop._get_statements(tree, None, param_vars_list, all_vars_list)
+        statements_scop = Py2Scop._get_statements(tree, None, [tree_id], param_vars_list, all_vars_list)
 
         # Generate extensions
         from pycompss.util.translators.scop_types.scop.extensions_class import Extensions
@@ -357,13 +357,14 @@ class Py2Scop(object):
         return array_vars
 
     @staticmethod
-    def _get_statements(node, for_fathers, param_vars, all_vars):
+    def _get_statements(node, for_fathers, scatter_indexes, param_vars, all_vars):
         """
         Returns the processed SCOP statements found inside the AST tree
 
         Arguments:
                 - node : head node
                 - for_fathers : list of for loops on top of the statement
+                - scatter_indexes : list of scatter indexes for the statement
                 - param_vars : List of parameter variables
                 - all_vars : List of parameter, iteration and access variables
         Return:
@@ -375,10 +376,9 @@ class Py2Scop(object):
         import _ast
 
         # Process current node
-        statements_scop = []
         if isinstance(node, _ast.Assign) or isinstance(node, _ast.AugAssign) or isinstance(node, _ast.Expr):
-            s_scop = Py2Scop._process_statement(node, for_fathers, param_vars, all_vars)
-            statements_scop.append(s_scop)
+            s_scop = Py2Scop._process_statement(node, for_fathers, scatter_indexes, param_vars, all_vars)
+            return [s_scop]
 
         # Insert for to fathers' list
         if isinstance(node, _ast.For):
@@ -386,16 +386,35 @@ class Py2Scop(object):
                 for_fathers = []
             for_fathers.append(node)
 
-        # Child recursion
+        # Add scatter depth index (top level is always a FOR so we always increase when processing children)
+        scatter_indexes.append(0)
+
+        # Children recursion
+        statements_scop = []
+        child_index = 0
         for _, value in ast.iter_fields(node):
             if isinstance(value, list):
                 for item in value:
                     if isinstance(item, ast.AST):
-                        statements_scop.extend(Py2Scop._get_statements(item, for_fathers,
+                        scatter_indexes[-1] = child_index
+                        statements_scop.extend(Py2Scop._get_statements(item, for_fathers, scatter_indexes,
                                                                        param_vars, all_vars))
+                        # Only increase child index if it a special node
+                        if isinstance(item, _ast.For) or isinstance(item, _ast.Assign) \
+                                or isinstance(item, _ast.AugAssign) or isinstance(item, _ast.Expr):
+                            child_index += 1
             elif isinstance(value, ast.AST):
-                statements_scop.extend(Py2Scop._get_statements(value, for_fathers, param_vars,
+                scatter_indexes[-1] = child_index
+                statements_scop.extend(Py2Scop._get_statements(value, for_fathers, scatter_indexes, param_vars,
                                                                all_vars))
+                # Only increase child index if it a special node
+                if isinstance(value, _ast.For) or isinstance(value, _ast.Assign) \
+                        or isinstance(value, _ast.AugAssign) or isinstance(value, _ast.Expr):
+                    print("INCREASE2")
+                    child_index += 1
+
+        # Remove scatter depth index
+        scatter_indexes.pop()
 
         # Remove from fathers
         if isinstance(node, _ast.For):
@@ -405,14 +424,14 @@ class Py2Scop(object):
         return statements_scop
 
     @staticmethod
-    def _process_statement(statement_loop, fathers_loop, param_vars, all_vars):
+    def _process_statement(statement_loop, fathers_loop, scatter_indexes, param_vars, all_vars):
         """
         Process the current AST node to generate its SCOP representation
 
         Arguments:
                 - statement_loop : AST node representing the statement
-                - fathers_loop : List of AST nodes representing the loops
-                              surrounding the statement
+                - fathers_loop : List of AST nodes representing the loops surrounding the statement
+                - scatter_indexes : list of scatter indexes for the statement
                 - param_vars : List of parameter variables
                 - all_vars : List of parameter, iteration, and access variables
         Return:
@@ -504,6 +523,7 @@ class Py2Scop(object):
         scattering_matrix = [[0 for _ in range(scattering_cols)] for _ in range(scattering_rows)]
         # Create dictionary from col name to col index
         names2index = {'e/i': 0}
+        index = 1
         for cv in control_vars:
             names2index[cv] = index
             index = index + 1
@@ -519,8 +539,19 @@ class Py2Scop(object):
             # Mark control variable
             col_ind = row_ind + 1
             scattering_matrix[row_ind][col_ind] = -1
-            # Mark iteration variable when needed
-            if row_ind % 2 == 1:
+
+            if row_ind % 2 == 0:
+                # Mark scatter index variable
+                col_ind = names2index['indep']
+                # Maybe this is not a full depth statement
+                scatter_index_depth = row_ind / 2
+                if scatter_index_depth < len(scatter_indexes):
+                    scatter_value = scatter_indexes[scatter_index_depth]
+                else:
+                    scatter_value = 0
+                scattering_matrix[row_ind][col_ind] = scatter_value
+            else:
+                # Mark iteration variable
                 col_ind = 1 + len(control_vars) + row_ind / 2
                 scattering_matrix[row_ind][col_ind] = 1
 
@@ -824,7 +855,7 @@ class TestPy2Scop(unittest.TestCase):
         fbs = Py2Scop._ast_extract_for_blocks(func_ast, 0, [])
 
         # Apply SCOP transformation to first for block
-        scop = Py2Scop._ast2scop(fbs[0])
+        scop = Py2Scop._ast2scop(fbs[0], 0)
 
         # Return scop
         return scop
@@ -1111,7 +1142,7 @@ class TestPy2Scop(unittest.TestCase):
             os.remove(test_file)
 
     def test_ast2scop_multi_statements(self):
-        func_name = "multi_statements1"
+        func_name = "multi_statements"
 
         # Retrieve scop
         scop = TestPy2Scop._test_ast2scop(func_name)

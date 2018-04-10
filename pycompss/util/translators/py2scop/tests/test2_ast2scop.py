@@ -39,10 +39,11 @@ def loop_nests2(a, b, c):
 
 
 # Multiple statements
-def multi_statements1(a, b, c):
+def multi_statements(a, b, c):
     for i1 in range(0, 2 * N - M + K, 1):
         for j1 in range(0, M, 1):
             c[i1][j1] = c[i1][j1] + a[i1][j1] * b[i1][M - j1]
+            c[i1][j1] = c[i1][j1] + b[i1][j1] * a[i1][M - j1]
         for j2 in range(0, M, 1):
             for k1 in range(0, K, 1):
                 c[i1][j2] = c[i1][j2] + a[i1][k1] * b[k1][j2]
