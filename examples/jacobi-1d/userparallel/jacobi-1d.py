@@ -11,22 +11,24 @@ from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
+import numpy as np
+
 
 ############################################
 # MATRIX GENERATION
 ############################################
 
 def initialize_variables(n_size):
-    a = create_matrix(n_size, False)
-    b = create_matrix(n_size, True)
+    a = create_matrix(n_size, 2)
+    b = create_matrix(n_size, 3)
 
     return a, b
 
 
-def create_matrix(n_size, is_zero):
+def create_matrix(n_size, offset):
     mat = []
     for i in range(n_size):
-        mb = create_entry(i, n_size, is_zero)
+        mb = create_entry(i, n_size, offset)
         mat.append(mb)
 
     return mat
@@ -34,11 +36,8 @@ def create_matrix(n_size, is_zero):
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
-def create_entry(index, n_size, is_zero):
-    if is_zero:
-        return float(0)
-    else:
-        return float(index) / float(n_size)
+def create_entry(index, n_size, offset):
+    return np.float(np.float(index + offset) / np.float(n_size))
 
 
 ############################################
@@ -48,30 +47,40 @@ def create_entry(index, n_size, is_zero):
 def jacobi_1d(a, b, n_size, t_size, coef):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # a = compss_wait_on(a)
-        # b = compss_wait_on(b)
+        a = compss_wait_on(a)
+        b = compss_wait_on(b)
         print("Matrix A:")
         print(a)
         print("Matrix B:")
         print(b)
 
+    # Compute expected result
+    if __debug__:
+        import copy
+        a_seq = copy.deepcopy(a)
+        b_seq = copy.deepcopy(b)
+        a_expected, b_expected = seq_jacobi_1d(a_seq, b_seq, n_size, t_size, coef)
+
     # Jacobi
     for _ in range(t_size):
-        for i in range(2, n_size - 1):
-            # b[i] = coef * (a[i - 1] + a[i] + a[i + 1])
+        for i in range(1, n_size - 1):
             b[i] = compute_b(coef, a[i - 1], a[i], a[i + 1])
-        for j in range(2, n_size - 1):
-            a[j] = copy(b[j])
+        for i in range(1, n_size - 1):
+            a[i] = compute_a(coef, b[i - 1], b[i], b[i + 1])
 
     # Debug result
     if __debug__:
-        print("New Matrix A:")
         a = compss_wait_on(a)
+        b = compss_wait_on(b)
+
+        print("New Matrix A:")
         print(a)
         print("New Matrix B:")
-        b = compss_wait_on(b)
         print(b)
+
+    # Check result
+    if __debug__:
+        check_result(a, b, a_expected, b_expected)
 
 
 ############################################
@@ -80,26 +89,55 @@ def jacobi_1d(a, b, n_size, t_size, coef):
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
+def compute_a(coef, b_left, b_center, b_right):
+    return compute(coef, b_left, b_center, b_right)
+
+
+@constraint(ComputingUnits="${ComputingUnits}")
+@task(returns=1)
 def compute_b(coef, a_left, a_center, a_right):
+    return compute(coef, a_left, a_center, a_right)
+
+
+def compute(coef, left, center, right):
     # import time
     # start = time.time()
 
-    return coef * (a_left + a_center + a_right)
+    return coef * (left + center + right)
 
     # end = time.time()
     # tm = end - start
     # print "TIME: " + str(tm*1000) + " ms"
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
-@task(returns=1)
-def copy(b):
-    return b
+############################################
+# RESULT CHECK FUNCTIONS
+############################################
+
+def seq_jacobi_1d(a, b, n_size, t_size, coef):
+    for _ in range(t_size):
+        for i in range(1, n_size - 1):
+            b[i] = coef * (a[i - 1] + a[i] + a[i + 1])
+        for i in range(1, n_size - 1):
+            a[i] = coef * (b[i - 1] + b[i] + b[i + 1])
+
+    return a, b
+
+
+def check_result(a, b, a_expected, b_expected):
+    is_a_ok = np.allclose(a, a_expected)
+    is_b_ok = np.allclose(b, b_expected)
+    is_ok = is_a_ok and is_b_ok
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################
 # MAIN
 ############################################
+
 
 if __name__ == "__main__":
     # Import libraries
@@ -111,7 +149,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     NSIZE = int(args[0])
     TSIZE = int(args[1])
-    COEF = float(1) / float(3)
+    COEF = np.float(np.float(1) / np.float(3))
 
     # Log arguments if required
     if __debug__:

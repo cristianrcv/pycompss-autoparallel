@@ -22,70 +22,80 @@ digraph {
 15[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
 16[shape=circle, style=filled fillcolor="#0000ff" fontcolor="#ffffff"];
 Synchro1[label="barrier", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
-9 -> Synchro1;
-13 -> Synchro1;
-5 -> Synchro1;
-7 -> Synchro1;
-6 -> Synchro1;
-15 -> Synchro1;
-8 -> Synchro1;
-14 -> Synchro1;
-2 -> Synchro1;
-1 -> Synchro1;
-12 -> Synchro1;
-11 -> Synchro1;
-16 -> Synchro1;
-3 -> Synchro1;
-4 -> Synchro1;
 10 -> Synchro1;
-17[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
-Synchro1 -> 17[ label="d2" ];
-Synchro1 -> 17[ label="d3" ];
-Synchro1 -> 17[ label="d4" ];
-18[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
-Synchro1 -> 18[ label="d3" ];
-Synchro1 -> 18[ label="d4" ];
-Synchro1 -> 18[ label="d5" ];
-19[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
-Synchro1 -> 19[ label="d4" ];
-Synchro1 -> 19[ label="d5" ];
-Synchro1 -> 19[ label="d6" ];
-20[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
-Synchro1 -> 20[ label="d5" ];
-Synchro1 -> 20[ label="d6" ];
-Synchro1 -> 20[ label="d7" ];
-21[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
-Synchro1 -> 21[ label="d6" ];
-Synchro1 -> 21[ label="d7" ];
-Synchro1 -> 21[ label="d8" ];
+5 -> Synchro1;
+8 -> Synchro1;
+1 -> Synchro1;
+14 -> Synchro1;
+16 -> Synchro1;
+7 -> Synchro1;
+9 -> Synchro1;
+11 -> Synchro1;
+2 -> Synchro1;
+15 -> Synchro1;
+12 -> Synchro1;
+4 -> Synchro1;
+13 -> Synchro1;
+6 -> Synchro1;
+3 -> Synchro1;
+1 -> Synchro1[ label="d1" ];
+2 -> Synchro1[ label="d2" ];
+3 -> Synchro1[ label="d3" ];
+4 -> Synchro1[ label="d4" ];
+5 -> Synchro1[ label="d5" ];
+6 -> Synchro1[ label="d6" ];
+7 -> Synchro1[ label="d7" ];
+8 -> Synchro1[ label="d8" ];
+9 -> Synchro1[ label="d9" ];
+10 -> Synchro1[ label="d10" ];
+11 -> Synchro1[ label="d11" ];
+12 -> Synchro1[ label="d12" ];
+13 -> Synchro1[ label="d13" ];
+14 -> Synchro1[ label="d14" ];
+15 -> Synchro1[ label="d15" ];
+16 -> Synchro1[ label="d16" ];
+17[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+18[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+19[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+20[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+21[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
 22[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
-17 -> 22[ label="d17" ];
-23[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+23[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+17 -> 23[ label="d17" ];
 18 -> 23[ label="d18" ];
-24[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+24[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+17 -> 24[ label="d17" ];
+18 -> 24[ label="d18" ];
 19 -> 24[ label="d19" ];
-25[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+25[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+18 -> 25[ label="d18" ];
+19 -> 25[ label="d19" ];
 20 -> 25[ label="d20" ];
-26[shape=circle, style=filled fillcolor="#ff0000" fontcolor="#000000"];
+26[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+19 -> 26[ label="d19" ];
+20 -> 26[ label="d20" ];
 21 -> 26[ label="d21" ];
+27[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+20 -> 27[ label="d20" ];
+21 -> 27[ label="d21" ];
+22 -> 27[ label="d22" ];
+28[shape=circle, style=filled fillcolor="#ffffff" fontcolor="#000000"];
+21 -> 28[ label="d21" ];
+22 -> 28[ label="d22" ];
 Synchro2[label="sync", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
 Synchro1 -> Synchro2;
-1 -> Synchro2[ label="d1" ];
-2 -> Synchro2[ label="d2" ];
-22 -> Synchro2[ label="d22" ];
 23 -> Synchro2[ label="d23" ];
 24 -> Synchro2[ label="d24" ];
 25 -> Synchro2[ label="d25" ];
 26 -> Synchro2[ label="d26" ];
-8 -> Synchro2[ label="d8" ];
-9 -> Synchro2[ label="d9" ];
-10 -> Synchro2[ label="d10" ];
+27 -> Synchro2[ label="d27" ];
+28 -> Synchro2[ label="d28" ];
 17 -> Synchro2[ label="d17" ];
 18 -> Synchro2[ label="d18" ];
 19 -> Synchro2[ label="d19" ];
 20 -> Synchro2[ label="d20" ];
 21 -> Synchro2[ label="d21" ];
-16 -> Synchro2[ label="d16" ];
+22 -> Synchro2[ label="d22" ];
 Synchro3[label="barrier", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
 Synchro2 -> Synchro3;  }
   subgraph legend {
@@ -101,11 +111,11 @@ Synchro2 -> Synchro3;  }
 </tr>
 <tr>
 <td align="right">jacobi-1d.compute_b</td>
-<td bgcolor="#ffffff">&nbsp;</td>
+<td bgcolor="#ff0000">&nbsp;</td>
 </tr>
 <tr>
-<td align="right">jacobi-1d.copy</td>
-<td bgcolor="#ff0000">&nbsp;</td>
+<td align="right">jacobi-1d.compute_a</td>
+<td bgcolor="#ffffff">&nbsp;</td>
 </tr>
       </table>
     >]
