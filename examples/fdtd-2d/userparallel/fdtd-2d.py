@@ -11,40 +11,35 @@ from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
 
+import numpy as np
+
 
 ############################################
 # MATRIX GENERATION
 ############################################
 
 def initialize_variables(nx_size, ny_size):
-    tile_size=1
-    ex = create_matrix(nx_size, ny_size + tile_size, True)
-    ey = create_matrix(nx_size + tile_size, ny_size, False)
-    hz = create_matrix(nx_size + tile_size, ny_size + tile_size, True)
+    ex = create_matrix(nx_size, ny_size, nx_size)
+    ey = create_matrix(nx_size, ny_size, ny_size)
+    hz = create_matrix(nx_size, ny_size, nx_size)
 
     return ex, ey, hz
 
 
-def create_matrix(nx_size, ny_size, is_zero):
+def create_matrix(nx_size, ny_size, ref_size):
     mat = []
     for i in range(nx_size):
         mat.append([])
         for j in range(ny_size):
-            if i == 0:
-                mb = create_entry(j, ny_size, is_zero)
-            else:
-                mb = create_entry(j, ny_size, True)
+            mb = create_entry(i, j, ref_size)
             mat[i].append(mb)
     return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
-def create_entry(index, ny_size, is_zero):
-    if is_zero:
-        return float(0)
-    else:
-        return float(index) / float(ny_size)
+def create_entry(i, j, size):
+    return np.float(np.float(i * (j + 1)) / np.float(size))
 
 
 ############################################
@@ -54,10 +49,9 @@ def create_entry(index, ny_size, is_zero):
 def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # ex = compss_wait_on(ex)
-        # ey = compss_wait_on(ey)
-        # hz = compss_wait_on(hz)
+        ex = compss_wait_on(ex)
+        ey = compss_wait_on(ey)
+        hz = compss_wait_on(hz)
         print("Matrix Ex:")
         print(ex)
         print("Matrix Ey:")
@@ -65,25 +59,38 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
         print("Matrix Hz:")
         print(hz)
 
+    # Compute expected result
+    if __debug__:
+        import copy
+        ex_seq = copy.deepcopy(ex)
+        ey_seq = copy.deepcopy(ey)
+        hz_seq = copy.deepcopy(hz)
+        hz_expected = seq_fdtd_2d(ex_seq, ey_seq, hz_seq, nx_size, ny_size, t_size, coef1, coef2)
+
     # FDTD
-    for t in range(1, t_size + 1):
+    for t in range(t_size):
         for j in range(ny_size):
-            ey[0][j] = copy(t)
+            ey[0][j] = copy_reference(t)
         for i in range(1, nx_size):
             for j in range(ny_size):
                 ey[i][j] = compute_e(ey[i][j], coef1, hz[i][j], hz[i - 1][j])
         for i in range(nx_size):
             for j in range(1, ny_size):
                 ex[i][j] = compute_e(ex[i][j], coef1, hz[i][j], hz[i][j - 1])
-        for i in range(nx_size):
-            for j in range(ny_size):
+        for i in range(nx_size - 1):
+            for j in range(ny_size - 1):
                 hz[i][j] = compute_h(hz[i][j], coef2, ex[i][j + 1], ex[i][j], ey[i + 1][j], ey[i][j])
 
     # Debug result
     if __debug__:
-        print("New Matrix Hz:")
         hz = compss_wait_on(hz)
+
+        print("New Matrix Hz:")
         print(hz)
+
+    # Check result
+    if __debug__:
+        check_result(hz, hz_expected)
 
 
 ############################################
@@ -116,8 +123,37 @@ def compute_h(h, coef2, ex2, ex1, ey2, ey1):
 
 
 @task(returns=1)
-def copy(elem):
+def copy_reference(elem):
     return elem
+
+
+############################################
+# RESULT CHECK FUNCTIONS
+############################################
+
+def seq_fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
+    for t in range(t_size):
+        for j in range(ny_size):
+            ey[0][j] = t
+        for i in range(1, nx_size):
+            for j in range(ny_size):
+                ey[i][j] -= coef1 * (hz[i][j] - hz[i - 1][j])
+        for i in range(nx_size):
+            for j in range(1, ny_size):
+                ex[i][j] -= coef1 * (hz[i][j] - hz[i][j - 1])
+        for i in range(nx_size - 1):
+            for j in range(ny_size - 1):
+                hz[i][j] -= coef2 * (ex[i][j + 1] - ex[i][j] + ey[i + 1][j] - ey[i][j])
+
+    return hz
+
+
+def check_result(result, result_expected):
+    is_ok = np.allclose(result, result_expected)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################
@@ -135,8 +171,8 @@ if __name__ == "__main__":
     NXSIZE = int(args[0])
     NYSIZE = int(args[1])
     TSIZE = int(args[2])
-    COEF1 = 0.5
-    COEF2 = 0.7
+    COEF1 = np.float(0.5)
+    COEF2 = np.float(0.7)
 
     # Log arguments if required
     if __debug__:
