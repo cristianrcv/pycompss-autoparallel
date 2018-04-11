@@ -19,8 +19,8 @@
   fi
 
   # COMPSs parameters
-  DEBUG_FLAGS="--summary -d"
-  TOOLS_FLAGS="-g"
+  DEBUG_FLAGS="--summary"
+  TOOLS_FLAGS="-g -t"
 
   # Application arguments
   NSIZE=8
