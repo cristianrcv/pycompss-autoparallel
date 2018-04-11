@@ -42,10 +42,6 @@ def generate_identity(m_size, b_size):
     return mat
 
 
-def generate_zeros(m_size, b_size):
-    return generate_matrix(m_size, b_size, block_type='zeros')
-
-
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, block_type='random'):
@@ -62,26 +58,22 @@ def create_block(b_size, block_type='random'):
 # MAIN FUNCTION
 ############################################
 
-def qr_blocked(a, m_size, b_size, overwrite_a=False):
+def qr_blocked(a, m_size, b_size):
     # Debug
     if __debug__:
-        # TODO: PyCOMPSs BUG sync-INOUT-sync
-        # a = compss_wait_on(a)
+        a = compss_wait_on(a)
+
         print("Matrix A:")
         print(a)
 
     # Initialize Q and R matrices
     q = generate_identity(m_size, b_size)
-
-    if not overwrite_a:
-        r = copy_blocked(a)
-    else:
-        r = a
+    r = copy_blocked(a)
 
     # Initialize intermediate iteration variables
     q_act = [None]
     q_sub = [[np.matrix(np.array([0])), np.matrix(np.array([0]))], [np.matrix(np.array([0])), np.matrix(np.array([0]))]]
-    q_sub_len = len(q_sub)
+    aux = [None, None]
 
     # Main loop
     for i in range(m_size):
@@ -100,26 +92,47 @@ def qr_blocked(a, m_size, b_size, overwrite_a=False):
 
             # Update values of the row for the value updated in the column
             for k in range(i + 1, m_size):
-                # Multiply each block
-                for mul_i in range(q_sub_len):
-                    multiply_single_block(q_sub[mul_i][0], r[i][k], r[i][k], transpose_b=False)
-                    multiply_single_block(q_sub[mul_i][1], r[j][k], r[j][k], transpose_b=False)
+                # [[r[i][k]], [r[j][k]]] = multiply_blocked_1(q_sub, [[r[i][k]], [r[j][k]]], b_size, transpose_b=False)
+                aux[0] = create_block(b_size, block_type='zeros')
+                aux[0] = multiply_single_block(q_sub[0][0], r[i][k], aux[0], transpose_b=False)
+                aux[0] = multiply_single_block(q_sub[0][1], r[j][k], aux[0], transpose_b=False)
+
+                aux[1] = create_block(b_size, block_type='zeros')
+                aux[1] = multiply_single_block(q_sub[1][0], r[i][k], aux[1], transpose_b=False)
+                aux[1] = multiply_single_block(q_sub[1][1], r[j][k], aux[1], transpose_b=False)
+
+                r[i][k] = aux[0]
+                r[j][k] = aux[1]
 
             for k in range(m_size):
-                # Multiply each block
-                for mul_i in range(q_sub_len):
-                    multiply_single_block(q[k][i], q_sub[mul_i][0], q[k][i], transpose_b=True)
-                    multiply_single_block(q[k][j], q_sub[mul_i][1], q[k][j], transpose_b=True)
+                # [[q[k][i], q[k][j]]] = multiply_blocked_2([[q[k][i], q[k][j]]], q_sub, b_size, transpose_b=True)
+                aux[0] = create_block(b_size, block_type='zeros')
+                aux[0] = multiply_single_block(q[k][i], q_sub[0][0], aux[0], transpose_b=True)
+                aux[0] = multiply_single_block(q[k][j], q_sub[0][1], aux[0], transpose_b=True)
+
+                aux[1] = create_block(b_size, block_type='zeros')
+                aux[1] = multiply_single_block(q[k][i], q_sub[1][0], aux[1], transpose_b=True)
+                aux[1] = multiply_single_block(q[k][j], q_sub[1][1], aux[1], transpose_b=True)
+
+                q[k][i] = aux[0]
+                q[k][j] = aux[1]
 
     # Debug result
     if __debug__:
+        input_a = join_matrix(compss_wait_on(a))
         q_res = join_matrix(compss_wait_on(q))
         r_res = join_matrix(compss_wait_on(r))
 
+        print("Matrix A:")
+        print(input_a)
         print("Matrix Q:")
         print(q_res)
         print("Matrix R:")
         print(r_res)
+
+    # Check result
+    if __debug__:
+        check_result(q_res, r_res, input_a)
 
 
 ############################################
@@ -173,14 +186,14 @@ def little_qr(a, b, b_size, transpose=False):
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
-@task(C=INOUT)
+@task(returns=1)
 def multiply_single_block(a, b, c, transpose_b=False):
     # Transpose if requested
     if transpose_b:
         b = np.transpose(b)
 
     # Numpy operation
-    c += a * b
+    return c + a * b
 
 
 ############################################
@@ -223,6 +236,14 @@ def join_matrix(a):
         else:
             res = np.bmat([[res], [current_row]])
     return np.matrix(res)
+
+
+def check_result(q_res, r_res, input_a):
+    is_ok = np.allclose(q_res * r_res, input_a)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################

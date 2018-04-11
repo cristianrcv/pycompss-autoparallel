@@ -232,7 +232,7 @@ EVENT_TYPE
 0    8000000    Task
 VALUES
 0      End
-1      create_block
+1      create_block_task
 2      S1
 3      S2
 4      S3
@@ -241,6 +241,18 @@ VALUES
 7      S6
 8      S7
 9      S8
+10      S9
+11      S10
+12      S11
+13      S12
+14      S13
+15      S14
+16      S15
+17      S16
+18      S17
+19      S18
+20      S19
+21      S20
 
 
 EVENT_TYPE

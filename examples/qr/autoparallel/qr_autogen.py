@@ -26,7 +26,7 @@ def generate_matrix(m_size, b_size, block_type='random'):
     for i in range(m_size):
         mat.append([])
         for _ in range(m_size):
-            mat[i].append(create_block(b_size, block_type=block_type))
+            mat[i].append(create_block_task(b_size, block_type=block_type))
     return mat
 
 
@@ -35,19 +35,19 @@ def generate_identity(m_size, b_size):
     for i in range(m_size):
         mat.append([])
         for _ in range(0, i):
-            mat[i].append(create_block(b_size, block_type='zeros'))
-        mat[i].append(create_block(b_size, block_type='identity'))
+            mat[i].append(create_block_task(b_size, block_type='zeros'))
+        mat[i].append(create_block_task(b_size, block_type='identity'))
         for _ in range(i + 1, m_size):
-            mat[i].append(create_block(b_size, block_type='zeros'))
+            mat[i].append(create_block_task(b_size, block_type='zeros'))
     return mat
-
-
-def generate_zeros(m_size, b_size):
-    return generate_matrix(m_size, b_size, block_type='zeros')
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
+def create_block_task(b_size, block_type='random'):
+    return create_block(b_size, block_type=block_type)
+
+
 def create_block(b_size, block_type='random'):
     if block_type == 'zeros':
         block = np.matrix(np.zeros((b_size, b_size)), dtype=np.double, copy=False)
@@ -90,103 +90,156 @@ def S4(var7, var8, b_size):
     return little_qr(var7, var8, b_size, transpose=True)
 
 
-@task(var1=IN, var2=IN, var3=IN)
-def S5(var1, var2, var3):
-    multiply_single_block(var1, var2, var3, transpose_b=False)
+@task(b_size=IN, returns=1)
+def S5(b_size):
+    return create_block(b_size, block_type='zeros')
 
 
-@task(var1=IN, var2=IN, var3=IN)
-def S6(var1, var2, var3):
-    multiply_single_block(var1, var2, var3, transpose_b=False)
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S6(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=False)
 
 
-@task(var1=IN, var2=IN, var3=IN)
-def S7(var1, var2, var3):
-    multiply_single_block(var1, var2, var3, transpose_b=True)
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S7(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=False)
 
 
-@task(var1=IN, var2=IN, var3=IN)
-def S8(var1, var2, var3):
-    multiply_single_block(var1, var2, var3, transpose_b=True)
+@task(b_size=IN, returns=1)
+def S8(b_size):
+    return create_block(b_size, block_type='zeros')
 
 
-def qr_blocked(a, m_size, b_size, overwrite_a=False):
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S9(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=False)
+
+
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S10(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=False)
+
+
+@task(var2=IN, returns=1)
+def S11(var2):
+    return copy_reference(var2)
+
+
+@task(var2=IN, returns=1)
+def S12(var2):
+    return copy_reference(var2)
+
+
+@task(b_size=IN, returns=1)
+def S13(b_size):
+    return create_block(b_size, block_type='zeros')
+
+
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S14(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=True)
+
+
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S15(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=True)
+
+
+@task(b_size=IN, returns=1)
+def S16(b_size):
+    return create_block(b_size, block_type='zeros')
+
+
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S17(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=True)
+
+
+@task(var2=IN, var3=IN, var4=IN, returns=1)
+def S18(var2, var3, var4):
+    return multiply_single_block(var2, var3, var4, transpose_b=True)
+
+
+@task(var2=IN, returns=1)
+def S19(var2):
+    return copy_reference(var2)
+
+
+@task(var2=IN, returns=1)
+def S20(var2):
+    return copy_reference(var2)
+
+
+def qr_blocked(a, m_size, b_size):
     if __debug__:
+        a = compss_wait_on(a)
         print('Matrix A:')
         print(a)
     q = generate_identity(m_size, b_size)
-    if not overwrite_a:
-        r = copy_blocked(a)
-    else:
-        r = a
+    r = copy_blocked(a)
     q_act = [None]
     q_sub = [[np.matrix(np.array([0])), np.matrix(np.array([0]))], [np.
         matrix(np.array([0])), np.matrix(np.array([0]))]]
-    q_sub_len = len(q_sub)
+    aux = [None, None]
     if m_size >= 1:
-        if q_sub_len >= 1:
+        lbp = 0
+        ubp = m_size - 2
+        for t1 in range(0, m_size - 2 + 1):
+            q_act[0], r[t1][t1] = S1(r[t1][t1])
             lbp = 0
-            ubp = m_size - 2
-            for t1 in range(0, m_size - 2 + 1):
-                q_act[0], r[t1][t1] = S1(r[t1][t1])
-                lbp = 0
-                ubp = t1
-                for t2 in range(0, t1 + 1):
-                    q[t2][t1] = S2(q[t2][t1], q_act[0])
+            ubp = t1
+            for t3 in range(lbp, ubp + 1):
+                q[t3][t1] = S2(q[t3][t1], q_act[0])
+            lbp = t1 + 1
+            ubp = m_size - 1
+            for t3 in range(lbp, ubp + 1):
+                r[t1][t3] = S3(q_act[0], r[t1][t3])
+                q[t3][t1] = S2(q[t3][t1], q_act[0])
+            lbp = t1 + 1
+            ubp = m_size - 1
+            for t3 in range(t1 + 1, m_size - 1 + 1):
+                q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][t1
+                    ], r[t3][t1] = S4(r[t1][t1], r[t3][t1], b_size)
                 lbp = t1 + 1
                 ubp = m_size - 1
-                for t2 in range(t1 + 1, m_size - 1 + 1):
-                    q[t2][t1] = S2(q[t2][t1], q_act[0])
-                    r[t1][t2] = S3(q_act[0], r[t1][t2])
-                    q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][
-                        t1], r[t2][t1] = S4(r[t1][t1], r[t2][t1], b_size)
-                    lbp = 0
-                    ubp = t1
-                    for t3 in range(lbp, ubp + 1):
-                        lbv = 0
-                        ubv = q_sub_len - 1
-                        for t4 in range(lbv, ubv + 1):
-                            S7(q[t3][t1], q_sub[t4][0], q[t3][t1])
-                            S8(q[t3][t2], q_sub[t4][1], q[t3][t2])
-                    lbp = t1 + 1
-                    ubp = m_size - 1
-                    for t3 in range(lbp, ubp + 1):
-                        lbv = 0
-                        ubv = q_sub_len - 1
-                        for t4 in range(lbv, ubv + 1):
-                            S5(q_sub[t4][0], r[t1][t3], r[t1][t3])
-                            S6(q_sub[t4][1], r[t2][t3], r[t2][t3])
-                            S7(q[t3][t1], q_sub[t4][0], q[t3][t1])
-                            S8(q[t3][t2], q_sub[t4][1], q[t3][t2])
-        if q_sub_len <= 0:
-            lbp = 0
-            ubp = m_size - 2
-            for t1 in range(0, m_size - 2 + 1):
-                q_act[0], r[t1][t1] = S1(r[t1][t1])
+                for t6 in range(t1 + 1, m_size - 1 + 1):
+                    aux[1] = S8(b_size)
+                    aux[1] = S9(q_sub[1][0], r[t1][t6], aux[1])
+                    aux[1] = S10(q_sub[1][1], r[t3][t6], aux[1])
+                    aux[0] = S5(b_size)
+                    aux[0] = S6(q_sub[0][0], r[t1][t6], aux[0])
+                    aux[0] = S7(q_sub[0][1], r[t3][t6], aux[0])
+                    r[t3][t6] = S12(aux[1])
+                    r[t1][t6] = S11(aux[0])
                 lbp = 0
-                ubp = t1
-                for t2 in range(0, t1 + 1):
-                    q[t2][t1] = S2(q[t2][t1], q_act[0])
-                lbp = t1 + 1
                 ubp = m_size - 1
-                for t2 in range(t1 + 1, m_size - 1 + 1):
-                    q[t2][t1] = S2(q[t2][t1], q_act[0])
-                    r[t1][t2] = S3(q_act[0], r[t1][t2])
-                    q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][
-                        t1], r[t2][t1] = S4(r[t1][t1], r[t2][t1], b_size)
-        q_act[0], r[t1][t1] = S1(r[t1][t1])
+                for t6 in range(0, m_size - 1 + 1):
+                    aux[1] = S16(b_size)
+                    aux[1] = S17(q[t6][t1], q_sub[1][0], aux[1])
+                    aux[1] = S18(q[t6][t3], q_sub[1][1], aux[1])
+                    aux[0] = S13(b_size)
+                    aux[0] = S14(q[t6][t1], q_sub[0][0], aux[0])
+                    aux[0] = S15(q[t6][t3], q_sub[0][1], aux[0])
+                    q[t6][t3] = S20(aux[1])
+                    q[t6][t1] = S19(aux[0])
+        q_act[0], r[m_size - 1][m_size - 1] = S1(r[m_size - 1][m_size - 1])
         lbp = 0
         ubp = m_size - 1
-        for t2 in range(0, m_size - 1 + 1):
-            q[t2][t1] = S2(q[t2][t1], q_act[0])
+        for t3 in range(lbp, ubp + 1):
+            q[t3][m_size - 1] = S2(q[t3][m_size - 1], q_act[0])
     compss_barrier()
     if __debug__:
+        input_a = join_matrix(compss_wait_on(a))
         q_res = join_matrix(compss_wait_on(q))
         r_res = join_matrix(compss_wait_on(r))
+        print('Matrix A:')
+        print(input_a)
         print('Matrix Q:')
         print(q_res)
         print('Matrix R:')
         print(r_res)
+    if __debug__:
+        check_result(q_res, r_res, input_a)
 
 # [COMPSs Autoparallel] End Autogenerated code
 
@@ -241,7 +294,7 @@ def multiply_single_block(a, b, c, transpose_b=False):
         b = np.transpose(b)
 
     # Numpy operation
-    c += a * b
+    return c + a * b
 
 
 ############################################
@@ -261,6 +314,10 @@ def copy_blocked(a, transpose=False):
             else:
                 res[i][j] = a[i][j]
     return res
+
+
+def copy_reference(block):
+    return block
 
 
 def split_matrix(a, m_size):
@@ -284,6 +341,14 @@ def join_matrix(a):
         else:
             res = np.bmat([[res], [current_row]])
     return np.matrix(res)
+
+
+def check_result(q_res, r_res, input_a):
+    is_ok = np.allclose(q_res * r_res, input_a)
+    print("Result check status: " + str(is_ok))
+
+    if not is_ok:
+        raise Exception("Result does not match expected result")
 
 
 ############################################
