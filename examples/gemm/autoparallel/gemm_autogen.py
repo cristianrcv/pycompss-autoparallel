@@ -160,10 +160,6 @@ def check_result(result, result_expected):
     print("Result check status: " + str(is_ok))
 
     if not is_ok:
-        print("GOT:")
-        print(result)
-        print("EXPECTED: ")
-        print(result_expected)
         raise Exception("Result does not match expected result")
 
 
