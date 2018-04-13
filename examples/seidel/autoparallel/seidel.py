@@ -39,7 +39,7 @@ def create_matrix(n_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def create_entry(i, j, n_size):
-    return np.float(np.float(i * (j + 2) + 2) / np.float(n_size))
+    return np.float64(np.float64(i * (j + 2) + 2) / np.float64(n_size))
 
 
 ############################################
@@ -65,9 +65,9 @@ def seidel(a, n_size, t_size):
     for _ in range(t_size):
         for i in range(1, n_size - 1):
             for j in range(1, n_size - 1):
-                # a[i][j] = np.float(np.float(
+                # a[i][j] = np.float64(np.float64(
                 # a[i - 1][j - 1] + a[i - 1][j] + a[i - 1][j + 1] + a[i][j - 1] + a[i][j] + a[i][j + 1]
-                # + a[i + 1][j - 1] + a[i + 1][j] + a[i + 1][j + 1]) / np.float(9))
+                # + a[i + 1][j - 1] + a[i + 1][j] + a[i + 1][j + 1]) / np.float64(9))
                 a[i][j] = compute_distance(a[i - 1][j - 1], a[i - 1][j], a[i - 1][j + 1], a[i][j - 1], a[i][j],
                                            a[i][j + 1], a[i + 1][j - 1], a[i + 1][j], a[i + 1][j + 1])
 
@@ -91,7 +91,7 @@ def compute_distance(a_tl, a_tc, a_tr, a_cl, a_cc, a_cr, a_bl, a_bc, a_br):
     # import time
     # start = time.time()
 
-    return np.float((np.float(a_tl + a_tc + a_tr + a_cl + a_cc + a_cr + a_bl + a_bc + a_br)) / np.float(9))
+    return np.float64((np.float64(a_tl + a_tc + a_tr + a_cl + a_cc + a_cr + a_bl + a_bc + a_br)) / np.float64(9))
 
     # end = time.time()
     # tm = end - start
@@ -106,9 +106,9 @@ def seq_seidel(a, n_size, t_size):
     for _ in range(t_size):
         for i in range(1, n_size - 1):
             for j in range(1, n_size - 1):
-                a[i][j] = np.float(np.float(
+                a[i][j] = np.float64(np.float64(
                     a[i - 1][j - 1] + a[i - 1][j] + a[i - 1][j + 1] + a[i][j - 1] + a[i][j] + a[i][j + 1] + a[i + 1][
-                        j - 1] + a[i + 1][j] + a[i + 1][j + 1]) / np.float(9))
+                        j - 1] + a[i + 1][j] + a[i + 1][j + 1]) / np.float64(9))
 
     return a
 

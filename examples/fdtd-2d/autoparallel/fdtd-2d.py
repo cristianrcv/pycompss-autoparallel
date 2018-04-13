@@ -40,7 +40,7 @@ def create_matrix(nx_size, ny_size, ref_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def create_entry(i, j, size):
-    return np.float(np.float(i * (j + 1)) / np.float(size))
+    return np.float64(np.float64(i * (j + 1)) / np.float64(size))
 
 
 ############################################
@@ -171,8 +171,8 @@ if __name__ == "__main__":
     NXSIZE = int(args[0])
     NYSIZE = int(args[1])
     TSIZE = int(args[2])
-    COEF1 = np.float(0.5)
-    COEF2 = np.float(0.7)
+    COEF1 = np.float64(0.5)
+    COEF2 = np.float64(0.7)
 
     # Log arguments if required
     if __debug__:

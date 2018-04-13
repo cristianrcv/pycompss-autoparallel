@@ -43,8 +43,8 @@ def generate_matrix(m_size, b_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, is_diag):
-    block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
-    mb = np.matrix(block, dtype=np.double, copy=False)
+    block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
+    mb = np.matrix(block, dtype=np.float64, copy=False)
     mb = mb + np.transpose(mb)
     if is_diag:
         mb = mb + 2 * b_size * np.eye(b_size)

@@ -43,10 +43,10 @@ def create_block(b_size, is_random):
     import numpy as np
 
     if is_random:
-        block = np.array(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
+        block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     else:
-        block = np.array(np.zeros((b_size, b_size)), dtype=np.double, copy=False)
-    mb = np.matrix(block, dtype=np.double, copy=False)
+        block = np.array(np.zeros((b_size, b_size)), dtype=np.float64, copy=False)
+    mb = np.matrix(block, dtype=np.float64, copy=False)
     return mb
 
 

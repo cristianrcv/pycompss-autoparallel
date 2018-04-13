@@ -46,11 +46,11 @@ def generate_identity(m_size, b_size):
 @task(returns=list)
 def create_block(b_size, block_type='random'):
     if block_type == 'zeros':
-        block = np.matrix(np.zeros((b_size, b_size)), dtype=np.double, copy=False)
+        block = np.matrix(np.zeros((b_size, b_size)), dtype=np.float64, copy=False)
     elif block_type == 'identity':
-        block = np.matrix(np.identity(b_size), dtype=np.double, copy=False)
+        block = np.matrix(np.identity(b_size), dtype=np.float64, copy=False)
     else:
-        block = np.matrix(np.random.random((b_size, b_size)), dtype=np.double, copy=False)
+        block = np.matrix(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     return block
 
 

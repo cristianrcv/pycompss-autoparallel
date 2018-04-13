@@ -21,7 +21,7 @@
 
   # Script arguments
   tracing=${1:-true}
-  graph=${2:-true}
+  graph=${2:-false}
   log_level=${3:-off}
 
   # Application variables

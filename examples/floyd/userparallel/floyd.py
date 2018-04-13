@@ -39,10 +39,10 @@ def create_matrix(n_size):
 @task(returns=1)
 def create_entry(n_size, is_zero):
     if is_zero:
-        return np.float(0)
+        return np.float64(0)
     else:
         import random
-        return np.float(n_size * random.random())
+        return np.float64(n_size * random.random())
 
 
 ############################################

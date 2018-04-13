@@ -41,7 +41,7 @@ def create_matrix(m_size):
 @task(returns=1)
 def create_entry():
     import random
-    return np.float(100 * random.random())
+    return np.float64(100 * random.random())
 
 
 ############################################
@@ -159,8 +159,8 @@ if __name__ == "__main__":
 
     args = sys.argv[1:]
     MSIZE = int(args[0])
-    ALPHA = np.float(1.5)
-    BETA = np.float(1.2)
+    ALPHA = np.float64(1.5)
+    BETA = np.float64(1.2)
 
     # Log arguments if required
     if __debug__:

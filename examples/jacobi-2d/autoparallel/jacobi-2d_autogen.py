@@ -40,7 +40,7 @@ def create_matrix(n_size, offset):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def create_entry(i, j, n_size, offset):
-    return np.float(np.float(i * (j + offset) + offset) / np.float(n_size))
+    return np.float64(np.float64(i * (j + offset) + offset) / np.float64(n_size))
 
 
 ############################################
@@ -353,7 +353,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     NSIZE = int(args[0])
     TSIZE = int(args[1])
-    COEF = np.float(np.float(1) / np.float(5))
+    COEF = np.float64(np.float64(1) / np.float64(5))
 
     # Log arguments if required
     if __debug__:
