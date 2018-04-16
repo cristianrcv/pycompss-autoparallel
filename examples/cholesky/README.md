@@ -14,11 +14,11 @@ efficient numerical solutions, e.g. Monte Carlo simulations."
 
 ### Auto Parallel Task Graph
 
-![AutoParallel Task Graph](./autoparallel/results/local/complete_graph.png)
+![AutoParallel Task Graph](./results/local/autoparallel/complete_graph.png)
 
 ### User Parallel Task Graph
 
-![UserParallel Task Graph](./userparallel/results/local/complete_graph.png)
+![UserParallel Task Graph](./results/local/userparallel/complete_graph.png)
 
 
 [wikipedia-cholesky]: https://en.wikipedia.org/wiki/Cholesky_decomposition
