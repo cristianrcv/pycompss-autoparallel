@@ -1,0 +1,193 @@
+-------- Launch arguments --------
+Master:                    s08r2b09
+Workers:                    s08r2b10
+Tasks per Node:            -1
+CPUs per Node:             48
+GPUs per Node:             0
+FPGAs per Node:            0
+CPU Affinity:              automatic
+GPU Affinity:              automatic
+FPGA Affinity:             automatic
+FPGA reprogram command:    
+Network:                   -ib0
+Worker in Master CPUs:     0
+Worker in Master Memory:   92
+Master Port:               43122
+Master WD:                 /home/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn/
+Worker WD:                 /scratch/tmp
+Master JVM Opts:           
+Workers JVM Opts:          -Xms16000m,-Xmx92000m,-Xmn1600m
+Worker in Master JVM Opts: 
+Library Path:              /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn
+Classpath:                 /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn
+Pythonpath:                /home/bsc19/bsc19533/autoparallel/lu/userparallel
+Appdir:			   /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn
+Lang:                      python
+COMM:                      es.bsc.compss.nio.master.NIOAdaptor
+Prolog:                    
+Epilog:                    
+Storage conf:              null
+Task execution:            compss
+To COMPSs:                  --tracing=true --graph=false --summary --log_level=off --pythonpath=/home/bsc19/bsc19533/autoparallel/lu/userparallel --lang=python /home/bsc19/bsc19533/autoparallel/lu/userparallel/lu.py 6 2048
+-----------------------------------
+ 
+Master will run in s08r2b09
+List of workers:  s08r2b10
+Worker WD mkdir: srun -n1 -N1 --nodelist=s08r2b10 mkdir -p /scratch/tmp
+Generation of resources and project file finished
+Project.xml:   /scratch/tmp/project_mn_1523647204.xml
+Resources.xml: /scratch/tmp/resources_1523647204.xml
+---- Executing Prolog actions ----
+------ Launching application ------
+CMD Worker 1 launcher: srun -n1 -N1 --nodelist=s08r2b10 /apps/COMPSs/TrunkAutoParallel/Runtime/scripts/user/../../..//Runtime/scripts/system/adaptors/nio/persistent_worker_starter.sh /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn             3             -Xms16000m -Xmx92000m -Xmn1600m             0                          false             5             5             s08r2b10-ib0             43001             43122             48             0             0             automatic             automatic             automatic             -1             2a1ce371-452c-46fe-b224-3160e606d23b             python             /scratch/tmp/2a1ce371-452c-46fe-b224-3160e606d23b/s08r2b10-ib0             /apps/COMPSs/TrunkAutoParallel/Runtime/scripts/user/../../../             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn             /home/bsc19/bsc19533/autoparallel/lu/userparallel             1             null             1             null             compss 	    false
+CMD Master: /apps/COMPSs/TrunkAutoParallel/Runtime/scripts/user/../../..//Runtime/scripts/user/runcompss --project=/scratch/tmp/project_mn_1523647204.xml             --resources=/scratch/tmp/resources_1523647204.xml             --uuid=2a1ce371-452c-46fe-b224-3160e606d23b             --specific_log_dir=/home/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn//.COMPSs/1439264/             --master_name=s08r2b09-ib0             --master_port=43122             --jvm_master_opts=""             --jvm_workers_opts="-Xms16000m,-Xmx92000m,-Xmn1600m"  --tracing=true --graph=false --summary --log_level=off --pythonpath=/home/bsc19/bsc19533/autoparallel/lu/userparallel --lang=python /home/bsc19/bsc19533/autoparallel/lu/userparallel/lu.py 6 2048
+[  INFO] Using default execution type: compss
+
+----------------- Executing lu.py --------------------------
+
+Welcome to Extrae 3.5.2
+Extrae: Parsing the configuration file (/apps/COMPSs/TrunkAutoParallel/Runtime/configuration/xml/tracing/extrae_basic.xml) begins
+Extrae: Warning! <trace> tag has no <home> property defined.
+Extrae: Generating intermediate files for Paraver traces.
+Extrae: PAPI domain set to USER for HWC set 1
+Extrae: HWC set 1 contains following counters < PAPI_TOT_INS (0x80000032) PAPI_TOT_CYC (0x8000003b) PAPI_LD_INS (0x80000035) PAPI_SR_INS (0x80000036) PAPI_VEC_SP (0x80000069) PAPI_L1_DCM (0x80000000) > - changing every 500000000 nanoseconds
+Extrae: PAPI domain set to USER for HWC set 2
+Extrae: HWC set 2 contains following counters < PAPI_TOT_INS (0x80000032) PAPI_TOT_CYC (0x8000003b) PAPI_LD_INS (0x80000035) PAPI_SR_INS (0x80000036) PAPI_L2_DCM (0x80000002) > - changing every 500000000 nanoseconds
+Extrae: Tracing buffer can hold 100000 events
+Extrae: Circular buffer disabled.
+Extrae: Dynamic memory instrumentation is disabled.
+Extrae: Basic I/O memory instrumentation is disabled.
+Extrae: System calls instrumentation is disabled.
+Extrae: Parsing the configuration file (/apps/COMPSs/TrunkAutoParallel/Runtime/configuration/xml/tracing/extrae_basic.xml) has ended
+Extrae: Intermediate traces will be stored in /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn
+Extrae: Tracing mode is set to: Detail.
+Extrae: Successfully initiated with 1 tasks and 1 threads
+
+[(687)    API]  -  Starting COMPSs Runtime v2.2.rc1803 (build 20180411-1500.ra75f15f3c65db2209bf60a1004053b073d91d2fb)
+
+[ WARNING ]:	guppy module is not installed.
+		Guppy is a module needed for the local decorator.
+		The local decorator allows you to define non-task functions which are able to
+		handle synchronizations implictly.
+		PyCOMPSs can work withouth guppy, but it is recommended to have it installed.
+		You can install it via pip typing pip install guppy, or (probably) with your package manager.
+
+RESULTS -----------------
+VERSION USERPARALLEL
+MSIZE 6
+BSIZE 2048
+DEBUG False
+TOTAL_TIME 30.100990057
+INIT_TIME 3.34353089333
+LU_TIME 26.7574591637
+-------------------------
+[(31710)    API]  -  ------- COMPSs Task Execution Summary per Worker ------
+[(31711)    API]  -  --- Summary for COMPSs Worker s08r2b10-ib0
+[(31711)    API]  -  36 lu.create_block tasks have been executed
+[(31711)    API]  -  85 lu.invert_triangular tasks have been executed
+[(31711)    API]  -  85 lu.multiply tasks have been executed
+[(31711)    API]  -  55 lu.dgemm tasks have been executed
+[(31711)    API]  -  6 lu.custom_lu tasks have been executed
+[(31711)    API]  -  --- Total executed tasks in COMPSs Worker s08r2b10-ib0: 267
+[(31711)    API]  -  -------------------------------------------------------
+[(31711)    API]  -  
+[(31711)    API]  -  ------------ COMPSs Task Execution Summary ------------
+[(31711)    API]  -  36 lu.create_block tasks have been executed
+[(31711)    API]  -  85 lu.invert_triangular tasks have been executed
+[(31711)    API]  -  85 lu.multiply tasks have been executed
+[(31711)    API]  -  55 lu.dgemm tasks have been executed
+[(31711)    API]  -  6 lu.custom_lu tasks have been executed
+[(31711)    API]  -  Total executed tasks: 267
+[(31711)    API]  -  -------------------------------------------------------
+Extrae: Intermediate raw trace file created : /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn/set-0/TRACE@s08r2b09.0000251436000000000002.mpit
+Extrae: Intermediate raw trace file created : /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn/set-0/TRACE@s08r2b09.0000251436000000000001.mpit
+Extrae: Intermediate raw trace file created : /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn/set-0/TRACE@s08r2b09.0000251436000000000000.mpit
+Extrae: Intermediate raw sym file created : /gpfs/projects/bsc19/bsc19533/autoparallel/lu/userparallel/results/mn/set-0/TRACE@s08r2b09.0000251436000000000000.sym
+Extrae: Deallocating memory.
+Extrae: Application has ended. Tracing has been terminated.
+merger: Output trace format is: Paraver
+merger: Extrae 3.5.2
+mpi2prv: Assigned nodes < s08r2b09 >
+mpi2prv: Assigned size per processor < <1 Mbyte >
+mpi2prv: File set-0/TRACE@s08r2b09.0000251436000000000000.mpit is object 1.1.1 on node s08r2b09 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b09.0000251436000000000001.mpit is object 1.1.2 on node s08r2b09 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b09.0000251436000000000002.mpit is object 1.1.3 on node s08r2b09 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000000.mpit is object 1.2.1 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000001.mpit is object 1.2.2 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000002.mpit is object 1.2.3 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000003.mpit is object 1.2.4 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000004.mpit is object 1.2.5 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000005.mpit is object 1.2.6 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000006.mpit is object 1.2.7 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000007.mpit is object 1.2.8 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000008.mpit is object 1.2.9 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000009.mpit is object 1.2.10 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000010.mpit is object 1.2.11 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000011.mpit is object 1.2.12 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000012.mpit is object 1.2.13 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000013.mpit is object 1.2.14 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000014.mpit is object 1.2.15 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000015.mpit is object 1.2.16 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000016.mpit is object 1.2.17 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000017.mpit is object 1.2.18 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000018.mpit is object 1.2.19 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000019.mpit is object 1.2.20 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000020.mpit is object 1.2.21 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000021.mpit is object 1.2.22 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000022.mpit is object 1.2.23 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000023.mpit is object 1.2.24 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000024.mpit is object 1.2.25 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000025.mpit is object 1.2.26 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000026.mpit is object 1.2.27 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000027.mpit is object 1.2.28 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000028.mpit is object 1.2.29 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000029.mpit is object 1.2.30 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000030.mpit is object 1.2.31 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000031.mpit is object 1.2.32 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000032.mpit is object 1.2.33 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000033.mpit is object 1.2.34 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000034.mpit is object 1.2.35 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000035.mpit is object 1.2.36 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000036.mpit is object 1.2.37 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000037.mpit is object 1.2.38 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000038.mpit is object 1.2.39 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000039.mpit is object 1.2.40 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000040.mpit is object 1.2.41 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000041.mpit is object 1.2.42 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000042.mpit is object 1.2.43 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000043.mpit is object 1.2.44 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000044.mpit is object 1.2.45 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000045.mpit is object 1.2.46 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000046.mpit is object 1.2.47 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000047.mpit is object 1.2.48 on node s08r2b10 assigned to processor 0
+mpi2prv: File set-0/TRACE@s08r2b10.0000026495000001000048.mpit is object 1.2.49 on node s08r2b10 assigned to processor 0
+mpi2prv: A total of 7 symbols were imported from TRACE.sym file
+mpi2prv: 0 function symbols imported
+mpi2prv: 7 HWC counter descriptions imported
+mpi2prv: Checking for target directory existance... exists, ok!
+mpi2prv: Selected output trace format is Paraver
+mpi2prv: Stored trace format is Paraver
+mpi2prv: Searching synchronization points... done
+mpi2prv: Time Synchronization disabled.
+mpi2prv: Circular buffer enabled at tracing time? NO
+mpi2prv: Parsing intermediate files
+mpi2prv: Progress 1 of 2 ... 5% 10% 15% 20% 25% 30% 35% 40% 45% 50% 55% 60% 65% 70% 75% 80% 85% 90% 95% done
+mpi2prv: Processor 0 succeeded to translate its assigned files
+mpi2prv: Elapsed time translating files: 0 hours 0 minutes 0 seconds
+mpi2prv: Elapsed time sorting addresses: 0 hours 0 minutes 0 seconds
+mpi2prv: Generating tracefile (intermediate buffers of 129053 events)
+         This process can take a while. Please, be patient.
+mpi2prv: Progress 2 of 2 ... 5% 10% 15% 20% 25% 30% 35% 40% 45% 50% 55% 60% 65% 70% 75% 80% 85% 90% 95% done
+mpi2prv: Elapsed time merge step: 0 hours 0 minutes 0 seconds
+mpi2prv: Resulting tracefile occupies 272520 bytes
+mpi2prv: Removing temporal files... done
+mpi2prv: Elapsed time removing temporal files: 0 hours 0 minutes 0 seconds
+mpi2prv: Congratulations! ./trace/lu.py_compss_trace_1523647270.prv has been generated.
+
+------------------------------------------------------------
+Waiting for application completion
+[persistent_worker.sh] Clean WD /scratch/tmp/2a1ce371-452c-46fe-b224-3160e606d23b/s08r2b10-ib0
+---- Executing Epilog actions ----
+Cleanup Worker TMP files
+- Removing /scratch/tmp/2a1ce371-452c-46fe-b224-3160e606d23b
+Cleanup TMP files

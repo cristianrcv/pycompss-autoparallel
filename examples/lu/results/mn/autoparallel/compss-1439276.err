@@ -1,0 +1,5 @@
+Picked up JAVA_TOOL_OPTIONS: -Xss1280k
+WARNING: COMPSs Properties file is null. Setting default values
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 1439276 ON s19r1b27 CANCELLED AT 2018-04-14T00:12:41 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 1439276.1 ON s23r2b69 CANCELLED AT 2018-04-14T00:12:41 DUE TO TIME LIMIT ***

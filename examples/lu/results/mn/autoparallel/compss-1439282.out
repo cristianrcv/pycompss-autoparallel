@@ -1,0 +1,108 @@
+-------- Launch arguments --------
+Master:                    s18r2b49
+Workers:                    s18r2b60
+Tasks per Node:            -1
+CPUs per Node:             48
+GPUs per Node:             0
+FPGAs per Node:            0
+CPU Affinity:              automatic
+GPU Affinity:              automatic
+FPGA Affinity:             automatic
+FPGA reprogram command:    
+Network:                   -ib0
+Worker in Master CPUs:     0
+Worker in Master Memory:   92
+Master Port:               43044
+Master WD:                 /home/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn/
+Worker WD:                 /scratch/tmp
+Master JVM Opts:           
+Workers JVM Opts:          -Xms16000m,-Xmx92000m,-Xmn1600m
+Worker in Master JVM Opts: 
+Library Path:              /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn
+Classpath:                 /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn
+Pythonpath:                /home/bsc19/bsc19533/autoparallel/lu/autoparallel
+Appdir:			   /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn
+Lang:                      python
+COMM:                      es.bsc.compss.nio.master.NIOAdaptor
+Prolog:                    
+Epilog:                    
+Storage conf:              null
+Task execution:            compss
+To COMPSs:                  --tracing=false --graph=false --summary --log_level=off --pythonpath=/home/bsc19/bsc19533/autoparallel/lu/autoparallel --lang=python /home/bsc19/bsc19533/autoparallel/lu/autoparallel/lu.py 6 4096
+-----------------------------------
+ 
+Master will run in s18r2b49
+List of workers:  s18r2b60
+Worker WD mkdir: srun -n1 -N1 --nodelist=s18r2b60 mkdir -p /scratch/tmp
+Generation of resources and project file finished
+Project.xml:   /scratch/tmp/project_mn_1523673618.xml
+Resources.xml: /scratch/tmp/resources_1523673618.xml
+---- Executing Prolog actions ----
+------ Launching application ------
+CMD Worker 1 launcher: srun -n1 -N1 --nodelist=s18r2b60 /apps/COMPSs/TrunkAutoParallel/Runtime/scripts/user/../../..//Runtime/scripts/system/adaptors/nio/persistent_worker_starter.sh /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn             3             -Xms16000m -Xmx92000m -Xmn1600m             0                          false             5             5             s18r2b60-ib0             43001             43044             48             0             0             automatic             automatic             automatic             -1             4493e9d4-559a-42b7-ba78-68b49e08275f             python             /scratch/tmp/4493e9d4-559a-42b7-ba78-68b49e08275f/s18r2b60-ib0             /apps/COMPSs/TrunkAutoParallel/Runtime/scripts/user/../../../             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn             /gpfs/projects/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn             /home/bsc19/bsc19533/autoparallel/lu/autoparallel             0             null             1             null             compss 	    false
+CMD Master: /apps/COMPSs/TrunkAutoParallel/Runtime/scripts/user/../../..//Runtime/scripts/user/runcompss --project=/scratch/tmp/project_mn_1523673618.xml             --resources=/scratch/tmp/resources_1523673618.xml             --uuid=4493e9d4-559a-42b7-ba78-68b49e08275f             --specific_log_dir=/home/bsc19/bsc19533/autoparallel/lu/autoparallel/results/mn//.COMPSs/1439282/             --master_name=s18r2b49-ib0             --master_port=43044             --jvm_master_opts=""             --jvm_workers_opts="-Xms16000m,-Xmx92000m,-Xmn1600m"  --tracing=false --graph=false --summary --log_level=off --pythonpath=/home/bsc19/bsc19533/autoparallel/lu/autoparallel --lang=python /home/bsc19/bsc19533/autoparallel/lu/autoparallel/lu.py 6 4096
+[  INFO] Using default execution type: compss
+
+----------------- Executing lu.py --------------------------
+
+[(670)    API]  -  Starting COMPSs Runtime v2.2.rc1803 (build 20180411-1500.ra75f15f3c65db2209bf60a1004053b073d91d2fb)
+
+[ WARNING ]:	guppy module is not installed.
+		Guppy is a module needed for the local decorator.
+		The local decorator allows you to define non-task functions which are able to
+		handle synchronizations implictly.
+		PyCOMPSs can work withouth guppy, but it is recommended to have it installed.
+		You can install it via pip typing pip install guppy, or (probably) with your package manager.
+
+RESULTS -----------------
+VERSION AUTOPARALLEL
+MSIZE 6
+BSIZE 4096
+DEBUG False
+TOTAL_TIME 200.366630077
+INIT_TIME 4.08611106873
+LU_TIME 196.280519009
+-------------------------
+[(201715)    API]  -  ------- COMPSs Task Execution Summary per Worker ------
+[(201715)    API]  -  --- Summary for COMPSs Worker s18r2b60-ib0
+[(201716)    API]  -  36 lu.create_block tasks have been executed
+[(201716)    API]  -  15 lu.S1 tasks have been executed
+[(201716)    API]  -  15 lu.S2 tasks have been executed
+[(201716)    API]  -  5 lu.S3 tasks have been executed
+[(201716)    API]  -  5 lu.S4 tasks have been executed
+[(201716)    API]  -  55 lu.S5 tasks have been executed
+[(201716)    API]  -  55 lu.S6 tasks have been executed
+[(201716)    API]  -  55 lu.S7 tasks have been executed
+[(201716)    API]  -  5 lu.S8 tasks have been executed
+[(201716)    API]  -  15 lu.S9 tasks have been executed
+[(201716)    API]  -  15 lu.S10 tasks have been executed
+[(201716)    API]  -  10 lu.S11 tasks have been executed
+[(201716)    API]  -  10 lu.S12 tasks have been executed
+[(201716)    API]  -  --- Total executed tasks in COMPSs Worker s18r2b60-ib0: 296
+[(201716)    API]  -  -------------------------------------------------------
+[(201716)    API]  -  
+[(201716)    API]  -  ------------ COMPSs Task Execution Summary ------------
+[(201716)    API]  -  36 lu.create_block tasks have been executed
+[(201717)    API]  -  15 lu.S1 tasks have been executed
+[(201717)    API]  -  15 lu.S2 tasks have been executed
+[(201717)    API]  -  5 lu.S3 tasks have been executed
+[(201717)    API]  -  5 lu.S4 tasks have been executed
+[(201717)    API]  -  55 lu.S5 tasks have been executed
+[(201717)    API]  -  55 lu.S6 tasks have been executed
+[(201717)    API]  -  55 lu.S7 tasks have been executed
+[(201717)    API]  -  5 lu.S8 tasks have been executed
+[(201717)    API]  -  15 lu.S9 tasks have been executed
+[(201717)    API]  -  15 lu.S10 tasks have been executed
+[(201717)    API]  -  10 lu.S11 tasks have been executed
+[(201717)    API]  -  10 lu.S12 tasks have been executed
+[(201717)    API]  -  Total executed tasks: 296
+[(201717)    API]  -  -------------------------------------------------------
+[(208148)    API]  -  Execution Finished
+[persistent_worker.sh] Clean WD /scratch/tmp/4493e9d4-559a-42b7-ba78-68b49e08275f/s18r2b60-ib0
+
+------------------------------------------------------------
+Waiting for application completion
+---- Executing Epilog actions ----
+Cleanup Worker TMP files
+- Removing /scratch/tmp/4493e9d4-559a-42b7-ba78-68b49e08275f
+Cleanup TMP files
