@@ -55,6 +55,6 @@
     \
     "$EXEC_FILE" "$msize" "$bsize"
 
-  # Params: job_dependency num_nodes execution_time cpus_per_node tracing graph log_level MSIZE BSIZE
+  # Params: job_dependency version num_nodes execution_time cpus_per_node tracing graph log_level MSIZE BSIZE
   # Example: ./enqueue.sh autoparallel None 2 15 48 true false off 16 2048
 
