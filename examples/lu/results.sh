@@ -49,7 +49,7 @@
     if [ "${move_traces}" == "true" ] && [ "$tracing" == "true" ]; then
       trace_path=${SCRIPT_DIR}/${version}/results/mn/.COMPSs/${job_id}/trace
       new_trace_path=${SCRIPT_DIR}/${version}/results/mn/trace-${job_id}
-      new_trace_basename=matmul-${version}-${job_id}-${msize}-${bsize}
+      new_trace_basename=lu-${version}-${job_id}-${msize}-${bsize}
       mkdir -p "${new_trace_path}"
       if [ -f "${trace_path}/*.prv" ]; then
         cp "${trace_path}"/*.prv "${new_trace_path}"/"${new_trace_basename}".prv
