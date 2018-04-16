@@ -19,11 +19,11 @@ by Seidel."
 
 ### Auto Parallel Task Graph
 
-![AutoParallel Task Graph](./autoparallel/results/local/complete_graph.png)
+![AutoParallel Task Graph](./results/local/autoparallel/complete_graph.png)
 
 ### User Parallel Task Graph
 
-![UserParallel Task Graph](./userparallel/results/local/complete_graph.png)
+![UserParallel Task Graph](./results/local/userparallel/complete_graph.png)
 
 
 [wikipedia-seidel]: https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
