@@ -59,16 +59,18 @@
 
     for app_path in "${SCRIPT_DIR}"/*/; do
       app_version=$(basename "${app_path}")
-      echo "--- Enqueueing ${app_version}"
-      # With tracing
-      tracing=true
-      ./enqueue.sh "${app_version}" "${job_dependency}" "${num_nodes}" "${execution_time}" "${cpus_per_node}" "${tracing}" "${graph}" "${log_level}" "${nxsize}" "${nysize}" "${tsize}"
-      wait_and_get_jobID
-      log_information "${job_log_file}" "${job_dependency}" "${app_version}" "${nxsize}" "${nysize}" "${tsize}" "${tracing}"
-      # Without tracing
-      tracing=false
-      ./enqueue.sh "${app_version}" "${job_dependency}" "${num_nodes}" "${execution_time}" "${cpus_per_node}" "${tracing}" "${graph}" "${log_level}" "${nxsize}" "${nysize}" "${tsize}"
-      wait_and_get_jobID
-      log_information "${job_log_file}" "${job_dependency}" "${app_version}" "${nxsize}" "${nysize}" "${tsize}" "${tracing}"
+      if [ "${app_version}" != "results" ]; then
+        echo "--- Enqueueing ${app_version}"
+        # With tracing
+        tracing=true
+        ./enqueue.sh "${app_version}" "${job_dependency}" "${num_nodes}" "${execution_time}" "${cpus_per_node}" "${tracing}" "${graph}" "${log_level}" "${nxsize}" "${nysize}" "${tsize}"
+        wait_and_get_jobID
+        log_information "${job_log_file}" "${job_dependency}" "${app_version}" "${nxsize}" "${nysize}" "${tsize}" "${tracing}"
+        # Without tracing
+        tracing=false
+        ./enqueue.sh "${app_version}" "${job_dependency}" "${num_nodes}" "${execution_time}" "${cpus_per_node}" "${tracing}" "${graph}" "${log_level}" "${nxsize}" "${nysize}" "${tsize}"
+        wait_and_get_jobID
+        log_information "${job_log_file}" "${job_dependency}" "${app_version}" "${nxsize}" "${nysize}" "${tsize}" "${tracing}"
+      fi
     done
   done

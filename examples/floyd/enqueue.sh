@@ -1,7 +1,7 @@
 #!/bin/bash -e                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                
   # Script arguments
-  if [ $# -ne 0 ] && [ $# -ne 10 ]; then
+  if [ $# -ne 0 ] && [ $# -ne 9 ]; then
     echo "ERROR: Incorrect number of parameters"
     exit 1
   fi
@@ -14,7 +14,7 @@
   graph=${7:-false}
   log_level=${8:-off}
 
-  nsize=${9:-1000}
+  nsize=${9:-10000}
 
   # Script variables                                                                                                                                                                                                                                                           
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -54,4 +54,4 @@
     "$EXEC_FILE" "$nsize"
 
   # Params: job_dependency version num_nodes execution_time cpus_per_node tracing graph log_level NSIZE
-  # Example: ./enqueue.sh autoparallel None 2 10 48 false false off 1000
+  # Example: ./enqueue.sh autoparallel None 2 10 48 false false off 10000
