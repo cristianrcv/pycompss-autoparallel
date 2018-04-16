@@ -16,11 +16,11 @@ run, and treat nonlinear material properties in a natural way."
 
 ### Auto Parallel Task Graph
 
-![AutoParallel Task Graph](./autoparallel/results/local/complete_graph.png)
+![AutoParallel Task Graph](./results/local/autoparallel/complete_graph.png)
 
 ### User Parallel Task Graph
 
-![UserParallel Task Graph](./userparallel/results/local/complete_graph.png)
+![UserParallel Task Graph](./results/local/userparallel/complete_graph.png)
 
 
 [wikipedia-fdtd]: https://en.wikipedia.org/wiki/Finite-difference_time-domain_method
