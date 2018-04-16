@@ -34,7 +34,6 @@
 
   # Enqueue job
   enqueue_compss \
-    --qos=debug \
     --job_dependency="${job_dependency}" \
     --exec_time="${execution_time}" \
     --num_nodes="${num_nodes}" \
