@@ -39,7 +39,7 @@
     job_output=${SCRIPT_DIR}/${version}/results/mn/compss-${job_id}.out
     total_time=$(grep "TOTAL_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     init_time=$(grep "INIT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
-    mult_time=$(grep "CHOLESKY_TIME" "${job_output}" | awk '{ print $NF }' | cat)
+    mult_time=$(grep "JACOBI_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     num_tasks=$(grep "Total executed tasks:" "${job_output}" | awk '{ print $NF }' | cat)
 
     # Print results
@@ -49,7 +49,7 @@
     if [ "${move_traces}" == "true" ] && [ "$tracing" == "true" ]; then
       trace_path=${SCRIPT_DIR}/${version}/results/mn/.COMPSs/${job_id}/trace
       new_trace_path=${SCRIPT_DIR}/${version}/results/mn/trace-${job_id}
-      new_trace_basename=cholesky-${version}-${job_id}-${msize}-${bsize}
+      new_trace_basename=jacobi2d-${version}-${job_id}-${msize}-${bsize}
       mkdir -p "${new_trace_path}"
       if [ -f "${trace_path}/*.prv" ]; then
         cp "${trace_path}"/*.prv "${new_trace_path}"/"${new_trace_basename}".prv

@@ -14,7 +14,7 @@
 
   # Script arguments
   job_log_file=${1:-experiments.log}
-  job_results_file=${2:-results.log}
+  job_results_file=${2:-./results/mn/results.summary}
   move_traces=${3:-true}
 
   # Initialize results log file
