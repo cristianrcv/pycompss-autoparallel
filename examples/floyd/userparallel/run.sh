@@ -2,7 +2,7 @@
 
   # Script global variables
   SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  RESULTS_DIR="${SCRIPT_DIR}"/results/local
+  RESULTS_DIR="${SCRIPT_DIR}"/../results/local/userparallel
   APP_NAME=floyd_userparallel
   LOG_DIR=$HOME/.COMPSs/${APP_NAME}
 
