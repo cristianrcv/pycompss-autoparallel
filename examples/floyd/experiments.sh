@@ -39,7 +39,7 @@
   log_level=off
 
   #        REFERENCE  MAX_PAR
-  NSIZES=(     10000)
+  NSIZES=(     100)
   NUM_NODES=(  2)
   EXEC_TIMES=( 30)
 

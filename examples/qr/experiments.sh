@@ -40,10 +40,10 @@
   log_level=off
 
   #         REFERENCE
-  MSIZES=(     16)
+  MSIZES=(     8)
   BSIZES=(     2048)
   NUM_NODES=(  2)
-  EXEC_TIMES=( 60)
+  EXEC_TIMES=( 120)
 
   cpus_per_node=48
 

@@ -14,8 +14,8 @@
   graph=${7:-false}
   log_level=${8:-off}
 
-  nxsize=${9:-1000}
-  nysize=${10:-1000}
+  nxsize=${9:-100}
+  nysize=${10:-100}
   tsize=${11:-10}
 
   # Script variables                                                                                                                                                                                                                                                           
@@ -57,5 +57,5 @@
     "$EXEC_FILE" "$nxsize" "$nysize" "$tsize"
 
   # Params: job_dependency version num_nodes execution_time cpus_per_node tracing graph log_level NXSIZE NYSIZE TSIZE
-  # Example: ./enqueue.sh autoparallel None 2 10 48 false false off 1000 1000 10
+  # Example: ./enqueue.sh autoparallel None 2 10 48 false false off 100 100 10
 

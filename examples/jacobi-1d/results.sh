@@ -18,7 +18,7 @@
   move_traces=${3:-true}
 
   # Initialize results log file
-  echo "JOB_ID		VERSION		MSIZE	BSIZE	TRACING	TOTAL_TIME	INIT_TIME	COMP_TIME	NUM_TASKS" > "${job_results_file}"
+  echo "JOB_ID		VERSION		NSIZE	TSIZE	TRACING	TOTAL_TIME	INIT_TIME	COMP_TIME	NUM_TASKS" > "${job_results_file}"
 
   first=0
   while read -r line; do
@@ -31,27 +31,27 @@
     # Get job log file information
     job_id=$(echo "$line" | awk '{ print $1 }')
     version=$(echo "$line" | awk '{ print $2 }')
-    msize=$(echo "$line" | awk '{ print $3 }')
-    bsize=$(echo "$line" | awk '{ print $4 }')
+    nsize=$(echo "$line" | awk '{ print $3 }')
+    tsize=$(echo "$line" | awk '{ print $4 }')
     tracing=$(echo "$line" | awk '{ print $5 }')
 
     # Get job output information
-    job_output=${SCRIPT_DIR}/${version}/results/mn/compss-${job_id}.out
+    job_output=${SCRIPT_DIR}/results/mn/${version}/compss-${job_id}.out
     total_time=$(grep "TOTAL_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     init_time=$(grep "INIT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     mult_time=$(grep "JACOBI_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     num_tasks=$(grep "Total executed tasks:" "${job_output}" | awk '{ print $NF }' | cat)
 
     # Print results
-    echo "${job_id}       ${version}        ${msize}	${bsize}	${tracing}	${total_time}	${init_time}	${mult_time}	${num_tasks}" >> "${job_results_file}"
+    echo "${job_id}       ${version}        ${nsize}	${tsize}	${tracing}	${total_time}	${init_time}	${mult_time}	${num_tasks}" >> "${job_results_file}"
 
     # Move traces to its location
     if [ "${move_traces}" == "true" ] && [ "$tracing" == "true" ]; then
-      trace_path=${SCRIPT_DIR}/${version}/results/mn/.COMPSs/${job_id}/trace
-      new_trace_path=${SCRIPT_DIR}/${version}/results/mn/trace-${job_id}
-      new_trace_basename=jacobi1d-${version}-${job_id}-${msize}-${bsize}
+      trace_path=${SCRIPT_DIR}/results/mn/${version}/.COMPSs/${job_id}/trace
+      new_trace_path=${SCRIPT_DIR}/results/mn/${version}/trace-${job_id}
+      new_trace_basename=jacobi1d-${version}-${job_id}-${nsize}-${tsize}
       mkdir -p "${new_trace_path}"
-      if [ -f "${trace_path}/*.prv" ]; then
+      if [[ $(find "${trace_path}" -name "*.prv") != "" ]]; then
         cp "${trace_path}"/*.prv "${new_trace_path}"/"${new_trace_basename}".prv
         cp "${trace_path}"/*.pcf "${new_trace_path}"/"${new_trace_basename}".pcf
         cp "${trace_path}"/*.row "${new_trace_path}"/"${new_trace_basename}".row

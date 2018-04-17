@@ -45,7 +45,7 @@
   BSIZES=(1000)
   TSIZES=(10)
   NUM_NODES=(2)
-  EXEC_TIMES=(10)
+  EXEC_TIMES=(20)
 
   cpus_per_node=48
 

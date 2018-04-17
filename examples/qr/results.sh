@@ -36,7 +36,7 @@
     tracing=$(echo "$line" | awk '{ print $5 }')
 
     # Get job output information
-    job_output=${SCRIPT_DIR}/${version}/results/mn/compss-${job_id}.out
+    job_output=${SCRIPT_DIR}/results/mn/${version}/compss-${job_id}.out
     total_time=$(grep "TOTAL_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     init_time=$(grep "INIT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     comp_time=$(grep "QR_TIME" "${job_output}" | awk '{ print $NF }' | cat)
@@ -47,11 +47,11 @@
 
     # Move traces to its location
     if [ "${move_traces}" == "true" ] && [ "$tracing" == "true" ]; then
-      trace_path=${SCRIPT_DIR}/${version}/results/mn/.COMPSs/${job_id}/trace
-      new_trace_path=${SCRIPT_DIR}/${version}/results/mn/trace-${job_id}
+      trace_path=${SCRIPT_DIR}/results/mn/${version}/.COMPSs/${job_id}/trace
+      new_trace_path=${SCRIPT_DIR}/results/mn/${version}/trace-${job_id}
       new_trace_basename=qr-${version}-${job_id}-${msize}-${bsize}
       mkdir -p "${new_trace_path}"
-      if [ -f "${trace_path}/*.prv" ]; then
+      if [[ $(find "${trace_path}" -name "*.prv") != "" ]]; then
         cp "${trace_path}"/*.prv "${new_trace_path}"/"${new_trace_basename}".prv
         cp "${trace_path}"/*.pcf "${new_trace_path}"/"${new_trace_basename}".pcf
         cp "${trace_path}"/*.row "${new_trace_path}"/"${new_trace_basename}".row

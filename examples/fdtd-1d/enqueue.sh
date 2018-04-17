@@ -20,7 +20,7 @@
   # Script variables                                                                                                                                                                                                                                                           
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   EXEC_FILE=${SCRIPT_DIR}/${app_version}/fdtd-1d.py
-  WORK_DIR=${SCRIPT_DIR}/${app_version}/results/mn/
+  WORK_DIR=${SCRIPT_DIR}/results/mn/${app_version}
   LOCAL_PYTHONPATH=${SCRIPT_DIR}/${app_version}
 
 
