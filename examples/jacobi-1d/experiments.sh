@@ -43,7 +43,7 @@
   NSIZES=(     1000     40)
   TSIZES=(     10     100)
   NUM_NODES=(  2       2)
-  EXEC_TIMES=( 30      30)
+  EXEC_TIMES=( 40      30)
 
   cpus_per_node=48
 

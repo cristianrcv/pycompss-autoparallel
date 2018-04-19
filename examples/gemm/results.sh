@@ -38,7 +38,7 @@
     job_output=${SCRIPT_DIR}/results/mn/${version}/compss-${job_id}.out
     total_time=$(grep "TOTAL_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     init_time=$(grep "INIT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
-    mult_time=$(grep "GEMM_TIME" "${job_output}" | awk '{ print $NF }' | cat)
+    mult_time=$(grep "MULT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     num_tasks=$(grep "Total executed tasks:" "${job_output}" | awk '{ print $NF }' | cat)
 
     # Print results

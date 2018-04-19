@@ -39,9 +39,9 @@
   log_level=off
 
   #        REFERENCE   MAX_PAR
-  MSIZES=(     128)
+  MSIZES=(     32)
   NUM_NODES=(  2)
-  EXEC_TIMES=( 30)
+  EXEC_TIMES=( 70)
 
   cpus_per_node=48
 

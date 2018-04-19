@@ -39,9 +39,9 @@
   log_level=off
 
   #        REFERENCE  MAX_PAR
-  NSIZES=(     100)
+  NSIZES=(     20)
   NUM_NODES=(  2)
-  EXEC_TIMES=( 30)
+  EXEC_TIMES=( 90)
 
   cpus_per_node=48
 
