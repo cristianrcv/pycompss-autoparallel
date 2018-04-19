@@ -117,3 +117,6 @@ examples/matmul/matmul_autogen.py
 # Intermediate trace files
 examples/**/results/local/trace/python/
 
+# MareNostrum trace files
+mn_b?/
+
