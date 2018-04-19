@@ -1,9 +1,0 @@
-Extrae: Warning! OMP_NUM_THREADS is set but OpenMP is not supported!
-Extrae: Error! Hardware counter PAPI_FP_INS (0x80000034) is not available. Check set 2.
-Picked up JAVA_TOOL_OPTIONS: -Xss1280k
-WARNING: COMPSs Properties file is null. Setting default values
-/apps/COMPSs/TrunkAutoParallel/Runtime/scripts/user/../../..//Runtime/scripts/user/runcompss: line 1032: 402450 Killed                  python ${py_flags} "$PYCOMPSS_HOME"/pycompss/runtime/launch.py $log_level $PyObject_serialize $storageConf "$fullAppPath" ${application_args}
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 1439294 ON s18r2b23 CANCELLED AT 2018-04-14T11:55:58 DUE TO TIME LIMIT ***
-slurmstepd: error: *** STEP 1439294.1 ON s18r2b24 CANCELLED AT 2018-04-14T11:55:58 DUE TO TIME LIMIT ***
-slurmstepd: error: Exceeded step memory limit at some point.

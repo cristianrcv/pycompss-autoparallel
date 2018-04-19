@@ -1,5 +1,0 @@
-Extrae: Warning! OMP_NUM_THREADS is set but OpenMP is not supported!
-Extrae: Error! Hardware counter PAPI_FP_INS (0x80000034) is not available. Check set 2.
-Picked up JAVA_TOOL_OPTIONS: -Xss1280k
-WARNING: COMPSs Properties file is null. Setting default values
-mpi2prv: Warning! Clock accuracy seems to be in microseconds instead of nanoseconds.

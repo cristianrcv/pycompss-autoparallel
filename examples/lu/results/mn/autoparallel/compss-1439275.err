@@ -1,7 +1,0 @@
-Extrae: Warning! OMP_NUM_THREADS is set but OpenMP is not supported!
-Extrae: Error! Hardware counter PAPI_FP_INS (0x80000034) is not available. Check set 2.
-Picked up JAVA_TOOL_OPTIONS: -Xss1280k
-WARNING: COMPSs Properties file is null. Setting default values
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 1439275 ON s19r1b27 CANCELLED AT 2018-04-13T22:51:21 DUE TO TIME LIMIT ***
-slurmstepd: error: *** STEP 1439275.1 ON s19r1b28 CANCELLED AT 2018-04-13T22:51:21 DUE TO TIME LIMIT ***
