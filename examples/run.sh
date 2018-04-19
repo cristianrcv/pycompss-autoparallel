@@ -15,31 +15,33 @@
     for version in "$application"/*/; do
       application_name=$(basename "${application}")
       version_name=$(basename "${version}")
-      echo "--- Executing Application: ${application_name} - Version: ${version_name}"
+      if [ "${version_name}" != "results" ]; then
+        echo "--- Executing Application: ${application_name} - Version: ${version_name}"
 
-      cd "$version" || exit 1
-      if [ ! -f "run.sh" ]; then
-        echo "[WARN] Cannot find run.sh script. Skipping application"
-      else
-        # Run application
-        ./run.sh "${USER_OPTS}"
-        app_ev=$?
-
-        # Store exit value
-        if [ "${app_ev}" -eq 0 ]; then
-          app_result="\e[32mOK\e[34m"
+        cd "$version" || exit 1
+        if [ ! -f "run.sh" ]; then
+          echo "[WARN] Cannot find run.sh script. Skipping application"
         else
-          app_result="\e[31mFAIL\e[34m"
-        fi
-        app_line=$(printf "%-15s | %-15s | %-15s" "${application_name}" "${version_name}" "${app_result}") 
-        EXECUTION_RESULTS="${EXECUTION_RESULTS}\n\e[34m${app_line}"
+          # Run application
+          ./run.sh "${USER_OPTS}"
+          app_ev=$?
 
-        # Set global exit value
-        if [ "${app_ev}" -ne 0 ]; then
-          GLOBAL_EV=${app_ev}
+          # Store exit value
+          if [ "${app_ev}" -eq 0 ]; then
+            app_result="\e[32mOK\e[34m"
+          else
+            app_result="\e[31mFAIL\e[34m"
+          fi
+          app_line=$(printf "%-15s | %-15s | %-15s" "${application_name}" "${version_name}" "${app_result}") 
+          EXECUTION_RESULTS="${EXECUTION_RESULTS}\n\e[34m${app_line}"
+
+          # Set global exit value
+          if [ "${app_ev}" -ne 0 ]; then
+            GLOBAL_EV=${app_ev}
+          fi
         fi
+        cd "${SCRIPT_DIR}" || exit 1
       fi
-      cd "${SCRIPT_DIR}" || exit 1
     done
   }
 
