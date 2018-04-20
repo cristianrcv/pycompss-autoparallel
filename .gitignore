@@ -119,4 +119,4 @@ examples/**/results/local/trace/python/
 
 # MareNostrum trace files
 mn_b?/
-
+/results/
