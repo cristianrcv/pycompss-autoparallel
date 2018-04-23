@@ -18,7 +18,7 @@
   move_traces=${3:-true}
 
   # Initialize results log file
-  echo "JOB_ID		VERSION		MSIZE	TRACING	TOTAL_TIME	INIT_TIME	COMP_TIME	NUM_TASKS" > "${job_results_file}"
+  echo -e "JOB_ID\tVERSION\t\tMSIZE\tTRACING\tNUM_WORKERS\tTOTAL_TIME\tINIT_TIME\tCOMP_TIME\tNUM_TASKS" > "${job_results_file}"
 
   first=0
   while read -r line; do
@@ -36,13 +36,14 @@
 
     # Get job output information
     job_output=${SCRIPT_DIR}/results/mn/${version}/compss-${job_id}.out
+    num_workers=$(grep -c "Worker WD mkdir" "${job_output}")
     total_time=$(grep "TOTAL_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     init_time=$(grep "INIT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
-    mult_time=$(grep "MULT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
+    comp_time=$(grep "MULT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     num_tasks=$(grep "Total executed tasks:" "${job_output}" | awk '{ print $NF }' | cat)
 
     # Print results
-    echo "${job_id}       ${version}        ${msize}	${tracing}	${total_time}	${init_time}	${mult_time}	${num_tasks}" >> "${job_results_file}"
+    echo -e "${job_id}\t${version}\t${msize}\t${tracing}\t${num_workers}\t\t${total_time}\t${init_time}\t${comp_time}\t${num_tasks}" >> "${job_results_file}"
 
     # Move traces to its location
     if [ "${move_traces}" == "true" ] && [ "$tracing" == "true" ]; then
