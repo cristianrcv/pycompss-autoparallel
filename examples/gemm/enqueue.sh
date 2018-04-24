@@ -46,7 +46,7 @@
     --log_level="${log_level}" \
     \
     --master_working_dir="${WORK_DIR}" \
-    --worker_working_dir=scratch \
+    --worker_working_dir=/gpfs/projects/bsc19/COMPSs_SandBox \
     --base_log_dir="${WORK_DIR}" \
     --pythonpath="${LOCAL_PYTHONPATH}" \
     --lang=python \
