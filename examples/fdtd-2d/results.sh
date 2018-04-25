@@ -19,7 +19,6 @@
 
   # Initialize results log file
   echo -e "JOB_ID\tVERSION\t\tNXSIZE\tNYSIZE\tTSIZE\tTRACING\tNUM_WORKERS\tTOTAL_TIME\tINIT_TIME\tCOMP_TIME\tNUM_TASKS" > "${job_results_file}"
-  echo "JOB_ID		VERSION		NXSIZE  NYSIZE	TSIZE	TRACING	TOTAL_TIME	INIT_TIME	COMP_TIME	NUM_TASKS" > "${job_results_file}"
 
   first=0
   while read -r line; do

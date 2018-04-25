@@ -40,11 +40,11 @@
     num_workers=$(grep -c "Worker WD mkdir" "${job_output}")
     total_time=$(grep "TOTAL_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     init_time=$(grep "INIT_TIME" "${job_output}" | awk '{ print $NF }' | cat)
-    mult_time=$(grep "CHOLESKY_TIME" "${job_output}" | awk '{ print $NF }' | cat)
+    comp_time=$(grep "CHOLESKY_TIME" "${job_output}" | awk '{ print $NF }' | cat)
     num_tasks=$(grep "Total executed tasks:" "${job_output}" | awk '{ print $NF }' | cat)
 
     # Print results
-    echo -e "${job_id}\t${version}\t${msize}\t${bsize}\t${tracing}\t${num_workers}\t\t${total_time}\t${init_time}\t${mult_time}\t${num_tasks}" >> "${job_results_file}"
+    echo -e "${job_id}\t${version}\t${msize}\t${bsize}\t${tracing}\t${num_workers}\t\t${total_time}\t${init_time}\t${comp_time}\t${num_tasks}" >> "${job_results_file}"
 
     # Move traces to its location
     if [ "${move_traces}" == "true" ] && [ "$tracing" == "true" ]; then
