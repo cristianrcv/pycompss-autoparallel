@@ -27,8 +27,10 @@ class parallel(object):
     Activates with the @parallel decorator and modifies the user code to make it
     parallel. Preserves the argspec, but includes the __init__ and the
     __call__ methods.
+
     Parsed kwargs:
-        - pluto_extra_flags = [] : List of extra flags for the PLUTO binary
+        - pluto_extra_flags = [] : List of extra flags for the PLUTO binary (default None)
+        - taskify_loop_level = N : Loop depth to taskify (default None)
     """
 
     def __init__(self, *args, **kwargs):
@@ -42,6 +44,9 @@ class parallel(object):
         self.pluto_extra_flags = None
         if "pluto_extra_flags" in self.kwargs.keys():
             self.pluto_extra_flags = self.kwargs["pluto_extra_flags"]
+        self.taskify_loop_level = None
+        if "taskify_loop_level" in self.kwargs.keys():
+            self.taskify_loop_level = self.kwargs["taskify_loop_level"]
 
         # Add a place to store internal translator structures
         self.translator_py2scop = None
@@ -276,7 +281,7 @@ class parallel(object):
             logger.debug("[decorator] Start py2pycompss")
 
         from pycompss.util.translators.py2pycompss.translator_py2pycompss import Py2PyCOMPSs
-        Py2PyCOMPSs.translate(func, par_py_files, output)
+        Py2PyCOMPSs.translate(func, par_py_files, output, taskify_loop_level=self.taskify_loop_level)
 
         # Finish
         if __debug__:

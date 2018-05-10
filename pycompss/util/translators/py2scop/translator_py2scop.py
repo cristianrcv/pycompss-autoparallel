@@ -168,11 +168,10 @@ class Py2Scop(object):
         """
 
         import ast
-        import _ast
         import copy
 
         # Copy current node if it is an outermost loop
-        if isinstance(node, _ast.For) and for_level == 0:
+        if isinstance(node, ast.For) and for_level == 0:
             node_copy = copy.deepcopy(node)
             ast.fix_missing_locations(node_copy)
             if for_blocks is None:
@@ -180,7 +179,7 @@ class Py2Scop(object):
             for_blocks.append(node_copy)
 
         # Prepare for next recursion
-        if isinstance(node, _ast.For):
+        if isinstance(node, ast.For):
             for_level = for_level + 1
 
         # Child recursion
@@ -268,10 +267,9 @@ class Py2Scop(object):
         """
 
         import ast
-        import _ast
 
         # Process current node
-        if isinstance(node, _ast.Name):
+        if isinstance(node, ast.Name):
             return [node.id]
 
         # Child recursion
@@ -304,11 +302,10 @@ class Py2Scop(object):
         """
 
         import ast
-        import _ast
 
         # Process current node
         iter_vars = []
-        if isinstance(node, _ast.For):
+        if isinstance(node, ast.For):
             iter_vars.append(node.target.id)
 
         # Child recursion
@@ -336,12 +333,11 @@ class Py2Scop(object):
         """
 
         import ast
-        import _ast
 
         # Process current node
         array_vars = []
-        if isinstance(node, _ast.Subscript):
-            if isinstance(node.value, _ast.Name):
+        if isinstance(node, ast.Subscript):
+            if isinstance(node.value, ast.Name):
                 array_vars.append(node.value.id)
 
         # Child recursion
@@ -373,15 +369,14 @@ class Py2Scop(object):
         """
 
         import ast
-        import _ast
 
         # Process current node
-        if isinstance(node, _ast.Assign) or isinstance(node, _ast.AugAssign) or isinstance(node, _ast.Expr):
+        if isinstance(node, ast.Assign) or isinstance(node, ast.AugAssign) or isinstance(node, ast.Expr):
             s_scop = Py2Scop._process_statement(node, for_fathers, scatter_indexes, param_vars, all_vars)
             return [s_scop]
 
         # Insert for to fathers' list
-        if isinstance(node, _ast.For):
+        if isinstance(node, ast.For):
             if for_fathers is None:
                 for_fathers = []
             for_fathers.append(node)
@@ -400,16 +395,16 @@ class Py2Scop(object):
                         statements_scop.extend(Py2Scop._get_statements(item, for_fathers, scatter_indexes,
                                                                        param_vars, all_vars))
                         # Only increase child index if it a special node
-                        if isinstance(item, _ast.For) or isinstance(item, _ast.Assign) \
-                                or isinstance(item, _ast.AugAssign) or isinstance(item, _ast.Expr):
+                        if isinstance(item, ast.For) or isinstance(item, ast.Assign) \
+                                or isinstance(item, ast.AugAssign) or isinstance(item, ast.Expr):
                             child_index += 1
             elif isinstance(value, ast.AST):
                 scatter_indexes[-1] = child_index
                 statements_scop.extend(Py2Scop._get_statements(value, for_fathers, scatter_indexes, param_vars,
                                                                all_vars))
                 # Only increase child index if it a special node
-                if isinstance(value, _ast.For) or isinstance(value, _ast.Assign) \
-                        or isinstance(value, _ast.AugAssign) or isinstance(value, _ast.Expr):
+                if isinstance(value, ast.For) or isinstance(value, ast.Assign) \
+                        or isinstance(value, ast.AugAssign) or isinstance(value, ast.Expr):
                     print("INCREASE2")
                     child_index += 1
 
@@ -417,7 +412,7 @@ class Py2Scop(object):
         scatter_indexes.pop()
 
         # Remove from fathers
-        if isinstance(node, _ast.For):
+        if isinstance(node, ast.For):
             for_fathers.pop()
 
         # Return all scop processed statements
@@ -439,6 +434,8 @@ class Py2Scop(object):
         Raise:
                 - Py2ScopException
         """
+
+        import ast
 
         from pycompss.util.translators.scop_types.scop.statement_class import Statement
         from pycompss.util.translators.scop_types.scop.statement.relation_class import Relation
@@ -560,28 +557,27 @@ class Py2Scop(object):
                                    scattering_num_pars, scattering_matrix)
 
         # Accesses
-        import _ast
         accesses_scop = []
         # Add write access
-        if isinstance(statement_loop, _ast.Assign):
+        if isinstance(statement_loop, ast.Assign):
             # Expr is of the form X1,...,Xn = expr
-            if isinstance(statement_loop.targets[0], _ast.Subscript):
+            if isinstance(statement_loop.targets[0], ast.Subscript):
                 # Single return value
                 accesses_scop.append(Py2Scop._process_access(statement_loop.targets[0], RelationType.WRITE, iter_vars,
                                                              param_vars, all_vars))
-            elif isinstance(statement_loop.targets[0], _ast.Tuple):
+            elif isinstance(statement_loop.targets[0], ast.Tuple):
                 # Multiple return value
                 for ret_expr in statement_loop.targets[0].elts:
                     accesses_scop.append(Py2Scop._process_access(ret_expr, RelationType.WRITE, iter_vars,
                                                                  param_vars, all_vars))
-        elif isinstance(statement_loop, _ast.AugAssign):
+        elif isinstance(statement_loop, ast.AugAssign):
             # Expr is of the form x += expr
-            if isinstance(statement_loop.target, _ast.Subscript):
+            if isinstance(statement_loop.target, ast.Subscript):
                 accesses_scop.append(Py2Scop._process_access(statement_loop.target, RelationType.WRITE, iter_vars,
                                                              param_vars, all_vars))
                 accesses_scop.append(Py2Scop._process_access(statement_loop.target, RelationType.READ, iter_vars,
                                                              param_vars, all_vars))
-        elif isinstance(statement_loop, _ast.Expr):
+        elif isinstance(statement_loop, ast.Expr):
             # Expr is of the form func(). Only READ access so no need to add anything
             pass
 
@@ -612,25 +608,25 @@ class Py2Scop(object):
         Raise:
         """
 
-        import _ast
+        import ast
 
         accesses = []
 
-        if isinstance(node, _ast.Name):
+        if isinstance(node, ast.Name):
             # Nothing to do since we control array accesses
             pass
-        elif isinstance(node, _ast.Num):
+        elif isinstance(node, ast.Num):
             # Nothing to do since we control array accesses
             pass
-        elif isinstance(node, _ast.Subscript):
+        elif isinstance(node, ast.Subscript):
             # Process array access
             from pycompss.util.translators.scop_types.scop.statement.relation_class import RelationType
             accesses.append(Py2Scop._process_access(node, RelationType.READ, iter_vars,
                                                     param_vars, all_vars))
-        elif isinstance(node, _ast.BinOp):
+        elif isinstance(node, ast.BinOp):
             accesses.extend(Py2Scop._process_accesses(node.left, iter_vars, param_vars, all_vars))
             accesses.extend(Py2Scop._process_accesses(node.right, iter_vars, param_vars, all_vars))
-        elif isinstance(node, _ast.Call):
+        elif isinstance(node, ast.Call):
             for call_arg in node.args:
                 accesses.extend(Py2Scop._process_accesses(call_arg, iter_vars, param_vars, all_vars))
 
@@ -652,11 +648,12 @@ class Py2Scop(object):
         Raise:
         """
 
+        import ast
+
         # Obtain array dimensions
-        import _ast
         array_dims = 1
         n2 = node
-        while isinstance(n2, _ast.Subscript):
+        while isinstance(n2, ast.Subscript):
             n2 = n2.value
             array_dims = array_dims + 1
         accessed_var = n2.id
@@ -693,7 +690,7 @@ class Py2Scop(object):
         col_index = 2
         row_index = 1
         n2 = node
-        while isinstance(n2, _ast.Subscript):
+        while isinstance(n2, ast.Subscript):
             # Process access expression
             access_row = Py2Scop._process_expr(n2.slice.value, names2index, access_cols)
             access_matrix[row_index] = access_row
@@ -725,24 +722,25 @@ class Py2Scop(object):
                 - Py2ScopException
         """
 
-        import _ast
+        import ast
+
         res = [0] * dim
-        if isinstance(node, _ast.Name):
+        if isinstance(node, ast.Name):
             res[names2index[node.id]] = 1
-        elif isinstance(node, _ast.Num):
+        elif isinstance(node, ast.Num):
             res[names2index['indep']] = node.n
-        elif isinstance(node, _ast.BinOp):
+        elif isinstance(node, ast.BinOp):
             # Process recursive expression
             res_left = Py2Scop._process_expr(node.left, names2index, dim)
             res_right = Py2Scop._process_expr(node.right, names2index, dim)
             # Merge current operation
-            if isinstance(node.op, _ast.Sub):
+            if isinstance(node.op, ast.Sub):
                 from operator import sub
                 res = map(sub, res_left, res_right)
-            elif isinstance(node.op, _ast.Add):
+            elif isinstance(node.op, ast.Add):
                 from operator import add
                 res = map(add, res_left, res_right)
-            elif isinstance(node.op, _ast.Mult):
+            elif isinstance(node.op, ast.Mult):
                 left_cnst = (res_left[:-1] == [0] * (dim - 1))
                 right_cnst = (res_right[:-1] == [0] * (dim - 1))
                 if not left_cnst and not right_cnst:
@@ -758,7 +756,7 @@ class Py2Scop(object):
                     # Both constants
                     res = res_left
                     res[-1] = res[-1] * res_right[-1]
-            elif isinstance(node.op, _ast.Div):
+            elif isinstance(node.op, ast.Div):
                 # Non-linear expression
                 raise Py2ScopException("ERROR: Unhandled operation DIV for expressions")
         return res
