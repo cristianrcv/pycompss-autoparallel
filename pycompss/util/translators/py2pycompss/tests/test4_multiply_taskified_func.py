@@ -3,6 +3,7 @@ def matmul(m_size, n_size, k_size, b_size, debug):
     a = initialize(m_size, n_size, b_size, True)
     b = initialize(n_size, k_size, b_size, True)
     c = initialize(m_size, k_size, b_size, False)
+    d = initialize(m_size, k_size, b_size, False)
 
     # Debug
     if debug:
@@ -14,11 +15,13 @@ def matmul(m_size, n_size, k_size, b_size, debug):
         print c
 
     # Perform computation
-    # c = a*b
-    for i in range(1, m_size + 1):
-        for j in range(1, k_size + 1):
-            for k in range(1, n_size + 1):
-                c[i][j] += a[i - 1][k - 1] * b[k - 1][j - 1]
+    # c, d = a*b
+    for i in range(m_size):
+        for j in range(k_size):
+            for k in range(n_size):
+                c[i][j] = multiply(c[i][j], a[i][k], b[k][j])
+                multiply(c[i][j], a[i][k], b[k][j])
+                c[i][j], d[i][j] = multiply(c[i][j], a[i][k], b[k][j])
 
     # Debug
     if debug:
@@ -27,3 +30,7 @@ def matmul(m_size, n_size, k_size, b_size, debug):
 
     # Result
     return c
+
+
+def multiply(c, a, b):
+    return c + a * b

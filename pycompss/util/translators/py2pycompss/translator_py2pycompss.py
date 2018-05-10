@@ -526,24 +526,56 @@ class _RewriteSubscriptToSubscript(ast.NodeTransformer):
         self.var_counter = 1
         self.var2subscript = {}
 
-    def get_next_var(self):
+    def get_var_subscripts(self):
+        return self.var2subscript
+
+    def visit_Subscript(self, node):
+        # Check that variable has not been found previously
+        for var_name, var_subscript in self.var2subscript.items():
+            if _RewriteSubscriptToSubscript._compare_ast(node, var_subscript):
+                var_ast = self._get_var_ast(var_name)
+                return ast.copy_location(var_ast, node)
+
+        # Register new subscript
+        var_name = self._get_next_var()
+        self.var2subscript[var_name] = node
+
+        var_ast = self._get_var_ast(var_name)
+        return ast.copy_location(var_ast, node)
+
+    def _get_next_var(self):
         # Create new var name
         var_name = "var" + str(self.var_counter)
-        var_ast = ast.Subscript(value=ast.Name(id=var_name), slice=ast.Index(value=self.loop_ind))
 
         # Increase counter for next call
         self.var_counter += 1
 
         # Return var object
-        return var_ast, var_name
+        return var_name
 
-    def get_var_subscripts(self):
-        return self.var2subscript
+    def _get_var_ast(self, var_name):
+        # Create new var_ast from var_name
+        # We can insert the plain loop index because offsets are computed on the callee
+        var_ast = ast.Subscript(value=ast.Name(id=var_name), slice=ast.Index(value=self.loop_ind))
 
-    def visit_Subscript(self, node):
-        var_ast, var_name = self.get_next_var()
-        self.var2subscript[var_name] = node
-        return ast.copy_location(var_ast, node)
+        return var_ast
+
+    @staticmethod
+    def _compare_ast(node1, node2):
+        if type(node1) is not type(node2):
+            return False
+        if isinstance(node1, ast.AST):
+            for k, v in vars(node1).iteritems():
+                if k in ('lineno', 'col_offset', 'ctx', '_pp'):
+                    continue
+                if not _RewriteSubscriptToSubscript._compare_ast(v, getattr(node2, k)):
+                    return False
+            return True
+        elif isinstance(node1, list):
+            import itertools
+            return all(itertools.starmap(_RewriteSubscriptToSubscript._compare_ast, itertools.izip(node1, node2)))
+        else:
+            return node1 == node2
 
 
 #
@@ -1129,8 +1161,7 @@ class TestPy2PyCOMPSs(unittest.TestCase):
             raise
         finally:
             # Erase file
-            # TODO os.remove(out_file)
-            pass
+            os.remove(out_file)
 
     def test_multiply(self):
         # Base variables
@@ -1160,6 +1191,47 @@ class TestPy2PyCOMPSs(unittest.TestCase):
 
         # Check file content
         expected_file = tests_path + "/test3_multiply.expected.pycompss"
+        try:
+            with open(expected_file, 'r') as f:
+                expected_content = f.read()
+            with open(out_file, 'r') as f:
+                out_content = f.read()
+            self.assertEqual(out_content, expected_content)
+        except Exception:
+            raise
+        finally:
+            # Erase file
+            os.remove(out_file)
+
+    def test_multiply_taskified(self):
+        # Base variables
+        import os
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        tests_path = dir_path + "/tests"
+
+        # Insert function file into pythonpath
+        import sys
+        sys.path.insert(0, tests_path)
+
+        # Import function to replace
+        import importlib
+        func_name = "matmul"
+        test_module = importlib.import_module(
+            "pycompss.util.translators.py2pycompss.tests.test4_multiply_taskified_func")
+        func = getattr(test_module, func_name)
+
+        # Create list of parallel py codes
+        src_file0 = tests_path + "/test4_multiply_taskified.src.python"
+        par_py_files = [src_file0]
+
+        # Output file
+        out_file = tests_path + "/test4_multiply_taskified.out.pycompss"
+
+        # Translate
+        Py2PyCOMPSs.translate(func, par_py_files, out_file, taskify_loop_level=1)
+
+        # Check file content
+        expected_file = tests_path + "/test4_multiply_taskified.expected.pycompss"
         try:
             with open(expected_file, 'r') as f:
                 expected_content = f.read()
