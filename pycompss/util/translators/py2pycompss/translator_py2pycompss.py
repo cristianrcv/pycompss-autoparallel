@@ -81,19 +81,19 @@ class Py2PyCOMPSs(object):
                     task_func_name = statement.name
                     # Update name to avoid override between par_py files
                     task_counter_id += 1
-                    new_name = "S" + str(task_counter_id)
-                    task2new_name[task_func_name] = new_name
+                    task_new_name = "S" + str(task_counter_id)
+                    task2new_name[task_func_name] = task_new_name
 
                     # Update task
                     header, code, original_args, new_args, ret_args, new_vars2subscripts = Py2PyCOMPSs._process_task(
-                        statement, new_name)
+                        statement, task_new_name)
 
-                    task2headers[task_func_name] = header
-                    task2func_code[task_func_name] = code
-                    task2original_args[task_func_name] = original_args
-                    task2new_args[task_func_name] = new_args
-                    task2ret_args[task_func_name] = ret_args
-                    task2vars2subscripts[task_func_name] = new_vars2subscripts
+                    task2headers[task_new_name] = header
+                    task2func_code[task_new_name] = code
+                    task2original_args[task_new_name] = original_args
+                    task2new_args[task_new_name] = new_args
+                    task2ret_args[task_new_name] = ret_args
+                    task2vars2subscripts[task_new_name] = new_vars2subscripts
                 else:
                     # Generated CLooG code for parallel loop
                     # Check for calls to task methods and replace them. Leave the rest intact
@@ -148,17 +148,17 @@ class Py2PyCOMPSs(object):
 
         # Debug
         # if __debug__:
-        # logger.debug("OUTPUT IMPORTS:")
-        # for oi in output_imports:
-        #    logger.debug(astor.dump_tree(oi))
-        # logger.debug("OUTPUT TASKS:")
-        # for task_name, task_code in task2func_code.items():
-        #    task_header = task2headers.get(task_name)
-        #    logger.debug(task_name)
-        #    logger.debug(task_header)
-        #    logger.debug(astor.dump_tree(task_code))
-        # logger.debug("OUTPUT CODE:")
-        # logger.debug(astor.dump_tree(func_ast.body))
+        #    logger.debug("OUTPUT IMPORTS:")
+        #    for oi in output_imports:
+        #        logger.debug(astor.dump_tree(oi))
+        #    logger.debug("OUTPUT TASKS:")
+        #    for task_name, task_code in task2func_code.items():
+        #        task_header = task2headers.get(task_name)
+        #        logger.debug(task_name)
+        #        logger.debug(task_header)
+        #        logger.debug(astor.dump_tree(task_code))
+        #    logger.debug("OUTPUT CODE:")
+        #    logger.debug(astor.dump_tree(func_ast.body))
 
         # Print content to PyCOMPSs file
         with open(output, 'w') as f:
@@ -174,7 +174,8 @@ class Py2PyCOMPSs(object):
             print("", file=f)
             print("", file=f)
             # Write tasks
-            for task_name, task_code in sorted(task2func_code.items()):
+            for task_name in sorted(task2func_code, key=Py2PyCOMPSs._task_name_sort):
+                task_code = task2func_code.get(task_name)
                 task_header = task2headers.get(task_name)
                 # Print task header if method is still a task
                 if task_header is not None:
@@ -189,6 +190,17 @@ class Py2PyCOMPSs(object):
 
         if __debug__:
             logger.debug("[Py2PyCOMPSs] End translation")
+
+    @staticmethod
+    def _task_name_sort(task_name):
+        import re
+        res = []
+        for c in re.split('(\d+)', task_name):
+            if c.isdigit():
+                res.append(int(c))
+            else:
+                res.append(c)
+        return res
 
     @staticmethod
     def _contains_import_statement(import_statement, list_of_imports):
@@ -612,12 +624,15 @@ class _RewriteCallees(ast.NodeTransformer):
                 import astor
                 logger.debug(astor.to_source(node))
 
+            # Function new name
+            new_name = self.task2new_name[original_name]
+
             # Replace function name
-            node.func = ast.Name(id=self.task2new_name[original_name])
+            node.func = ast.Name(id=new_name)
 
             # Map function arguments to call arguments
             import copy
-            func_args = self.task2original_args[original_name]
+            func_args = self.task2original_args[new_name]
             func_args2callee_args = {}
             for i in range(len(node.args)):
                 func_arg = func_args[i].id
@@ -625,7 +640,7 @@ class _RewriteCallees(ast.NodeTransformer):
                 func_args2callee_args[func_arg] = callee_arg
 
             # Transform function variables to call arguments on all var2subscript
-            vars2subscripts = copy.deepcopy(self.task2vars2subscripts[original_name])
+            vars2subscripts = copy.deepcopy(self.task2vars2subscripts[new_name])
             vars2new_subscripts = {}
             for var, subscript in vars2subscripts.items():
                 ran = _RewriteArgNames(func_args2callee_args)
@@ -638,7 +653,7 @@ class _RewriteCallees(ast.NodeTransformer):
 
             # Transform all the new arguments into its subscript
             transformed_new_args = []
-            new_args = self.task2new_args[original_name]
+            new_args = self.task2new_args[new_name]
             for arg in new_args:
                 transformed_new_args.append(vars2new_subscripts[arg.id])
 
@@ -652,7 +667,7 @@ class _RewriteCallees(ast.NodeTransformer):
 
             # Transform all the new return variables into its subscript
             transformed_return_vars = []
-            return_vars = self.task2ret_vars[original_name]
+            return_vars = self.task2ret_vars[new_name]
             for ret_var in return_vars:
                 transformed_return_vars.append(vars2new_subscripts[ret_var])
 
