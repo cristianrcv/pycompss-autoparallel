@@ -31,15 +31,11 @@ class Py2PyCOMPSs(object):
         function code and adds the required PyCOMPSs annotations. The
         result is stored in the given output file
 
-        Arguments:
-                - func : Python original function
-                - par_py_files : List of files containing the Python parallelization
-                        of each for block in the func_source
-                - output : PyCOMPSs file path
-                - taskify_loop_level : Loop depth to perform taskification (default None)
-        Return:
-        Raise:
-                - Py2PyCOMPSsException
+        :param func: Python original function
+        :param par_py_files: List of files containing the Python parallelization of each for block in the func_source
+        :param output: PyCOMPSs file path
+        :param taskify_loop_level: Loop depth to perform taskification (default None)
+        :raise Py2PyCOMPSsException:
         """
 
         if __debug__:
@@ -193,6 +189,13 @@ class Py2PyCOMPSs(object):
 
     @staticmethod
     def _task_name_sort(task_name):
+        """
+        Function used to sort the entries of a list of the form [a-zA-Z]*[0-9]*
+
+        :param task_name: name to evaluate
+        :return result: Compare value
+        """
+
         import re
         res = []
         for c in re.split('(\d+)', task_name):
@@ -204,6 +207,14 @@ class Py2PyCOMPSs(object):
 
     @staticmethod
     def _contains_import_statement(import_statement, list_of_imports):
+        """
+        Function to determine if an import already exists in the given list of imports
+
+        :param import_statement: Import to evaluate
+        :param list_of_imports: List of saved imports
+        :return: True if the import already exists, False otherwise
+        """
+
         for i in list_of_imports:
             if Py2PyCOMPSs._equal_imports(import_statement, i):
                 return True
@@ -211,6 +222,14 @@ class Py2PyCOMPSs(object):
 
     @staticmethod
     def _equal_imports(import_statement1, import_statement2):
+        """
+        Determines whether two import statements are equal or not
+
+        :param import_statement1: Import statement 1
+        :param import_statement2: Import statement 2
+        :return: True if import_statement1 is equal to import_statement2, False otherwise
+        """
+
         if len(import_statement1.names) != len(import_statement2.names):
             return False
         for i in range(len(import_statement1.names)):
@@ -227,18 +246,15 @@ class Py2PyCOMPSs(object):
         PyCOMPSs equivalent function and the callee modification. Renames
         it with the given new_name
 
-        Arguments:
-                - func : AST node representing the head of the Python function
-                - new_name : New name for the Python function
-        Return:
-                - task_header : String representing the function task header
-                - new_func : new AST node representing the head of the function
-                - original_args : List of original arguments
-                - new_args : List of new arguments
-                - ret_args : List of return variables
-                - var2subscript : Dictionary containing the mapping of new variables to previous subscripts
-        Raise:
-                - Py2PyCOMPSsException
+        :param func: AST node representing the head of the Python function
+        :param new_name: New name for the Python function
+        :return task_header: String representing the function task header
+        :return new_func: new AST node representing the head of the function
+        :return original_args: List of original arguments
+        :return new_args: List of new arguments
+        :return ret_args: List of return variables
+        :return var2subscript: Dictionary containing the mapping of new variables to previous subscripts
+        :raise Py2PyCOMPSsException:
         """
 
         if __debug__:
@@ -295,15 +311,12 @@ class Py2PyCOMPSs(object):
         """
         Processes all the directions of the parameters found in the given statement
 
-        Arguments:
-                - statement : AST node representing the head of the statement
-        Return:
-                - in_vars : List of names of IN variables
-                - out_vars : List of names of OUT variables
-                - inout_vars : List of names of INOUT variables
-                - return_vars : List of names of RETURN variables
-        Raise:
-                - Py2PyCOMPSsException
+        :param statement: AST node representing the head of the statement
+        :return in_vars: List of names of IN variables
+        :return out_vars: List of names of OUT variables
+        :return inout_vars: List of names of INOUT variables
+        :return return_vars: List of names of RETURN variables
+        :raise Py2PyCOMPSsException:
         """
 
         in_vars = Py2PyCOMPSs._get_access_vars(statement)
@@ -351,11 +364,9 @@ class Py2PyCOMPSs(object):
         """
         Returns the accessed variable names within the given expression
 
-        Arguments:
-                - statement : AST node representing the head of the statement
-        Return:
-                - in_vars : List of names of accessed variables
-        Raise:
+        :param statement: AST node representing the head of the statement
+        :param is_target: Boolean to indicate if we are inside a target node or not
+        :return in_vars: List of names of accessed variables
         """
 
         # Direct case
@@ -386,11 +397,8 @@ class Py2PyCOMPSs(object):
         """
         Returns the target variables within given the expression
 
-        Arguments:
-                - statement : AST node representing the head of the statement
-        Return:
-                - target_vars : List of names of target variables
-        Raise:
+        :param statement: AST node representing the head of the statement
+        :return target_vars: List of names of target variables
         """
 
         if isinstance(statement, ast.Assign):
@@ -432,14 +440,11 @@ class Py2PyCOMPSs(object):
         """
         Constructs the task header corresponding to the given IN, OUT, and INOUT variables
 
-        Arguments:
-                - in_vars : List of names of IN variables
-                - out_vars : List of names of OUT variables
-                - inout_vars : List of names of INOUT variables
-                - return_vars : List of names of RETURN variables
-        Return:
-                - task_header : String representing the PyCOMPSs task header
-        Raise:
+        :param in_vars: List of names of IN variables
+        :param out_vars: List of names of OUT variables
+        :param inout_vars: List of names of INOUT variables
+        :param return_vars: List of names of RETURN variables
+        :return task_header: String representing the PyCOMPSs task header
         """
 
         # Construct task header
@@ -494,10 +499,21 @@ class _RewriteSubscript(ast.NodeTransformer):
     """
 
     def __init__(self):
+        """
+        Initialize Rewrite Subscript internal structures
+        """
+
         self.var_counter = 1
         self.var2subscript = {}
 
     def get_next_var(self):
+        """
+        Returns the next variable AST node and name
+
+        :return var_ast: New variable AST representation
+        :return var_name: New variable name
+        """
+
         # Create new var name
         var_name = "var" + str(self.var_counter)
         var_ast = ast.Name(id=var_name)
@@ -509,9 +525,23 @@ class _RewriteSubscript(ast.NodeTransformer):
         return var_ast, var_name
 
     def get_var_subscripts(self):
+        """
+        Returns the mapping between detected variables and its subscripts
+
+        :return var2subscript: Map between variable names and its subscripts
+        """
+
         return self.var2subscript
 
     def visit_Subscript(self, node):
+        """
+        Modifies the subscript node by a plain variable and internally stores the relation between
+        the new variable and the old subscript
+
+        :param node: Subscript node to process
+        :return new_node: New AST representation of a plain variable
+        """
+
         var_ast, var_name = self.get_next_var()
         self.var2subscript[var_name] = node
         return ast.copy_location(var_ast, node)
@@ -534,14 +564,34 @@ class _RewriteSubscriptToSubscript(ast.NodeTransformer):
     """
 
     def __init__(self, loop_ind):
+        """
+        Initializes the _RewriteSubscriptToSubscript internal structures.
+
+        :param loop_ind: Loop index AST representation
+        """
+
         self.loop_ind = loop_ind
         self.var_counter = 1
         self.var2subscript = {}
 
     def get_var_subscripts(self):
+        """
+        Returns the mapping between detected variables and its subscripts
+
+        :return var2subscript: Map between variable names and its subscripts
+        """
+
         return self.var2subscript
 
     def visit_Subscript(self, node):
+        """
+        Modifies the subscript node by a 1D subscript variable and internally stores the relation between
+        the new variable and the old subscript
+
+        :param node: Subscript node to process
+        :return new_node: New AST representation of a plain variable
+        """
+
         # Check that variable has not been found previously
         for var_name, var_subscript in self.var2subscript.items():
             if _RewriteSubscriptToSubscript._compare_ast(node, var_subscript):
@@ -556,6 +606,12 @@ class _RewriteSubscriptToSubscript(ast.NodeTransformer):
         return ast.copy_location(var_ast, node)
 
     def _get_next_var(self):
+        """
+        Returns the next variable name
+
+        :return var_name: Variable name
+        """
+
         # Create new var name
         var_name = "var" + str(self.var_counter)
 
@@ -566,6 +622,13 @@ class _RewriteSubscriptToSubscript(ast.NodeTransformer):
         return var_name
 
     def _get_var_ast(self, var_name):
+        """
+        Creates an AST subscript representation of the variable var_name
+
+        :param var_name: String containing the name of the variable
+        :return var_ast: AST subscript representation of the given variable
+        """
+
         # Create new var_ast from var_name
         # We can insert the plain loop index because offsets are computed on the callee
         var_ast = ast.Subscript(value=ast.Name(id=var_name), slice=ast.Index(value=self.loop_ind))
@@ -574,6 +637,15 @@ class _RewriteSubscriptToSubscript(ast.NodeTransformer):
 
     @staticmethod
     def _compare_ast(node1, node2):
+        """
+        Compares the given two AST nodes to check if they are equal or not. Does not consider lineno, col_offset,
+        ctx or _pp fields
+
+        :param node1: First node to compare
+        :param node2: Second node to compare
+        :return: True if node1 equals node2, False otherwise
+        """
+
         if type(node1) is not type(node2):
             return False
         if isinstance(node1, ast.AST):
@@ -607,6 +679,16 @@ class _RewriteCallees(ast.NodeTransformer):
     """
 
     def __init__(self, task2new_name, task2original_args, task2new_args, task2ret_vars, task2vars2subscripts):
+        """
+        Initializes _RewriteCallees internal structures
+
+        :param task2new_name: Dictionary mapping the function variable original and new names
+        :param task2original_args: Dictionary mapping the function name to its original arguments
+        :param task2new_args: Dictionary mapping the function name to its new arguments
+        :param task2ret_vars: Dictionary mapping the function name to its return values
+        :param task2vars2subscripts: Dictionary mapping the function name to its vars-subscripts dictionary
+        """
+
         self.task2new_name = task2new_name
         self.task2original_args = task2original_args
         self.task2new_args = task2new_args
@@ -614,6 +696,13 @@ class _RewriteCallees(ast.NodeTransformer):
         self.task2vars2subscripts = task2vars2subscripts
 
     def visit_Call(self, node):
+        """
+        Process the call node to modify the callee with the new task_function parameters
+
+        :param node: Call AST node
+        :return new_call: New Call AST node containing the modified task call
+        """
+
         original_name = node.func.id
 
         if original_name in self.task2new_name.keys():
@@ -714,9 +803,22 @@ class _RewriteArgNames(ast.NodeTransformer):
     """
 
     def __init__(self, func_args2callee_args):
+        """
+        Initializes _RewriteArgNames internal structures
+
+        :param func_args2callee_args: Dictionary mapping the function variable names and its callee expression
+        """
+
         self.func_args2callee_args = func_args2callee_args
 
     def visit_Name(self, node):
+        """
+        Rewrites each variable node with the new variable name
+
+        :param node: Variable AST name node
+        :return new_node: AST Node representing the new name of the variable
+        """
+
         if node.id in self.func_args2callee_args.keys():
             # Accessed variable is a function parameter
             # Modify it by its callee value
@@ -744,21 +846,55 @@ class _LoopTasking(ast.NodeTransformer):
     """
 
     def __init__(self, taskify_loop_level, task_counter_id, task2headers, task2func_code):
+        """
+        Initializes the _LoopTasking internal structures
+
+        :param taskify_loop_level: Depth level of for loop to taskify
+        :param task_counter_id: Task counter
+        :param task2headers: Map containing the task names and their headers
+        :param task2func_code: Map containing the task names and their AST code representations
+        """
+
         self.taskify_loop_level = taskify_loop_level
         self.task_counter_id = task_counter_id
         self.task2headers = task2headers
         self.task2func_code = task2func_code
 
     def get_final_task_counter_id(self):
+        """
+        Returns the task counter
+
+        :return task_counter_id: task counter
+        """
+
         return self.task_counter_id
 
     def get_final_task2headers(self):
+        """
+        Returns the map containing the task names and their headers
+
+        :return task2headers: Map containing the task names and their headers
+        """
+
         return self.task2headers
 
     def get_final_task2func_code(self):
+        """
+        Returns the map containing the task names and their AST code representations
+
+        :return task2func_code: Map containing the task names and their AST code representations
+        """
+
         return self.task2func_code
 
     def visit_For(self, node):
+        """
+        Checks whether the node is a ast.For instance and it is valid for taskification. If so, creates the
+        corresponding taskification task, and modifies the current node with a call to a it
+
+        :param node: For AST node representation
+        :return new_node: If the node is valid for taskification, a AST Call node. Otherwise the same node
+        """
         import astor
 
         # Compute for level
@@ -851,6 +987,13 @@ class _LoopTasking(ast.NodeTransformer):
 
     @staticmethod
     def _get_for_level(node):
+        """
+        Returns the number of nested for loops inside the current node
+
+        :param node: Node to evaluate
+        :return current_for_level: Number of nested for loops
+        """
+
         # Child recursion
         current_for_level = 0
         for _, value in ast.iter_fields(node):
@@ -873,6 +1016,11 @@ class _LoopTasking(ast.NodeTransformer):
         return current_for_level
 
     def _remove_statements_from_tasks(self, node):
+        """
+        If present, removes the current node from the task list
+
+        :param node: Node to remove from the task list
+        """
         # Process current node
         if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Name):
@@ -892,18 +1040,15 @@ class _LoopTasking(ast.NodeTransformer):
 
     def _process_parameters(self, statement):
         """
-        Processes all the directions of the parameters found in the given statement
-        considering that they might be calls to existing tasks
+        Processes all the directions of the parameters found in the given statement considering that they
+         might be calls to existing tasks
 
-        Arguments:
-                - statement : AST node representing the head of the statement
-        Return:
-                - in_vars : List of names of IN variables
-                - out_vars : List of names of OUT variables
-                - inout_vars : List of names of INOUT variables
-                - return_vars : List of names of RETURN variables
-        Raise:
-                - Py2PyCOMPSsException
+        :param statement: AST node representing the head of the statement
+        :return fixed_in_vars: List of names of IN variables
+        :return fixed_out_vars: List of names of OUT variables
+        :return fixed_inout_vars: List of names of INOUT variables
+        :return fixed_return_vars: List of names of RETURN variables
+        :raise Py2PyCOMPSsException:
         """
 
         in_vars, inout_vars, out_vars = self._get_access_vars(statement)
@@ -939,13 +1084,13 @@ class _LoopTasking(ast.NodeTransformer):
         """
         Returns the accessed variable names within the given expression
 
-        Arguments:
-                - statement : AST node representing the head of the statement
-        Return:
-                - in_vars : List of names of accessed variables
-                - out_vars : List of names of OUT variables
-                - inout_vars : List of names of INOUT variables
-        Raise:
+        :param statement: AST node representing the head of the statement
+        :param is_target: Indicates whether the current node belongs to a target node or not
+
+        :return in_vars: List of names of accessed variables
+        :return out_vars: List of names of OUT variables
+        :return inout_vars: List of names of INOUT variables
+        :raise Py2PyCOMPSsException: For unrecognised types as task arguments
         """
 
         in_vars = []
@@ -969,11 +1114,13 @@ class _LoopTasking(ast.NodeTransformer):
                 task_def_args2directions = _LoopTasking._split_header(self.task2headers[call_name])
                 # Get callee arguments
                 task_call_args = statement.args
+                print("TASK CALL ARGS:")
+                print(task_call_args)
                 # Process all arguments
                 for position, task_def_arg in enumerate(task_def_arguments):
                     arg_name = task_def_arg.id
                     arg_direction = task_def_args2directions[arg_name]
-                    call_name = task_call_args[position].value.id
+                    call_name = _LoopTasking._get_var_name(task_call_args[position])
                     if arg_direction == "IN":
                         in_vars.append(call_name)
                     elif arg_direction == "INOUT":
@@ -1005,7 +1152,30 @@ class _LoopTasking(ast.NodeTransformer):
         return in_vars, inout_vars, out_vars
 
     @staticmethod
+    def _get_var_name(node):
+        """
+        Returns the variable name of a Subscript or Name AST node
+
+        :param node: Head node of the Subscript/Name statement
+        :return: String containing the name of the variable
+        """
+
+        if isinstance(node, ast.Name):
+            return node.id
+        elif isinstance(node, ast.Subscript):
+            return _LoopTasking._get_var_name(node.value)
+        else:
+            raise Py2PyCOMPSsException("[ERROR] Unrecognised type " + str(type(node)) + " on task argument")
+
+    @staticmethod
     def _split_header(header):
+        """
+        Constructs a map containing all the variables of the task header and its directionality (IN, OUT, INOUT)
+
+        :param header: String containing the task header
+        :return args2dirs: Map containing the task variables and its directionality
+        """
+
         header = header.replace("@task(", "")
         header = header.replace(")", "")
 
@@ -1022,11 +1192,8 @@ class _LoopTasking(ast.NodeTransformer):
         """
         Returns the target variables within given the expression
 
-        Arguments:
-                - statement : AST node representing the head of the statement
-        Return:
-                - target_vars : List of names of target variables
-        Raise:
+        :param statement: AST node representing the head of the statement
+        :return target_vars: List of names of target variables
         """
 
         if isinstance(statement, ast.Assign):
