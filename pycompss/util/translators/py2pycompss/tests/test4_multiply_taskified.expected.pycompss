@@ -4,14 +4,17 @@ import math
 from pycompss.api.api import compss_barrier, compss_wait_on, compss_open
 from pycompss.api.task import task
 from pycompss.api.parameter import *
+from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
 
 
-@task(lbv=IN, ubv=IN, var2=IN, var3=IN, var4=OUT, var1=INOUT)
-def LT4(lbv, ubv, var2, var3, var4, var1):
-    for t3 in range(lbv, ubv + 1):
+@task(lbv=IN, ubv=IN, returns=list)
+def LT4(lbv, ubv, *args):
+    var2, var3, var4, var1 = ArgUtils.rebuild_args(args)
+    for t3 in range(0, ubv + 1 - lbv):
         var1[t3] = S1(var1[t3], var2[t3], var3[t3])
         S2(var1[t3], var2[t3], var3[t3])
         var1[t3], var4[t3] = S3(var1[t3], var2[t3], var3[t3])
+    return ArgUtils.flatten_args(var2, var3, var4, var1)
 
 
 def S1(var2, var3, var4):
@@ -47,10 +50,14 @@ def matmul(m_size, n_size, k_size, b_size, debug):
             for t2 in range(0, n_size - 1 + 1):
                 lbv = 0
                 ubv = m_size - 1
-                LT4(lbv, ubv, [a[t3][t2] for t3 in range(lbv, ubv + 1)], [b
-                    [t2][t1] for t3 in range(lbv, ubv + 1)], [d[t3][t1] for
-                    t3 in range(lbv, ubv + 1)], [c[t3][t1] for t3 in range(
-                    lbv, ubv + 1)])
+                [a[t3][t2] for t3 in range(lbv, ubv + 1)], [b[t2][t1] for
+                    t3 in range(lbv, ubv + 1)], [d[t3][t1] for t3 in range(
+                    lbv, ubv + 1)], [c[t3][t1] for t3 in range(lbv, ubv + 1)
+                    ] = ArgUtils.rebuild_args(compss_wait_on(LT4(lbv, ubv,
+                    *ArgUtils.flatten_args([a[t3][t2] for t3 in range(lbv, 
+                    ubv + 1)], [b[t2][t1] for t3 in range(lbv, ubv + 1)], [
+                    d[t3][t1] for t3 in range(lbv, ubv + 1)], [c[t3][t1] for
+                    t3 in range(lbv, ubv + 1)]))))
     compss_barrier()
     if debug:
         print 'Matrix C:'
