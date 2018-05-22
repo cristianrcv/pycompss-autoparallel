@@ -13,7 +13,6 @@ import logging
 # Logger definition
 #
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(levelname)s | %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -184,4 +183,5 @@ class TestScop2PScop2Py(unittest.TestCase):
 #
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(levelname)s | %(name)s - %(message)s')
     unittest.main()
