@@ -39,13 +39,20 @@ def matmul(m_size, n_size, k_size, b_size, debug):
             for t2 in range(1, n_size - 1 + 1):
                 lbv = 1
                 ubv = m_size - 1 + 1
-                [a[t3 - 1][t2 - 1] for t3 in range(lbv, ubv + 1)], [b[t2 - 
-                    1][t1 - 1] for t3 in range(lbv, ubv + 1)], [c[t3][t1] for
-                    t3 in range(lbv, ubv + 1)] = ArgUtils.rebuild_args(
-                    compss_wait_on(LT2(lbv, ubv, *ArgUtils.flatten_args([a[
-                    t3 - 1][t2 - 1] for t3 in range(lbv, ubv + 1)], [b[t2 -
-                    1][t1 - 1] for t3 in range(lbv, ubv + 1)], [c[t3][t1] for
-                    t3 in range(lbv, ubv + 1)]))))
+                LT2_aux_0 = [a[t3 - 1][t2 - 1] for t3 in range(lbv, ubv + 1)]
+                LT2_aux_1 = [b[t2 - 1][t1 - 1] for t3 in range(lbv, ubv + 1)]
+                LT2_aux_2 = [c[t3][t1] for t3 in range(lbv, ubv + 1)]
+                LT2_argutils = ArgUtils()
+                LT2_flat_args = LT2_argutils.flatten(LT2_aux_0, LT2_aux_1, LT2_aux_2)
+                LT2_new_args = LT2(lbv, ubv, *LT2_flat_args)
+                LT2_new_args = compss_wait_on(LT2_new_args)
+                LT2_aux_0, LT2_aux_1, LT2_aux_2 = LT2_argutils.rebuild(LT2_new_args)
+                LT2_index = 0
+                for t3 in range(lbv, ubv + 1):
+                    a[t3 - 1][t2 - 1] = LT2_aux_0[LT2_index]
+                    b[t2 - 1][t1 - 1] = LT2_aux_1[LT2_index]
+                    c[t3][t1] = LT2_aux_2[LT2_index]
+                    LT2_index = LT2_index + 1
     compss_barrier()
     if debug:
         print 'Matrix C:'
