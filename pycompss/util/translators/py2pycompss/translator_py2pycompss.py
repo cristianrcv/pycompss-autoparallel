@@ -658,8 +658,21 @@ class _RewriteSubscriptToSubscript(ast.NodeTransformer):
         :return: True if node1 equals node2, False otherwise
         """
 
+        # Check node types (so we guarantee they have the same fields)
         if type(node1) is not type(node2):
             return False
+
+        # Do not perform recursion on subscripts but compare its expressions
+        if isinstance(node1, ast.Index):
+            import astor
+            from sympy import simplify
+
+            expr1 = simplify(astor.to_source(node1.value))
+            expr2 = simplify(astor.to_source(node2.value))
+
+            return expr1 == expr2
+
+        # Regular recursion checks
         if isinstance(node1, ast.AST):
             for k, v in vars(node1).iteritems():
                 if k in ('lineno', 'col_offset', 'ctx', '_pp'):

@@ -19,7 +19,7 @@ def matmul(m_size, n_size, k_size, b_size, debug):
     for i in range(m_size):
         for j in range(k_size):
             for k in range(n_size):
-                c[i][j] = multiply(c[i][j], a[i][k], b[k][j])
+                c[i][j] = multiply(c[i + 0][j], a[i][k], b[k][j])
                 multiply(c[i][j], a[i][k], b[k][j])
                 c[i][j], d[i][j] = multiply(c[i][j], a[i][k], b[k][j])
 
