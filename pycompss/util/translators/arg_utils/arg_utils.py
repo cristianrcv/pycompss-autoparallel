@@ -22,8 +22,54 @@ logger = logging.getLogger(__name__)
 
 class ArgUtils(object):
 
+    def __init__(self):
+        """
+        Initialize internal ArgUtils structures
+        """
+
+        self.flat_args = None
+
+    def flatten(self, *args):
+        """
+        Flats the given arguments and stores them inside the ArgUtils object
+
+        :param args: List of arguments to flat
+        :return: Flattened list
+        """
+
+        if __debug__:
+            logger.debug("Storing flatten Args")
+
+        self.flat_args = ArgUtils.flatten_args(*args)
+
+        return self.flat_args
+
+    def rebuild(self, out_args):
+        """
+        Rebuilds the given flatten list into nested objects considering the structure of the
+        previously flattened objects
+
+        :param out_args: Flat list of new objects
+        :return: List of complex objects with the same structure than the objects in the last flatten call
+        """
+
+        if __debug__:
+            logger.debug("Rebuilding Args with FO")
+
+        # Check FO list has same size as the original arguments
+        assert len(self.flat_args) == len(out_args)
+
+        return ArgUtils.rebuild_args(out_args, original_args=self.flat_args)
+
     @staticmethod
     def flatten_args(*args):
+        """
+        Flats the given arguments
+
+        :param args: List of arguments to flat
+        :return: Flattened list
+        """
+
         if __debug__:
             logger.debug("Flattening Args")
 
@@ -47,14 +93,21 @@ class ArgUtils(object):
         return func_args
 
     @staticmethod
-    def rebuild_args(args):
+    def rebuild_args(args, original_args=None):
+        """
+        Rebuilds the given flatten list into nested objects
+
+        :param out_args: Flat list of new objects
+        :return: List of complex objects
+        """
+
         if __debug__:
             logger.debug("Rebuilding Args")
 
         index = 0
         new_args = []
         while index < len(args):
-            arg, index = ArgUtils._rebuild_list(args, index)
+            arg, index = ArgUtils._rebuild_list(args, index, original_args=original_args)
             new_args.append(arg)
 
         if __debug__:
@@ -73,15 +126,21 @@ class ArgUtils(object):
                 yield elem
 
     @staticmethod
-    def _rebuild_list(args, index):
-        # Nested list entry
-        if isinstance(args[index], _Dimension):
-            sublist_dim = args[index].get_dimension()
-            index = index + 1
+    def _rebuild_list(args, index, original_args=None):
+        sublist_dim = None
+        if original_args is None:
+            if isinstance(args[index], _Dimension):
+                sublist_dim = args[index].get_dimension()
+                index = index + 1
+        else:
+            if isinstance(original_args[index], _Dimension):
+                sublist_dim = original_args[index].get_dimension()
+                index = index + 1
 
+        if sublist_dim is not None:
             list_object = []
             for elem_id in range(sublist_dim):
-                elem, index = ArgUtils._rebuild_list(args, index)
+                elem, index = ArgUtils._rebuild_list(args, index, original_args=original_args)
                 list_object.append(elem)
             return list_object, index
 
@@ -119,12 +178,25 @@ class _Dimension(object):
         return self.dimension
 
     def __eq__(self, other):
+        """
+        Returns whether the implicit object and the other represent the same dimension value or not
+
+        :param other: Another object to compare with
+        :return: True if self and other represent the same value, False otherwise
+        """
         if isinstance(other, _Dimension):
             return self.dimension == other.dimension
         else:
             return False
 
     def __ne__(self, other):
+        """
+        Returns whether the implicit object and the other represent different dimension values or not
+
+        :param other: Another object to compare with
+        :return: True if self and other represent different values, False otherwise
+        """
+
         if isinstance(other, _Dimension):
             return self.dimension != other.dimension
         else:
@@ -137,7 +209,16 @@ class _Dimension(object):
         :return: A string representing the Dimension Class attributes
         """
 
-        return "{Dimension = " + str(self.dimension) + "}"
+        return "Dimension(" + str(self.dimension) + ")"
+
+    def __repr__(self):
+        """
+        String representation of the Dimension Class
+
+        :return: A string representing the Dimension Class attributes
+        """
+
+        return self.__str__()
 
 
 #
