@@ -585,7 +585,10 @@ class Py2Scop(object):
 
         # Extensions
         import astor
-        e_scop = StatementExtension(iter_vars, astor.to_source(statement_loop, pretty_source=long_line_pretty_source))
+        from pycompss.util.translators.astor_source_gen.pycompss_source_gen import PyCOMPSsSourceGen
+        e_scop = StatementExtension(iter_vars,
+                                    astor.to_source(statement_loop,
+                                                    pretty_source=PyCOMPSsSourceGen.long_long_line_ps))
         extensions_scop = [e_scop]
 
         # Create and return statement
@@ -759,17 +762,6 @@ class Py2Scop(object):
                 # Non-linear expression
                 raise Py2ScopException("ERROR: Unhandled operation DIV for expressions")
         return res
-
-
-#
-# ASTOR pretty writer
-#
-
-def long_line_pretty_source(source):
-    # A log pretty source printer for ASTOR because OSL parser does
-    # not accept breaking statements into different lines
-    from astor.source_repr import split_lines
-    return ''.join(split_lines(source, maxline=200))
 
 
 #
