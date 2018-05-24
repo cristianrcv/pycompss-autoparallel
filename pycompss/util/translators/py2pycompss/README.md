@@ -11,6 +11,7 @@ fashion (see [OpenScop to Python Translator][scop2pscop2py] translator).
 
 - [AST][ast] Python module
 - [AST Observe/Rewrite (ASTOR)][astor] Python module
+- [SymPy][sympy] Python module
 - [Logging][logging] Python module
 - [UnitTest][unittest] Python module
 
@@ -60,6 +61,7 @@ find . -name "*.pyo" -delete
 [scop2pscop2py]: https://github.com/cristianrcv/pycompss-pluto/tree/master/pycompss/util/translators/scop2pscop2py
 [ast]: https://docs.python.org/2/library/ast.html
 [astor]: http://astor.readthedocs.io/en/latest/
+[sympy]: http://www.sympy.org/es/
 [logging]: https://docs.python.org/2/library/logging.html
 [unittest]: https://docs.python.org/2/library/unittest.html
 [nose]: https://nose.readthedocs.io/en/latest/

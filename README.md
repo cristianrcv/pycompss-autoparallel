@@ -124,6 +124,7 @@ control overhead and to produce a very effective code.
 - [AST][ast] Python module
 - [Enum34][enum34] Python module
 - [AST Observe/Rewrite (ASTOR)][astor] Python module
+- [SymPy][sympy] Python module
 - Uses the [subprocess][subprocess] Python module (`scop2pscop2py` translator)
 - [Logging][logging] Python module
 - [UnitTest][unittest] Python module
@@ -263,6 +264,7 @@ Licensed under the [Apache 2.0 License][apache-2]
 [enum34]: https://pypi.python.org/pypi/enum34
 [ast]: https://docs.python.org/2/library/ast.html
 [astor]: http://astor.readthedocs.io/en/latest/
+[sympy]: http://www.sympy.org/es/
 [subprocess]: https://docs.python.org/2/library/subprocess.html
 [logging]: https://docs.python.org/2/library/logging.html
 [unittest]: https://docs.python.org/2/library/unittest.html
