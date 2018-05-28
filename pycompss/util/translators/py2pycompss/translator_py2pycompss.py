@@ -928,6 +928,7 @@ class _LoopTasking(ast.NodeTransformer):
         for_level = _LoopTasking._get_for_level(node)
 
         # Taskify for loop if it has the right depth-level
+        # TODO: Support N-depth taskification (currently, 1D)
         if for_level == self.taskify_loop_level:
             if __debug__:
                 import astor
