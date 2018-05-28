@@ -7,8 +7,9 @@ from pycompss.api.parameter import *
 from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
 
 
-@task(lbv=IN, ubv=IN, returns=list)
+@task(lbv=IN, ubv=IN, returns="LT4_args_size")
 def LT4(lbv, ubv, *args):
+    global LT4_args_size
     var2, var3, var4, var1 = ArgUtils.rebuild_args(args)
     for t3 in range(0, ubv + 1 - lbv):
         var1[t3] = S1(var1[t3], var2[t3], var3[t3])
@@ -56,8 +57,9 @@ def matmul(m_size, n_size, k_size, b_size, debug):
                 LT4_aux_3 = [c[t3][t1] for t3 in range(lbv, ubv + 1)]
                 LT4_argutils = ArgUtils()
                 LT4_flat_args = LT4_argutils.flatten(LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3)
+                global LT4_args_size
+                LT4_args_size = len(LT4_flat_args)
                 LT4_new_args = LT4(lbv, ubv, *LT4_flat_args)
-                LT4_new_args = compss_wait_on(LT4_new_args)
                 LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3 = LT4_argutils.rebuild(LT4_new_args)
                 LT4_index = 0
                 for t3 in range(lbv, ubv + 1):
