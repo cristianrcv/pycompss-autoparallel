@@ -195,7 +195,7 @@ if __name__ == "__main__":
         print("Performing computation")
     fdtd_start_time = time.time()
     fdtd_blocked(EX, EY, HZ, NSIZE, BSIZE, TSIZE, COEF1, COEF2)
-    compss_barrier()
+    compss_barrier(True)
     end_time = time.time()
 
     # Log results and time

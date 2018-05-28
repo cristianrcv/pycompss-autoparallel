@@ -150,7 +150,7 @@ if __name__ == "__main__":
         print("Performing computation")
     seidel_start_time = time.time()
     seidel(A, NSIZE, TSIZE)
-    compss_barrier()
+    compss_barrier(True)
     end_time = time.time()
 
     # Log results and time

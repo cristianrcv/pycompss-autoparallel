@@ -279,7 +279,7 @@ if __name__ == "__main__":
         print("Performing computation")
     qr_start_time = time.time()
     qr_blocked(A, MSIZE, BSIZE)
-    compss_barrier()
+    compss_barrier(True)
     end_time = time.time()
 
     # Log results and time

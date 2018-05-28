@@ -159,7 +159,7 @@ if __name__ == "__main__":
         print("Performing computation")
     jacobi_start_time = time.time()
     jacobi_1d(A, B, NSIZE, TSIZE, COEF)
-    compss_barrier()
+    compss_barrier(True)
     end_time = time.time()
 
     # Log results and time

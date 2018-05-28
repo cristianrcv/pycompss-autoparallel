@@ -179,7 +179,7 @@ if __name__ == "__main__":
         print("Performing computation")
     mult_start_time = time.time()
     matmul(A, B, C, MSIZE, ALPHA, BETA)
-    compss_barrier()
+    compss_barrier(True)
     end_time = time.time()
 
     # Log results and time
