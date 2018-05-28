@@ -233,8 +233,7 @@ EVENT_TYPE
 VALUES
 0      End
 1      create_entry
-2      S1
-3      S2
+2      LT3
 
 
 EVENT_TYPE
