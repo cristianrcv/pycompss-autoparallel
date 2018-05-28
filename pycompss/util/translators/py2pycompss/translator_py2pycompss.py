@@ -297,7 +297,7 @@ class Py2PyCOMPSs(object):
         new_func.args.args = new_args
 
         # Construct task header
-        task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars, [])
+        task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars, [], None)
 
         # Return task header and new function
         if __debug__:
@@ -440,7 +440,7 @@ class Py2PyCOMPSs(object):
             raise Py2PyCOMPSsException("[ERROR] Unrecognised expression on write operation " + str(type(statement)))
 
     @staticmethod
-    def _construct_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args):
+    def _construct_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args, len_var):
         """
         Constructs the task header corresponding to the given IN, OUT, and INOUT variables
 
@@ -449,6 +449,7 @@ class Py2PyCOMPSs(object):
         :param inout_vars: List of names of INOUT variables
         :param return_vars: List of names of RETURN variables
         :param task_star_args: List of variables that will be passed as star arguments
+        :param len_var: Variable containing the name of the global variable used for star_args length
         :return task_header: String representing the PyCOMPSs task header
         """
 
@@ -483,7 +484,7 @@ class Py2PyCOMPSs(object):
         if len(task_star_args) > 0:
             if not first:
                 task_header += ", "
-            task_header += "returns=list"
+            task_header += "returns=\"" + len_var + "\""
         elif len(return_vars) > 0:
             if not first:
                 task_header += ", "
@@ -980,15 +981,19 @@ class _LoopTasking(ast.NodeTransformer):
             #        logger.debug(ast.dump(tsa))
             #        logger.debug(astor.to_source(tsa))
 
-            # Construct task header
-            task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args)
-
-            # Create task definition node
+            # New task variables
             self.task_counter_id += 1
             task_name = "LT" + str(self.task_counter_id)
             task_vararg = "args" if len(task_star_args) > 0 else None
+            len_var = task_name + "_args_size"
+
+            # Construct task header
+            task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args,
+                                                             len_var)
+
+            # Create task definition node
             func_node = _LoopTasking._fix_loop_bounds(func_node)
-            task_body = _LoopTasking._create_task_body_with_argutils(func_node, task_star_args)
+            task_body = _LoopTasking._create_task_body_with_argutils(func_node, task_star_args, len_var)
             new_task = ast.FunctionDef(name=task_name,
                                        args=ast.arguments(args=task_args, vararg=task_vararg, kwarg=None, defaults=[]),
                                        body=task_body,
@@ -1082,6 +1087,17 @@ class _LoopTasking(ast.NodeTransformer):
                                                            kwargs=None))
                 new_nodes.append(flat_args_node)
 
+                # Insert Compute length
+                global_node = ast.Global(names=[len_var])
+                assign_global_node = ast.Assign(targets=[ast.Name(id=len_var)],
+                                                value=ast.Call(func=ast.Name(id="len"),
+                                                               args=[flat_args_var],
+                                                               keywords=[],
+                                                               starargs=None,
+                                                               kwargs=None))
+                new_nodes.append(global_node)
+                new_nodes.append(assign_global_node)
+
                 # Insert task call
                 new_args_var = ast.Name(id=task_name + "_new_args")
                 task_call_node = ast.Assign(targets=[new_args_var],
@@ -1091,15 +1107,6 @@ class _LoopTasking(ast.NodeTransformer):
                                                            starargs=flat_args_var,
                                                            kwargs=None))
                 new_nodes.append(task_call_node)
-
-                # TODO: Remove compss_wait on insertion
-                compss_wait_on_node = ast.Assign(targets=[new_args_var],
-                                                 value=ast.Call(func=ast.Name(id="compss_wait_on"),
-                                                                args=[new_args_var],
-                                                                keywords=[],
-                                                                starargs=None,
-                                                                kwargs=None))
-                new_nodes.append(compss_wait_on_node)
 
                 # Rebuild chunks from flat new arguments
                 rebuild_node = ast.Assign(targets=[ast.Tuple(elts=chunked_task_star_args)],
@@ -1270,13 +1277,14 @@ class _LoopTasking(ast.NodeTransformer):
         return func_node
 
     @staticmethod
-    def _create_task_body_with_argutils(func_node, var_list):
+    def _create_task_body_with_argutils(func_node, var_list, len_var):
         """
         Creates the body of a LoopTasking function by adding the rebuild and flatten calls before and after the loop
         execution
 
         :param func_node: Node containing the loop execution
         :param var_list: List of stared variables
+        :param len_var: Name of the global length variable
         :return: <List<ast.Node>> Containing the task body representation
         """
 
@@ -1284,6 +1292,9 @@ class _LoopTasking(ast.NodeTransformer):
         ast_var_list = []
         for var_name in var_list:
             ast_var_list.append(ast.Name(id=var_name))
+
+        # Construct the global length  node
+        global_node = ast.Global(names=[len_var])
 
         # Construct the rebuild arguments node
         rebuild_args_call = ast.Call(func=ast.Attribute(value=ast.Name(id="ArgUtils"), attr="rebuild_args"),
@@ -1302,7 +1313,7 @@ class _LoopTasking(ast.NodeTransformer):
         flatten_node = ast.Return(value=flatten_args_call)
 
         # Construct the task body
-        task_body = [rebuild_node, func_node, flatten_node]
+        task_body = [global_node, rebuild_node, func_node, flatten_node]
         return task_body
 
     def _get_access_vars(self, statement, is_target=False):
