@@ -91,8 +91,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
         ex_seq = copy.deepcopy(ex)
         ey_seq = copy.deepcopy(ey)
         hz_seq = copy.deepcopy(hz)
-        hz_expected = seq_fdtd_2d(ex_seq, ey_seq, hz_seq, nx_size, ny_size,
-            t_size, coef1, coef2)
+        hz_expected = seq_fdtd_2d(ex_seq, ey_seq, hz_seq, nx_size, ny_size, t_size, coef1, coef2)
     if ny_size >= 1 and t_size >= 1:
         if nx_size >= 2 and ny_size >= 2:
             ey[0][0] = S1(0)
@@ -107,14 +106,11 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 if t1 % 2 == 0:
                     ey[0][0] = S1(t1 / 2)
                     lbp = int(math.ceil(float(t1 + 2) / float(2)))
-                    ubp = int(math.floor(float(t1 + 2 * nx_size - 2) /
-                        float(2)))
-                    for t3 in range(int(math.ceil(float(t1 + 2) / float(2))
-                        ), int(math.floor(float(t1 + 2 * nx_size - 2) /
-                        float(2))) + 1):
-                        ey[(-t1 + 2 * t3) / 2][0] = S2(ey[(-t1 + 2 * t3) / 
-                            2][0], coef1, hz[(-t1 + 2 * t3) / 2][0], hz[(-
-                            t1 + 2 * t3) / 2 - 1][0])
+                    ubp = int(math.floor(float(t1 + 2 * nx_size - 2) / float(2)))
+                    for t3 in range(int(math.ceil(float(t1 + 2) / float(2))), int(math.floor(float(t1 + 2 * nx_size -
+                        2) / float(2))) + 1):
+                        ey[(-t1 + 2 * t3) / 2][0] = S2(ey[(-t1 + 2 * t3) / 2][0], coef1, hz[(-t1 + 2 * t3) / 2][0],
+                            hz[(-t1 + 2 * t3) / 2 - 1][0])
         if nx_size == 1 and ny_size >= 2:
             ey[0][0] = S1(0)
         if nx_size == 1 and ny_size == 1:
@@ -127,10 +123,8 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
             lbp = 0
             ubp = 2 * t_size + ny_size - 3
             for t1 in range(0, 2 * t_size + ny_size - 3 + 1):
-                lbp = max(int(math.ceil(float(t1) / float(2))), t1 - t_size + 1
-                    )
-                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2)
-                    )), t1)
+                lbp = max(int(math.ceil(float(t1) / float(2))), t1 - t_size + 1)
+                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2))), t1)
                 for t2 in range(lbp, ubp + 1):
                     ey[0][-t1 + 2 * t2] = S1(t1 - t2)
         if nx_size >= 2 and ny_size >= 2:
@@ -140,62 +134,45 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 if t1 % 2 == 0:
                     ey[0][0] = S1(t1 / 2)
                     lbp = int(math.ceil(float(t1 + 2) / float(2)))
-                    ubp = int(math.floor(float(t1 + 2 * nx_size - 2) /
-                        float(2)))
-                    for t3 in range(int(math.ceil(float(t1 + 2) / float(2))
-                        ), int(math.floor(float(t1 + 2 * nx_size - 2) /
-                        float(2))) + 1):
-                        ey[(-t1 + 2 * t3) / 2][0] = S2(ey[(-t1 + 2 * t3) / 
-                            2][0], coef1, hz[(-t1 + 2 * t3) / 2][0], hz[(-
-                            t1 + 2 * t3) / 2 - 1][0])
+                    ubp = int(math.floor(float(t1 + 2 * nx_size - 2) / float(2)))
+                    for t3 in range(int(math.ceil(float(t1 + 2) / float(2))), int(math.floor(float(t1 + 2 * nx_size -
+                        2) / float(2))) + 1):
+                        ey[(-t1 + 2 * t3) / 2][0] = S2(ey[(-t1 + 2 * t3) / 2][0], coef1, hz[(-t1 + 2 * t3) / 2][0],
+                            hz[(-t1 + 2 * t3) / 2 - 1][0])
                 lbp = int(math.ceil(float(t1 + 1) / float(2)))
-                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2)
-                    )), t1)
+                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2))), t1)
                 for t2 in range(lbp, ubp + 1):
-                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
-                        [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
+                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz[0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
                     ey[0][-t1 + 2 * t2] = S1(t1 - t2)
                     lbp = t1 - t2 + 1
                     ubp = t1 - t2 + nx_size - 1
                     for t3 in range(t1 - t2 + 1, t1 - t2 + nx_size - 1 + 1):
-                        ey[-t1 + t2 + t3][-t1 + 2 * t2] = S2(ey[-t1 + t2 +
-                            t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 + t3][-t1 +
-                            2 * t2], hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2])
-                        ex[-t1 + t2 + t3][-t1 + 2 * t2] = S3(ex[-t1 + t2 +
-                            t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 + t3][-t1 +
-                            2 * t2], hz[-t1 + t2 + t3][-t1 + 2 * t2 - 1])
-                        hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = S4(hz[-t1 +
-                            t2 + t3 - 1][-t1 + 2 * t2 - 1], coef2, ex[-t1 +
-                            t2 + t3 - 1][-t1 + 2 * t2 - 1 + 1], ex[-t1 + t2 +
-                            t3 - 1][-t1 + 2 * t2 - 1], ey[-t1 + t2 + t3 - 1 +
-                            1][-t1 + 2 * t2 - 1], ey[-t1 + t2 + t3 - 1][-t1 +
-                            2 * t2 - 1])
+                        ey[-t1 + t2 + t3][-t1 + 2 * t2] = S2(ey[-t1 + t2 + t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 +
+                            t3][-t1 + 2 * t2], hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2])
+                        ex[-t1 + t2 + t3][-t1 + 2 * t2] = S3(ex[-t1 + t2 + t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 +
+                            t3][-t1 + 2 * t2], hz[-t1 + t2 + t3][-t1 + 2 * t2 - 1])
+                        hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = S4(hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1], coef2,
+                            ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1 + 1], ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1], ey
+                            [-t1 + t2 + t3 - 1 + 1][-t1 + 2 * t2 - 1], ey[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1])
         if nx_size >= 2:
             lbp = 2 * t_size - 1
             ubp = 2 * t_size + ny_size - 3
             for t1 in range(2 * t_size - 1, 2 * t_size + ny_size - 3 + 1):
                 lbp = t1 - t_size + 1
-                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2)
-                    )), t1)
+                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2))), t1)
                 for t2 in range(lbp, ubp + 1):
-                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
-                        [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
+                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz[0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
                     ey[0][-t1 + 2 * t2] = S1(t1 - t2)
                     lbp = t1 - t2 + 1
                     ubp = t1 - t2 + nx_size - 1
                     for t3 in range(t1 - t2 + 1, t1 - t2 + nx_size - 1 + 1):
-                        ey[-t1 + t2 + t3][-t1 + 2 * t2] = S2(ey[-t1 + t2 +
-                            t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 + t3][-t1 +
-                            2 * t2], hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2])
-                        ex[-t1 + t2 + t3][-t1 + 2 * t2] = S3(ex[-t1 + t2 +
-                            t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 + t3][-t1 +
-                            2 * t2], hz[-t1 + t2 + t3][-t1 + 2 * t2 - 1])
-                        hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = S4(hz[-t1 +
-                            t2 + t3 - 1][-t1 + 2 * t2 - 1], coef2, ex[-t1 +
-                            t2 + t3 - 1][-t1 + 2 * t2 - 1 + 1], ex[-t1 + t2 +
-                            t3 - 1][-t1 + 2 * t2 - 1], ey[-t1 + t2 + t3 - 1 +
-                            1][-t1 + 2 * t2 - 1], ey[-t1 + t2 + t3 - 1][-t1 +
-                            2 * t2 - 1])
+                        ey[-t1 + t2 + t3][-t1 + 2 * t2] = S2(ey[-t1 + t2 + t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 +
+                            t3][-t1 + 2 * t2], hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2])
+                        ex[-t1 + t2 + t3][-t1 + 2 * t2] = S3(ex[-t1 + t2 + t3][-t1 + 2 * t2], coef1, hz[-t1 + t2 +
+                            t3][-t1 + 2 * t2], hz[-t1 + t2 + t3][-t1 + 2 * t2 - 1])
+                        hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = S4(hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1], coef2,
+                            ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1 + 1], ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1], ey
+                            [-t1 + t2 + t3 - 1 + 1][-t1 + 2 * t2 - 1], ey[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1])
         if nx_size == 1 and ny_size >= 2:
             lbp = 1
             ubp = 2 * t_size - 2
@@ -203,22 +180,18 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 if t1 % 2 == 0:
                     ey[0][0] = S1(t1 / 2)
                 lbp = int(math.ceil(float(t1 + 1) / float(2)))
-                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2)
-                    )), t1)
+                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2))), t1)
                 for t2 in range(lbp, ubp + 1):
-                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
-                        [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
+                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz[0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
                     ey[0][-t1 + 2 * t2] = S1(t1 - t2)
         if nx_size == 1:
             lbp = 2 * t_size - 1
             ubp = 2 * t_size + ny_size - 3
             for t1 in range(2 * t_size - 1, 2 * t_size + ny_size - 3 + 1):
                 lbp = t1 - t_size + 1
-                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2)
-                    )), t1)
+                ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2))), t1)
                 for t2 in range(lbp, ubp + 1):
-                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz
-                        [0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
+                    ex[0][-t1 + 2 * t2] = S3(ex[0][-t1 + 2 * t2], coef1, hz[0][-t1 + 2 * t2], hz[0][-t1 + 2 * t2 - 1])
                     ey[0][-t1 + 2 * t2] = S1(t1 - t2)
     compss_barrier()
     if __debug__:

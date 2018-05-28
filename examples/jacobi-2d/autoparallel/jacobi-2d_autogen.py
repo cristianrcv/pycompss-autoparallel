@@ -77,213 +77,150 @@ def jacobi_2d(a, b, n_size, t_size, coef):
         import copy
         a_seq = copy.deepcopy(a)
         b_seq = copy.deepcopy(b)
-        a_expected, b_expected = seq_jacobi_2d(a_seq, b_seq, n_size, t_size,
-            coef)
+        a_expected, b_expected = seq_jacobi_2d(a_seq, b_seq, n_size, t_size, coef)
     if n_size >= 3 and t_size >= 1:
         lbp = 1
         ubp = n_size - 2
         for t3 in range(1, n_size - 2 + 1):
-            b[t3][1] = S1(coef, a[t3][1], a[t3][1 - 1], a[t3][1 + 1], a[1 +
-                t3][1], a[t3 - 1][1])
+            b[t3][1] = S1(coef, a[t3][1], a[t3][1 - 1], a[t3][1 + 1], a[1 + t3][1], a[t3 - 1][1])
         lbp = 2
         ubp = min(n_size - 2, 3 * t_size - 2)
         for t1 in range(2, min(n_size - 2, 3 * t_size - 2) + 1):
             if (2 * t1 + 1) % 3 == 0:
                 lbp = int(math.ceil(float(2 * t1 + 1) / float(3)))
-                ubp = int(math.floor(float(2 * t1 + 3 * n_size - 8) / float(3))
-                    )
-                for t3 in range(int(math.ceil(float(2 * t1 + 1) / float(3))
-                    ), int(math.floor(float(2 * t1 + 3 * n_size - 8) /
-                    float(3))) + 1):
-                    b[(-2 * t1 + 3 * t3 + 2) / 3][1] = S1(coef, a[(-2 * t1 +
-                        3 * t3 + 2) / 3][1], a[(-2 * t1 + 3 * t3 + 2) / 3][
-                        1 - 1], a[(-2 * t1 + 3 * t3 + 2) / 3][1 + 1], a[1 +
-                        (-2 * t1 + 3 * t3 + 2) / 3][1], a[(-2 * t1 + 3 * t3 +
-                        2) / 3 - 1][1])
+                ubp = int(math.floor(float(2 * t1 + 3 * n_size - 8) / float(3)))
+                for t3 in range(int(math.ceil(float(2 * t1 + 1) / float(3))), int(math.floor(float(2 * t1 + 3 *
+                    n_size - 8) / float(3))) + 1):
+                    b[(-2 * t1 + 3 * t3 + 2) / 3][1] = S1(coef, a[(-2 * t1 + 3 * t3 + 2) / 3][1], a[(-2 * t1 + 3 *
+                        t3 + 2) / 3][1 - 1], a[(-2 * t1 + 3 * t3 + 2) / 3][1 + 1], a[1 + (-2 * t1 + 3 * t3 + 2) / 3]
+                        [1], a[(-2 * t1 + 3 * t3 + 2) / 3 - 1][1])
             lbp = int(math.ceil(float(2 * t1 + 2) / float(3)))
             ubp = t1
             for t2 in range(lbp, ubp + 1):
-                b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2], a
-                    [1][-2 * t1 + 3 * t2 - 1], a[1][1 + (-2 * t1 + 3 * t2)],
-                    a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 * t1 + 3 * t2])
+                b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2], a[1][-2 * t1 + 3 * t2 - 1], a[1][1 + (-2 *
+                    t1 + 3 * t2)], a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 * t1 + 3 * t2])
                 lbp = 2 * t1 - 2 * t2 + 2
                 ubp = 2 * t1 - 2 * t2 + n_size - 2
-                for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 +
-                    n_size - 2 + 1):
-                    b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef, a
-                        [-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2], a[-2 *
-                        t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a[-2 * t1 +
-                        2 * t2 + t3][1 + (-2 * t1 + 3 * t2)], a[1 + (-2 *
-                        t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2], a[-2 * t1 + 2 *
-                        t2 + t3 - 1][-2 * t1 + 3 * t2])
-                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = S2(
-                        coef, b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 -
-                        1], b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 -
-                        1 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][1 + (-2 * t1 +
-                        3 * t2 - 1)], b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 *
-                        t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1 - 1][
-                        -2 * t1 + 3 * t2 - 1])
-                a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size - 2
-                    ][-2 * t1 + 3 * t2 - 1], b[n_size - 2][-2 * t1 + 3 * t2 -
-                    1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 1)], b[1 +
-                    (n_size - 2)][-2 * t1 + 3 * t2 - 1], b[n_size - 2 - 1][
-                    -2 * t1 + 3 * t2 - 1])
+                for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
+                    b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2],
+                        a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 *
+                        t2)], a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2], a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 +
+                        3 * t2])
+                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 2 * t2 + t3 - 1][-2 *
+                        t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 2 * t2 +
+                        t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1
+                        ], b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1])
+                a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size - 2][-2 * t1 + 3 * t2 - 1], b[n_size - 2][-2 *
+                    t1 + 3 * t2 - 1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (n_size - 2)][-2 * t1 + 3 *
+                    t2 - 1], b[n_size - 2 - 1][-2 * t1 + 3 * t2 - 1])
         if n_size == 3:
             lbp = 2
             ubp = 3 * t_size - 2
             for t1 in range(2, 3 * t_size - 2 + 1):
                 if (2 * t1 + 1) % 3 == 0:
-                    b[1][1] = S1(coef, a[1][1], a[1][1 - 1], a[1][1 + 1], a
-                        [1 + 1][1], a[1 - 1][1])
+                    b[1][1] = S1(coef, a[1][1], a[1][1 - 1], a[1][1 + 1], a[1 + 1][1], a[1 - 1][1])
                 if (2 * t1 + 2) % 3 == 0:
-                    a[1][1] = S2(coef, b[1][1], b[1][1 - 1], b[1][1 + 1], b
-                        [1 + 1][1], b[1 - 1][1])
+                    a[1][1] = S2(coef, b[1][1], b[1][1 - 1], b[1][1 + 1], b[1 + 1][1], b[1 - 1][1])
         lbp = 3 * t_size - 1
         ubp = n_size - 2
         for t1 in range(3 * t_size - 1, n_size - 2 + 1):
             lbp = t1 - t_size + 1
             ubp = t1
             for t2 in range(lbp, ubp + 1):
-                b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2], a
-                    [1][-2 * t1 + 3 * t2 - 1], a[1][1 + (-2 * t1 + 3 * t2)],
-                    a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 * t1 + 3 * t2])
+                b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2], a[1][-2 * t1 + 3 * t2 - 1], a[1][1 + (-2 *
+                    t1 + 3 * t2)], a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 * t1 + 3 * t2])
                 lbp = 2 * t1 - 2 * t2 + 2
                 ubp = 2 * t1 - 2 * t2 + n_size - 2
-                for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 +
-                    n_size - 2 + 1):
-                    b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef, a
-                        [-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2], a[-2 *
-                        t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a[-2 * t1 +
-                        2 * t2 + t3][1 + (-2 * t1 + 3 * t2)], a[1 + (-2 *
-                        t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2], a[-2 * t1 + 2 *
-                        t2 + t3 - 1][-2 * t1 + 3 * t2])
-                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = S2(
-                        coef, b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 -
-                        1], b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 -
-                        1 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][1 + (-2 * t1 +
-                        3 * t2 - 1)], b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 *
-                        t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1 - 1][
-                        -2 * t1 + 3 * t2 - 1])
-                a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size - 2
-                    ][-2 * t1 + 3 * t2 - 1], b[n_size - 2][-2 * t1 + 3 * t2 -
-                    1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 1)], b[1 +
-                    (n_size - 2)][-2 * t1 + 3 * t2 - 1], b[n_size - 2 - 1][
-                    -2 * t1 + 3 * t2 - 1])
+                for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
+                    b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2],
+                        a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 *
+                        t2)], a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2], a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 +
+                        3 * t2])
+                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 2 * t2 + t3 - 1][-2 *
+                        t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 2 * t2 +
+                        t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1
+                        ], b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1])
+                a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size - 2][-2 * t1 + 3 * t2 - 1], b[n_size - 2][-2 *
+                    t1 + 3 * t2 - 1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (n_size - 2)][-2 * t1 + 3 *
+                    t2 - 1], b[n_size - 2 - 1][-2 * t1 + 3 * t2 - 1])
         if n_size >= 4:
             lbp = n_size - 1
             ubp = 3 * t_size - 2
             for t1 in range(n_size - 1, 3 * t_size - 2 + 1):
                 if (2 * t1 + 1) % 3 == 0:
                     lbp = int(math.ceil(float(2 * t1 + 1) / float(3)))
-                    ubp = int(math.floor(float(2 * t1 + 3 * n_size - 8) /
-                        float(3)))
-                    for t3 in range(int(math.ceil(float(2 * t1 + 1) / float
-                        (3))), int(math.floor(float(2 * t1 + 3 * n_size - 8
-                        ) / float(3))) + 1):
-                        b[(-2 * t1 + 3 * t3 + 2) / 3][1] = S1(coef, a[(-2 *
-                            t1 + 3 * t3 + 2) / 3][1], a[(-2 * t1 + 3 * t3 +
-                            2) / 3][1 - 1], a[(-2 * t1 + 3 * t3 + 2) / 3][1 +
-                            1], a[1 + (-2 * t1 + 3 * t3 + 2) / 3][1], a[(-2 *
-                            t1 + 3 * t3 + 2) / 3 - 1][1])
+                    ubp = int(math.floor(float(2 * t1 + 3 * n_size - 8) / float(3)))
+                    for t3 in range(int(math.ceil(float(2 * t1 + 1) / float(3))), int(math.floor(float(2 * t1 + 3 *
+                        n_size - 8) / float(3))) + 1):
+                        b[(-2 * t1 + 3 * t3 + 2) / 3][1] = S1(coef, a[(-2 * t1 + 3 * t3 + 2) / 3][1], a[(-2 * t1 + 3 *
+                            t3 + 2) / 3][1 - 1], a[(-2 * t1 + 3 * t3 + 2) / 3][1 + 1], a[1 + (-2 * t1 + 3 * t3 + 2) /
+                            3][1], a[(-2 * t1 + 3 * t3 + 2) / 3 - 1][1])
                 lbp = int(math.ceil(float(2 * t1 + 2) / float(3)))
                 ubp = int(math.floor(float(2 * t1 + n_size - 2) / float(3)))
                 for t2 in range(lbp, ubp + 1):
-                    b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2
-                        ], a[1][-2 * t1 + 3 * t2 - 1], a[1][1 + (-2 * t1 + 
-                        3 * t2)], a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 *
-                        t1 + 3 * t2])
+                    b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2], a[1][-2 * t1 + 3 * t2 - 1], a[1][1 + (
+                        -2 * t1 + 3 * t2)], a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 * t1 + 3 * t2])
                     lbp = 2 * t1 - 2 * t2 + 2
                     ubp = 2 * t1 - 2 * t2 + n_size - 2
-                    for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 +
-                        n_size - 2 + 1):
-                        b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef,
-                            a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2], a[
-                            -2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a
-                            [-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 * t2)],
-                            a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2
-                            ], a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2])
-                        a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1
-                            ] = S2(coef, b[-2 * t1 + 2 * t2 + t3 - 1][-2 *
-                            t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][
-                            -2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 2 * t2 +
-                            t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (-2 *
-                            t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1], b
-                            [-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 *
-                            t2 - 1])
-                    a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size -
-                        2][-2 * t1 + 3 * t2 - 1], b[n_size - 2][-2 * t1 + 3 *
-                        t2 - 1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 
-                        1)], b[1 + (n_size - 2)][-2 * t1 + 3 * t2 - 1], b[
-                        n_size - 2 - 1][-2 * t1 + 3 * t2 - 1])
+                    for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
+                        b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 *
+                            t2], a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 2 * t2 + t3][1 + (-2 *
+                            t1 + 3 * t2)], a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2], a[-2 * t1 + 2 * t2 + t3 -
+                            1][-2 * t1 + 3 * t2])
+                        a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 2 * t2 + t3 - 1][
+                            -2 * t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 +
+                            2 * t2 + t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 +
+                            3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1])
+                    a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size - 2][-2 * t1 + 3 * t2 - 1], b[n_size - 2
+                        ][-2 * t1 + 3 * t2 - 1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (n_size - 2)][
+                        -2 * t1 + 3 * t2 - 1], b[n_size - 2 - 1][-2 * t1 + 3 * t2 - 1])
                 if (2 * t1 + n_size + 2) % 3 == 0:
-                    lbp = int(math.ceil(float(2 * t1 - 2 * n_size + 8) /
-                        float(3)))
-                    ubp = int(math.floor(float(2 * t1 + n_size - 1) / float(3))
-                        )
-                    for t3 in range(int(math.ceil(float(2 * t1 - 2 * n_size +
-                        8) / float(3))), int(math.floor(float(2 * t1 +
-                        n_size - 1) / float(3))) + 1):
-                        a[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2
-                            ] = S2(coef, b[(-2 * t1 + 3 * t3 + 2 * n_size -
-                            5) / 3][n_size - 2], b[(-2 * t1 + 3 * t3 + 2 *
-                            n_size - 5) / 3][n_size - 2 - 1], b[(-2 * t1 + 
-                            3 * t3 + 2 * n_size - 5) / 3][1 + (n_size - 2)],
-                            b[1 + (-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][
-                            n_size - 2], b[(-2 * t1 + 3 * t3 + 2 * n_size -
-                            5) / 3 - 1][n_size - 2])
+                    lbp = int(math.ceil(float(2 * t1 - 2 * n_size + 8) / float(3)))
+                    ubp = int(math.floor(float(2 * t1 + n_size - 1) / float(3)))
+                    for t3 in range(int(math.ceil(float(2 * t1 - 2 * n_size + 8) / float(3))), int(math.floor(float(
+                        2 * t1 + n_size - 1) / float(3))) + 1):
+                        a[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = S2(coef, b[(-2 * t1 + 3 * t3 + 2 *
+                            n_size - 5) / 3][n_size - 2], b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2 - 1],
+                            b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][1 + (n_size - 2)], b[1 + (-2 * t1 + 3 * t3 + 
+                            2 * n_size - 5) / 3][n_size - 2], b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3 - 1][n_size - 2]
+                            )
         lbp = max(n_size - 1, 3 * t_size - 1)
         ubp = n_size + 3 * t_size - 5
-        for t1 in range(max(n_size - 1, 3 * t_size - 1), n_size + 3 *
-            t_size - 5 + 1):
+        for t1 in range(max(n_size - 1, 3 * t_size - 1), n_size + 3 * t_size - 5 + 1):
             lbp = t1 - t_size + 1
             ubp = int(math.floor(float(2 * t1 + n_size - 2) / float(3)))
             for t2 in range(lbp, ubp + 1):
-                b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2], a
-                    [1][-2 * t1 + 3 * t2 - 1], a[1][1 + (-2 * t1 + 3 * t2)],
-                    a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 * t1 + 3 * t2])
+                b[1][-2 * t1 + 3 * t2] = S1(coef, a[1][-2 * t1 + 3 * t2], a[1][-2 * t1 + 3 * t2 - 1], a[1][1 + (-2 *
+                    t1 + 3 * t2)], a[1 + 1][-2 * t1 + 3 * t2], a[1 - 1][-2 * t1 + 3 * t2])
                 lbp = 2 * t1 - 2 * t2 + 2
                 ubp = 2 * t1 - 2 * t2 + n_size - 2
-                for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 +
-                    n_size - 2 + 1):
-                    b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef, a
-                        [-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2], a[-2 *
-                        t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a[-2 * t1 +
-                        2 * t2 + t3][1 + (-2 * t1 + 3 * t2)], a[1 + (-2 *
-                        t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2], a[-2 * t1 + 2 *
-                        t2 + t3 - 1][-2 * t1 + 3 * t2])
-                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = S2(
-                        coef, b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 -
-                        1], b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 -
-                        1 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][1 + (-2 * t1 +
-                        3 * t2 - 1)], b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 *
-                        t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1 - 1][
-                        -2 * t1 + 3 * t2 - 1])
-                a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size - 2
-                    ][-2 * t1 + 3 * t2 - 1], b[n_size - 2][-2 * t1 + 3 * t2 -
-                    1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 1)], b[1 +
-                    (n_size - 2)][-2 * t1 + 3 * t2 - 1], b[n_size - 2 - 1][
-                    -2 * t1 + 3 * t2 - 1])
+                for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
+                    b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2],
+                        a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 *
+                        t2)], a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2], a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 +
+                        3 * t2])
+                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 2 * t2 + t3 - 1][-2 *
+                        t1 + 3 * t2 - 1], b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 2 * t2 +
+                        t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1
+                        ], b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1])
+                a[n_size - 2][-2 * t1 + 3 * t2 - 1] = S2(coef, b[n_size - 2][-2 * t1 + 3 * t2 - 1], b[n_size - 2][-2 *
+                    t1 + 3 * t2 - 1 - 1], b[n_size - 2][1 + (-2 * t1 + 3 * t2 - 1)], b[1 + (n_size - 2)][-2 * t1 + 3 *
+                    t2 - 1], b[n_size - 2 - 1][-2 * t1 + 3 * t2 - 1])
             if (2 * t1 + n_size + 2) % 3 == 0:
                 lbp = int(math.ceil(float(2 * t1 - 2 * n_size + 8) / float(3)))
                 ubp = int(math.floor(float(2 * t1 + n_size - 1) / float(3)))
-                for t3 in range(int(math.ceil(float(2 * t1 - 2 * n_size + 8
-                    ) / float(3))), int(math.floor(float(2 * t1 + n_size - 
-                    1) / float(3))) + 1):
-                    a[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2
-                        ] = S2(coef, b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) /
-                        3][n_size - 2], b[(-2 * t1 + 3 * t3 + 2 * n_size - 
-                        5) / 3][n_size - 2 - 1], b[(-2 * t1 + 3 * t3 + 2 *
-                        n_size - 5) / 3][1 + (n_size - 2)], b[1 + (-2 * t1 +
-                        3 * t3 + 2 * n_size - 5) / 3][n_size - 2], b[(-2 *
-                        t1 + 3 * t3 + 2 * n_size - 5) / 3 - 1][n_size - 2])
+                for t3 in range(int(math.ceil(float(2 * t1 - 2 * n_size + 8) / float(3))), int(math.floor(float(2 *
+                    t1 + n_size - 1) / float(3))) + 1):
+                    a[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = S2(coef, b[(-2 * t1 + 3 * t3 + 2 *
+                        n_size - 5) / 3][n_size - 2], b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2 - 1], b[
+                        (-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][1 + (n_size - 2)], b[1 + (-2 * t1 + 3 * t3 + 2 *
+                        n_size - 5) / 3][n_size - 2], b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3 - 1][n_size - 2])
         lbp = 2 * t_size
         ubp = n_size + 2 * t_size - 3
         for t3 in range(2 * t_size, n_size + 2 * t_size - 3 + 1):
-            a[t3 - 2 * t_size + 1][n_size - 2] = S2(coef, b[t3 - 2 * t_size +
-                1][n_size - 2], b[t3 - 2 * t_size + 1][n_size - 2 - 1], b[
-                t3 - 2 * t_size + 1][1 + (n_size - 2)], b[1 + (t3 - 2 *
-                t_size + 1)][n_size - 2], b[t3 - 2 * t_size + 1 - 1][n_size -
-                2])
+            a[t3 - 2 * t_size + 1][n_size - 2] = S2(coef, b[t3 - 2 * t_size + 1][n_size - 2], b[t3 - 2 * t_size + 1]
+                [n_size - 2 - 1], b[t3 - 2 * t_size + 1][1 + (n_size - 2)], b[1 + (t3 - 2 * t_size + 1)][n_size - 2],
+                b[t3 - 2 * t_size + 1 - 1][n_size - 2])
     compss_barrier()
     if __debug__:
         a = compss_wait_on(a)

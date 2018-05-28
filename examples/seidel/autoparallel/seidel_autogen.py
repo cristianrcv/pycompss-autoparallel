@@ -56,8 +56,7 @@ from pycompss.api.parameter import *
 
 @task(var2=IN, var3=IN, var4=IN, var5=IN, var6=IN, var7=IN, var8=IN, var9=IN, var10=IN, returns=1)
 def S1(var2, var3, var4, var5, var6, var7, var8, var9, var10):
-    return compute_distance(var2, var3, var4, var5, var6, var7, var8, var9,
-        var10)
+    return compute_distance(var2, var3, var4, var5, var6, var7, var8, var9, var10)
 
 
 def seidel(a, n_size, t_size):
@@ -73,20 +72,16 @@ def seidel(a, n_size, t_size):
         lbp = 1
         ubp = n_size + 2 * t_size - 4
         for t1 in range(1, n_size + 2 * t_size - 4 + 1):
-            lbp = max(int(math.ceil(float(t1 + 1) / float(2))), t1 - t_size + 1
-                )
+            lbp = max(int(math.ceil(float(t1 + 1) / float(2))), t1 - t_size + 1)
             ubp = min(int(math.floor(float(t1 + n_size - 2) / float(2))), t1)
             for t2 in range(lbp, ubp + 1):
                 lbp = t1 + 1
                 ubp = t1 + n_size - 2
                 for t3 in range(t1 + 1, t1 + n_size - 2 + 1):
-                    a[-t1 + 2 * t2][-t1 + t3] = S1(a[-t1 + 2 * t2 - 1][-t1 +
-                        t3 - 1], a[-t1 + 2 * t2 - 1][-t1 + t3], a[-t1 + 2 *
-                        t2 - 1][-t1 + t3 + 1], a[-t1 + 2 * t2][-t1 + t3 - 1
-                        ], a[-t1 + 2 * t2][-t1 + t3], a[-t1 + 2 * t2][-t1 +
-                        t3 + 1], a[-t1 + 2 * t2 + 1][-t1 + t3 - 1], a[-t1 +
-                        2 * t2 + 1][-t1 + t3], a[-t1 + 2 * t2 + 1][-t1 + t3 +
-                        1])
+                    a[-t1 + 2 * t2][-t1 + t3] = S1(a[-t1 + 2 * t2 - 1][-t1 + t3 - 1], a[-t1 + 2 * t2 - 1][-t1 + t3],
+                        a[-t1 + 2 * t2 - 1][-t1 + t3 + 1], a[-t1 + 2 * t2][-t1 + t3 - 1], a[-t1 + 2 * t2][-t1 + t3],
+                        a[-t1 + 2 * t2][-t1 + t3 + 1], a[-t1 + 2 * t2 + 1][-t1 + t3 - 1], a[-t1 + 2 * t2 + 1][-t1 +
+                        t3], a[-t1 + 2 * t2 + 1][-t1 + t3 + 1])
     compss_barrier()
     if __debug__:
         a = compss_wait_on(a)

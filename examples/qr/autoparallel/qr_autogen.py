@@ -178,8 +178,7 @@ def qr_blocked(a, m_size, b_size):
     q = generate_identity(m_size, b_size)
     r = copy_blocked(a)
     q_act = [None]
-    q_sub = [[np.matrix(np.array([0])), np.matrix(np.array([0]))], [np.
-        matrix(np.array([0])), np.matrix(np.array([0]))]]
+    q_sub = [[np.matrix(np.array([0])), np.matrix(np.array([0]))], [np.matrix(np.array([0])), np.matrix(np.array([0]))]]
     aux = [None, None]
     if m_size >= 1:
         lbp = 0
@@ -198,8 +197,8 @@ def qr_blocked(a, m_size, b_size):
             lbp = t1 + 1
             ubp = m_size - 1
             for t3 in range(t1 + 1, m_size - 1 + 1):
-                q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][t1
-                    ], r[t3][t1] = S4(r[t1][t1], r[t3][t1], b_size)
+                q_sub[0][0], q_sub[0][1], q_sub[1][0], q_sub[1][1], r[t1][t1], r[t3][t1] = S4(r[t1][t1], r[t3][t1],
+                    b_size)
                 lbp = t1 + 1
                 ubp = m_size - 1
                 for t6 in range(t1 + 1, m_size - 1 + 1):

@@ -119,8 +119,7 @@ def lu_blocked(a, m_size, b_size):
         res_expected = np.zeros((m_size * b_size, m_size * b_size))
     if len(a) == 0:
         return
-    p_mat = [([np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size
-        ) for _ in range(m_size)]
+    p_mat = [([np.matrix(np.zeros((b_size, b_size)), dtype=float)] * m_size) for _ in range(m_size)]
     l_mat = [[None for _ in range(m_size)] for _ in range(m_size)]
     u_mat = [[None for _ in range(m_size)] for _ in range(m_size)]
     if m_size >= 2:
@@ -170,16 +169,14 @@ def lu_blocked(a, m_size, b_size):
                 u_mat[t1][t3] = S12(aux[0], p_mat[t1][t1], a[t1][t3])
         aux[0] = S5(u_mat[m_size - 1 - 1][m_size - 1 - 1])
         aux2[0] = S6(a[m_size - 1][m_size - 1 - 1], aux[0])
-        a[m_size - 1][m_size - 1] = S7(a[m_size - 1][m_size - 1], aux2[0],
-            u_mat[m_size - 1 - 1][m_size - 1])
-        p_mat[m_size - 1][m_size - 1], l_mat[m_size - 1][m_size - 1], u_mat[
-            m_size - 1][m_size - 1] = S8(a[m_size - 1][m_size - 1])
+        a[m_size - 1][m_size - 1] = S7(a[m_size - 1][m_size - 1], aux2[0], u_mat[m_size - 1 - 1][m_size - 1])
+        p_mat[m_size - 1][m_size - 1], l_mat[m_size - 1][m_size - 1], u_mat[m_size - 1][m_size - 1] = S8(a[m_size - 
+            1][m_size - 1])
         lbp = 0
         ubp = m_size - 2
         for t3 in range(0, m_size - 2 + 1):
             aux[0] = S9(u_mat[t3][t3])
-            l_mat[m_size - 1][t3] = S10(p_mat[m_size - 1][m_size - 1], a[
-                m_size - 1][t3], aux[0])
+            l_mat[m_size - 1][t3] = S10(p_mat[m_size - 1][m_size - 1], a[m_size - 1][t3], aux[0])
     compss_barrier()
     if __debug__:
         p_res = join_matrix(compss_wait_on(p_mat))

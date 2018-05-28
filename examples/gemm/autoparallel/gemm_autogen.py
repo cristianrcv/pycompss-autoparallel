@@ -83,8 +83,7 @@ def matmul(a, b, c, m_size, alpha, beta):
         input_a = copy.deepcopy(a)
         input_b = copy.deepcopy(b)
         input_c = copy.deepcopy(c)
-        res_expected = seq_multiply(input_a, input_b, input_c, m_size,
-            alpha, beta)
+        res_expected = seq_multiply(input_a, input_b, input_c, m_size, alpha, beta)
     if m_size >= 1:
         lbp = 0
         ubp = m_size - 1

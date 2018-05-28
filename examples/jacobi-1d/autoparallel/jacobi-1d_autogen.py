@@ -75,8 +75,7 @@ def jacobi_1d(a, b, n_size, t_size, coef):
         import copy
         a_seq = copy.deepcopy(a)
         b_seq = copy.deepcopy(b)
-        a_expected, b_expected = seq_jacobi_1d(a_seq, b_seq, n_size, t_size,
-            coef)
+        a_expected, b_expected = seq_jacobi_1d(a_seq, b_seq, n_size, t_size, coef)
     if n_size >= 3 and t_size >= 1:
         b[1] = S1(coef, a[1 - 1], a[1], a[1 + 1])
         lbp = 2
@@ -87,10 +86,9 @@ def jacobi_1d(a, b, n_size, t_size, coef):
             lbp = int(math.ceil(float(2 * t1 + 2) / float(3)))
             ubp = t1
             for t2 in range(lbp, ubp + 1):
-                b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1], a[
-                    -2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1])
-                a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 - 1 -
-                    1], b[-2 * t1 + 3 * t2 - 1], b[-2 * t1 + 3 * t2 - 1 + 1])
+                b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1])
+                a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 3 * t2 - 1], b[-2 * t1 +
+                    3 * t2 - 1 + 1])
         if n_size == 3:
             lbp = 2
             ubp = 3 * t_size - 2
@@ -105,10 +103,9 @@ def jacobi_1d(a, b, n_size, t_size, coef):
             lbp = t1 - t_size + 1
             ubp = t1
             for t2 in range(lbp, ubp + 1):
-                b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1], a[
-                    -2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1])
-                a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 - 1 -
-                    1], b[-2 * t1 + 3 * t2 - 1], b[-2 * t1 + 3 * t2 - 1 + 1])
+                b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1])
+                a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 3 * t2 - 1], b[-2 * t1 +
+                    3 * t2 - 1 + 1])
         if n_size >= 4:
             lbp = n_size - 1
             ubp = 3 * t_size - 2
@@ -118,30 +115,24 @@ def jacobi_1d(a, b, n_size, t_size, coef):
                 lbp = int(math.ceil(float(2 * t1 + 2) / float(3)))
                 ubp = int(math.floor(float(2 * t1 + n_size - 2) / float(3)))
                 for t2 in range(lbp, ubp + 1):
-                    b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1],
-                        a[-2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1])
-                    a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 -
-                        1 - 1], b[-2 * t1 + 3 * t2 - 1], b[-2 * t1 + 3 * t2 -
-                        1 + 1])
+                    b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1]
+                        )
+                    a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 3 * t2 - 1], b[-2 *
+                        t1 + 3 * t2 - 1 + 1])
                 if (2 * t1 + n_size + 2) % 3 == 0:
-                    a[n_size - 2] = S2(coef, b[n_size - 2 - 1], b[n_size - 
-                        2], b[n_size - 2 + 1])
+                    a[n_size - 2] = S2(coef, b[n_size - 2 - 1], b[n_size - 2], b[n_size - 2 + 1])
         lbp = max(n_size - 1, 3 * t_size - 1)
         ubp = n_size + 3 * t_size - 5
-        for t1 in range(max(n_size - 1, 3 * t_size - 1), n_size + 3 *
-            t_size - 5 + 1):
+        for t1 in range(max(n_size - 1, 3 * t_size - 1), n_size + 3 * t_size - 5 + 1):
             lbp = t1 - t_size + 1
             ubp = int(math.floor(float(2 * t1 + n_size - 2) / float(3)))
             for t2 in range(lbp, ubp + 1):
-                b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1], a[
-                    -2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1])
-                a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 - 1 -
-                    1], b[-2 * t1 + 3 * t2 - 1], b[-2 * t1 + 3 * t2 - 1 + 1])
+                b[-2 * t1 + 3 * t2] = S1(coef, a[-2 * t1 + 3 * t2 - 1], a[-2 * t1 + 3 * t2], a[-2 * t1 + 3 * t2 + 1])
+                a[-2 * t1 + 3 * t2 - 1] = S2(coef, b[-2 * t1 + 3 * t2 - 1 - 1], b[-2 * t1 + 3 * t2 - 1], b[-2 * t1 +
+                    3 * t2 - 1 + 1])
             if (2 * t1 + n_size + 2) % 3 == 0:
-                a[n_size - 2] = S2(coef, b[n_size - 2 - 1], b[n_size - 2],
-                    b[n_size - 2 + 1])
-        a[n_size - 2] = S2(coef, b[n_size - 2 - 1], b[n_size - 2], b[n_size -
-            2 + 1])
+                a[n_size - 2] = S2(coef, b[n_size - 2 - 1], b[n_size - 2], b[n_size - 2 + 1])
+        a[n_size - 2] = S2(coef, b[n_size - 2 - 1], b[n_size - 2], b[n_size - 2 + 1])
     compss_barrier()
     if __debug__:
         a = compss_wait_on(a)

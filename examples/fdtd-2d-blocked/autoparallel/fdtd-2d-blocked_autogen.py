@@ -90,8 +90,7 @@ def fdtd_blocked(ex, ey, hz, n_size, b_size, t_size, coef1, coef2):
         ex_seq = copy.deepcopy(ex)
         ey_seq = copy.deepcopy(ey)
         hz_seq = copy.deepcopy(hz)
-        hz_expected = seq_fdtd_2d(ex_seq, ey_seq, hz_seq, n_size, b_size,
-            t_size, coef1, coef2)
+        hz_expected = seq_fdtd_2d(ex_seq, ey_seq, hz_seq, n_size, b_size, t_size, coef1, coef2)
     if t_size >= 1:
         if n_size >= 2:
             ex[0] = S3(ex[0], coef1, hz[0], hz[0], b_size)
@@ -117,29 +116,22 @@ def fdtd_blocked(ex, ey, hz, n_size, b_size, t_size, coef1, coef2):
                     ex[0] = S3(ex[0], coef1, hz[0], hz[0], b_size)
                     ey[0] = S1(t1 / 2, b_size)
                 lbp = int(math.ceil(float(t1 + 1) / float(2)))
-                ubp = min(int(math.floor(float(t1 + n_size - 1) / float(2))
-                    ), t1)
+                ubp = min(int(math.floor(float(t1 + n_size - 1) / float(2))), t1)
                 for t2 in range(lbp, ubp + 1):
-                    ex[-t1 + 2 * t2] = S3(ex[-t1 + 2 * t2], coef1, hz[-t1 +
-                        2 * t2], hz[-t1 + 2 * t2], b_size)
-                    ey[-t1 + 2 * t2] = S2(ey[-t1 + 2 * t2], coef1, hz[-t1 +
-                        2 * t2], hz[-t1 + 2 * t2 - 1], b_size)
-                    hz[-t1 + 2 * t2 - 1] = S4(hz[-t1 + 2 * t2 - 1], coef2,
-                        ex[-t1 + 2 * t2 - 1], ey[-t1 + 2 * t2 - 1 + 1], ey[
-                        -t1 + 2 * t2 - 1], b_size)
+                    ex[-t1 + 2 * t2] = S3(ex[-t1 + 2 * t2], coef1, hz[-t1 + 2 * t2], hz[-t1 + 2 * t2], b_size)
+                    ey[-t1 + 2 * t2] = S2(ey[-t1 + 2 * t2], coef1, hz[-t1 + 2 * t2], hz[-t1 + 2 * t2 - 1], b_size)
+                    hz[-t1 + 2 * t2 - 1] = S4(hz[-t1 + 2 * t2 - 1], coef2, ex[-t1 + 2 * t2 - 1], ey[-t1 + 2 * t2 - 1 +
+                        1], ey[-t1 + 2 * t2 - 1], b_size)
         lbp = 2 * t_size - 1
         ubp = n_size + 2 * t_size - 3
         for t1 in range(2 * t_size - 1, n_size + 2 * t_size - 3 + 1):
             lbp = t1 - t_size + 1
             ubp = min(int(math.floor(float(t1 + n_size - 1) / float(2))), t1)
             for t2 in range(lbp, ubp + 1):
-                ex[-t1 + 2 * t2] = S3(ex[-t1 + 2 * t2], coef1, hz[-t1 + 2 *
-                    t2], hz[-t1 + 2 * t2], b_size)
-                ey[-t1 + 2 * t2] = S2(ey[-t1 + 2 * t2], coef1, hz[-t1 + 2 *
-                    t2], hz[-t1 + 2 * t2 - 1], b_size)
-                hz[-t1 + 2 * t2 - 1] = S4(hz[-t1 + 2 * t2 - 1], coef2, ex[-
-                    t1 + 2 * t2 - 1], ey[-t1 + 2 * t2 - 1 + 1], ey[-t1 + 2 *
-                    t2 - 1], b_size)
+                ex[-t1 + 2 * t2] = S3(ex[-t1 + 2 * t2], coef1, hz[-t1 + 2 * t2], hz[-t1 + 2 * t2], b_size)
+                ey[-t1 + 2 * t2] = S2(ey[-t1 + 2 * t2], coef1, hz[-t1 + 2 * t2], hz[-t1 + 2 * t2 - 1], b_size)
+                hz[-t1 + 2 * t2 - 1] = S4(hz[-t1 + 2 * t2 - 1], coef2, ex[-t1 + 2 * t2 - 1], ey[-t1 + 2 * t2 - 1 + 1
+                    ], ey[-t1 + 2 * t2 - 1], b_size)
     compss_barrier()
     if __debug__:
         hz = compss_wait_on(hz)

@@ -82,8 +82,7 @@ def floyd(d, n_size):
                 lbp = max(0, t2 - n_size + 1)
                 ubp = min(t2, n_size - 1)
                 for t3 in range(lbp, ubp + 1):
-                    d[t3][t2 - t3] = S1(d[t3][t2 - t3], d[t3][t1], d[t1][t2 -
-                        t3])
+                    d[t3][t2 - t3] = S1(d[t3][t2 - t3], d[t3][t1], d[t1][t2 - t3])
     compss_barrier()
     if __debug__:
         d = compss_wait_on(d)

@@ -360,22 +360,22 @@ Synchro1 -> 112[ label="d32" ];
 111 -> 112[ label="d48" ];
 Synchro2[label="barrier", shape=octagon, style=filled fillcolor="#ff0000" fontcolor="#FFFFFF"];
 Synchro1 -> Synchro2;
-80 -> Synchro2;
-72 -> Synchro2;
-84 -> Synchro2;
-108 -> Synchro2;
+64 -> Synchro2;
+96 -> Synchro2;
+56 -> Synchro2;
+88 -> Synchro2;
+100 -> Synchro2;
 52 -> Synchro2;
 104 -> Synchro2;
-100 -> Synchro2;
-88 -> Synchro2;
 112 -> Synchro2;
-56 -> Synchro2;
-96 -> Synchro2;
+84 -> Synchro2;
 68 -> Synchro2;
-60 -> Synchro2;
 76 -> Synchro2;
-64 -> Synchro2;
-92 -> Synchro2;  }
+60 -> Synchro2;
+80 -> Synchro2;
+72 -> Synchro2;
+92 -> Synchro2;
+108 -> Synchro2;  }
   subgraph legend {
     rank=sink;
     node [shape=plaintext, height=0.75];
