@@ -6,12 +6,12 @@ def matmul(mSize, nSize, kSize, bSize, debug):
 
     # Debug
     if debug:
-        print "Matrix A:"
-        print a
-        print "Matrix B:"
-        print b
-        print "Matrix C:"
-        print c
+        print("Matrix A:")
+        print(a)
+        print("Matrix B:")
+        print(b)
+        print("Matrix C:")
+        print(c)
 
     # Perform computation
     # c = a*b
@@ -22,8 +22,8 @@ def matmul(mSize, nSize, kSize, bSize, debug):
 
     # Debug
     if debug:
-        print "Matrix C:"
-        print c
+        print("Matrix C:")
+        print(c)
 
     # Result
     return c
