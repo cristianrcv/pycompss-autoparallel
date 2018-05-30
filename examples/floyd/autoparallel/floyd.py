@@ -50,7 +50,7 @@ def create_entry(n_size, is_zero):
 # MAIN FUNCTION
 ############################################
 
-@parallel()
+@parallel(taskify_loop_level=1)
 def floyd(d, n_size):
     # Debug
     if __debug__:

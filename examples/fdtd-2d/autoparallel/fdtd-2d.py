@@ -47,7 +47,7 @@ def create_entry(i, j, size):
 # MAIN FUNCTION
 ############################################
 
-@parallel()
+@parallel(taskify_loop_level=1)
 def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
     # Debug
     if __debug__:

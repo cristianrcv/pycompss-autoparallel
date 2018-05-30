@@ -73,12 +73,9 @@ def matmul(a, b, c, m_size, alpha, beta):
     # Matrix multiplication
     for i in range(m_size):
         for j in range(m_size):
-            print("Scaling c[" + str(i) + "][" + str(j) + "]")
             c[i][j] = scale(c[i][j], beta)
         for k in range(m_size):
             for j in range(m_size):
-                print("Multiplying c[" + str(i) + "][" + str(j) + "] with a[" + str(i) + "][" + str(
-                    k) + "] and b[" + str(k) + "][" + str(j))
                 c[i][j] = multiply(c[i][j], alpha, a[i][k], b[k][j])
 
     # Debug result

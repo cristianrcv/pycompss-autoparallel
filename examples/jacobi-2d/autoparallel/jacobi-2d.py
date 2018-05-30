@@ -47,7 +47,7 @@ def create_entry(i, j, n_size, offset):
 # MAIN FUNCTION
 ############################################
 
-@parallel()
+@parallel(taskify_loop_level=1)
 def jacobi_2d(a, b, n_size, t_size, coef):
     # Debug
     if __debug__:

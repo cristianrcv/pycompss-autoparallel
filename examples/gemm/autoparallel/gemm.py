@@ -49,7 +49,7 @@ def create_entry():
 # MAIN FUNCTION
 ############################################
 
-@parallel()
+@parallel(taskify_loop_level=1)
 def matmul(a, b, c, m_size, alpha, beta):
     # Debug
     if __debug__:
