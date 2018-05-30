@@ -928,7 +928,7 @@ class _LoopTasking(ast.NodeTransformer):
         for_level = _LoopTasking._get_for_level(node)
 
         # Taskify for loop if it has the right depth-level
-        # TODO: Support N-depth taskification (currently, 1D)
+        # TODO: Support N-depth taskification (currently, 1-D)
         if for_level == self.taskify_loop_level:
             if __debug__:
                 import astor
@@ -937,217 +937,17 @@ class _LoopTasking(ast.NodeTransformer):
                 # logger.debug(ast.dump(node))
                 logger.debug(astor.to_source(node, pretty_source=PyCOMPSsSourceGen.long_line_ps))
 
-            # Obtain loop index
-            loop_ind = node.target
-            loop_bounds = node.iter
-
-            # Rebuild loop body with plain variables
-            import copy
-            func_node = copy.deepcopy(node)
-            rs = _RewriteSubscriptToSubscript(loop_ind)
-            func_node = rs.visit(func_node)
-            var2subscript = rs.get_var_subscripts()
-
-            # Process direction of parameters
-            in_vars, out_vars, inout_vars, return_vars = self._process_parameters(func_node)
-
-            # Add non subscript variables to var2subscript
-            for var in in_vars + out_vars + inout_vars + return_vars:
-                if var not in var2subscript.keys():
-                    var_ast = ast.Name(id=var)
-                    var2subscript[var] = var_ast
-
-            # Create new function arguments
-            task_args = []
-            task_star_args = []
-            for var in in_vars + out_vars + inout_vars:
-                var_ast = ast.Name(id=var)
-                # Add subscript variables to star_args. Add the rest of variables to task header
-                if isinstance(var2subscript[var], ast.Name):
-                    # Do not repeat variables
-                    if var not in task_args:
-                        task_args.append(var_ast)
-                else:
-                    # Do not repeat variables
-                    if var not in task_star_args:
-                        task_star_args.append(var)
-
-            # if __debug__:
-            #    logger.debug("Task function arguments:")
-            #    for ta in task_args:
-            #        logger.debug(ast.dump(ta))
-            #        logger.debug(astor.to_source(ta))
-            #    logger.debug("Task function star arguments:")
-            #    for tsa in task_star_args:
-            #        logger.debug(ast.dump(tsa))
-            #        logger.debug(astor.to_source(tsa))
-
-            # New task variables
-            self.task_counter_id += 1
-            task_name = "LT" + str(self.task_counter_id)
-            task_vararg = "args" if len(task_star_args) > 0 else None
-            len_var = task_name + "_args_size"
-
-            # Construct task header
-            task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args,
-                                                             len_var)
-
-            # Create task definition node
-            func_node = _LoopTasking._fix_loop_bounds(func_node)
-            task_body = _LoopTasking._create_task_body_with_argutils(func_node, task_star_args, len_var)
-            new_task = ast.FunctionDef(name=task_name,
-                                       args=ast.arguments(args=task_args, vararg=task_vararg, kwarg=None, defaults=[]),
-                                       body=task_body,
-                                       decorator_list=[])
-            self.task2func_code[task_name] = new_task
-            self.task2headers[task_name] = task_header
-
-            # Modify the task call arguments
-            call_func = ast.Name(id=task_name)
-            call_args = []
-            for ta in task_args:
-                arg_name = ta.id
-                orig_call_arg = var2subscript[arg_name]
-                if isinstance(orig_call_arg, ast.Name):
-                    # Argument is a plain variable, no changes
-                    call_args.append(orig_call_arg)
-                elif isinstance(orig_call_arg, ast.Subscript):
-                    # Argument is a subscript
-                    call_arg = ast.ListComp(elt=orig_call_arg,
-                                            generators=[ast.comprehension(target=loop_ind, iter=loop_bounds, ifs=[])])
-                    call_args.append(call_arg)
-                else:
-                    # Unrecognised argument type
-                    raise Py2PyCOMPSsException("[ERROR] Unrecognised call argument type " + str(type(orig_call_arg)))
-
-            # Replace the current node by a task callee
-            if len(task_star_args) == 0:
-                # Regular callee expression
-                new_node = ast.Expr(value=ast.Call(func=call_func,
-                                                   args=call_args,
-                                                   keywords=[],
-                                                   starargs=None,
-                                                   kwargs=None))
-            else:
-                # Loop Tasking callee expression
-                new_nodes = []
-
-                # Store operations for build and destroy chunks
-                # Add assign build chunks to new_nodes
-                chunked_task_star_args = []
-                unassign_loop_var = ast.Name(id=task_name + "_index")
-                unassign_nodes = []
-                star_arg_ind = 0
-                for var_name in task_star_args:
-                    orig_call_arg = var2subscript[var_name]
-                    if isinstance(orig_call_arg, ast.Name):
-                        # Argument is a plain variable, no changes
-                        chunked_task_star_args.append(orig_call_arg)
-                    elif isinstance(orig_call_arg, ast.Subscript):
-                        # Argument is a subscript
-                        star_arg_name = task_name + "_aux_" + str(star_arg_ind)
-                        star_arg_ind = star_arg_ind + 1
-                        star_arg = ast.Name(id=star_arg_name)
-                        # Store star_arg name
-                        chunked_task_star_args.append(star_arg)
-                        # Insert build assignation to new_nodes
-                        assign_node = ast.Assign(targets=[star_arg],
-                                                 value=ast.ListComp(elt=orig_call_arg,
-                                                                    generators=[ast.comprehension(target=loop_ind,
-                                                                                                  iter=loop_bounds,
-                                                                                                  ifs=[])]))
-                        new_nodes.append(assign_node)
-                        # Store destroy assignation to later append to new_nodes
-                        unassign_node = ast.Assign(targets=[orig_call_arg],
-                                                   value=ast.Subscript(value=star_arg,
-                                                                       slice=ast.Index(value=unassign_loop_var)))
-                        unassign_nodes.append(unassign_node)
-
-                    else:
-                        # Unrecognised argument type
-                        raise Py2PyCOMPSsException(
-                            "[ERROR] Unrecognised call argument type " + str(type(orig_call_arg)))
-
-                # Insert ArgUtils instantiation
-                argutils_var = ast.Name(id=task_name + "_argutils")
-                argutils_node = ast.Assign(targets=[argutils_var],
-                                           value=ast.Call(func=ast.Name(id="ArgUtils"),
-                                                          args=[],
-                                                          keywords=[],
-                                                          starargs=None,
-                                                          kwargs=None))
-                new_nodes.append(argutils_node)
-
-                # Flatten args
-                flat_args_var = ast.Name(id=task_name + "_flat_args")
-                flat_args_node = ast.Assign(targets=[flat_args_var],
-                                            value=ast.Call(func=ast.Attribute(value=argutils_var, attr="flatten"),
-                                                           args=chunked_task_star_args,
-                                                           keywords=[],
-                                                           starargs=None,
-                                                           kwargs=None))
-                new_nodes.append(flat_args_node)
-
-                # Insert Compute length
-                global_node = ast.Global(names=[len_var])
-                assign_global_node = ast.Assign(targets=[ast.Name(id=len_var)],
-                                                value=ast.Call(func=ast.Name(id="len"),
-                                                               args=[flat_args_var],
-                                                               keywords=[],
-                                                               starargs=None,
-                                                               kwargs=None))
-                new_nodes.append(global_node)
-                new_nodes.append(assign_global_node)
-
-                # Insert task call
-                new_args_var = ast.Name(id=task_name + "_new_args")
-                task_call_node = ast.Assign(targets=[new_args_var],
-                                            value=ast.Call(func=call_func,
-                                                           args=call_args,
-                                                           keywords=[],
-                                                           starargs=flat_args_var,
-                                                           kwargs=None))
-                new_nodes.append(task_call_node)
-
-                # Rebuild chunks from flat new arguments
-                rebuild_node = ast.Assign(targets=[ast.Tuple(elts=chunked_task_star_args)],
-                                          value=ast.Call(func=ast.Attribute(value=argutils_var, attr="rebuild"),
-                                                         args=[new_args_var],
-                                                         keywords=[],
-                                                         starargs=None,
-                                                         kwargs=None))
-                new_nodes.append(rebuild_node)
-
-                # Undo chunks to user subscripts
-                loop_var_init_node = ast.Assign(targets=[unassign_loop_var], value=ast.Num(n=0))
-                new_nodes.append(loop_var_init_node)
-
-                incr_index_node = ast.Assign(targets=[unassign_loop_var],
-                                             value=ast.BinOp(left=unassign_loop_var,
-                                                             op=ast.Add(),
-                                                             right=ast.Num(n=1)))
-                unassign_nodes.append(incr_index_node)
-                loop_unassign_node = ast.For(target=loop_ind, iter=loop_bounds, body=unassign_nodes, orelse=[])
-                new_nodes.append(loop_unassign_node)
-
-                # Assign to function return
-                new_node = new_nodes
+            new_node = self._taskify_loop(node)
 
             if __debug__:
                 import astor
                 from pycompss.util.translators.astor_source_gen.pycompss_source_gen import PyCOMPSsSourceGen
-                logger.debug("New Taskified task:")
-                # logger.debug(ast.dump(new_task))
-                logger.debug(astor.to_source(new_task, pretty_source=PyCOMPSsSourceGen.long_line_ps))
                 logger.debug("New Taskified loop:")
                 if isinstance(new_node, list):
                     for internal_op in new_node:
                         logger.debug(astor.to_source(internal_op, pretty_source=PyCOMPSsSourceGen.long_line_ps))
                 else:
                     logger.debug(astor.to_source(new_node, pretty_source=PyCOMPSsSourceGen.long_line_ps))
-
-            # Remove internal loop statements from task headers
-            self._remove_statements_from_tasks(node)
         else:
             new_node = node
 
@@ -1156,6 +956,220 @@ class _LoopTasking(ast.NodeTransformer):
 
         # Return modified node
         return new_node
+
+    def _taskify_loop(self, node):
+        """
+        Taskifies the loop represented by the given node
+
+        :param node: Node representing the head of the loop
+        :return: New taskified node (or list of nodes)
+        """
+
+        # Obtain loop index
+        loop_ind = node.target
+        loop_bounds = node.iter
+
+        # Rebuild loop body with plain variables
+        import copy
+        func_node = copy.deepcopy(node)
+        rs = _RewriteSubscriptToSubscript(loop_ind)
+        func_node = rs.visit(func_node)
+        var2subscript = rs.get_var_subscripts()
+
+        # Process direction of parameters
+        in_vars, out_vars, inout_vars, return_vars = self._process_parameters(func_node, loop_ind)
+
+        # Add non subscript variables to var2subscript
+        for var in in_vars + out_vars + inout_vars + return_vars:
+            if var not in var2subscript.keys():
+                var_ast = ast.Name(id=var)
+                var2subscript[var] = var_ast
+
+        # Create new function arguments
+        task_args = []
+        task_star_args = []
+        for var in in_vars + out_vars + inout_vars:
+            var_ast = ast.Name(id=var)
+            # Add plan variables to task header and subscript variables to star_args
+            if isinstance(var2subscript[var], ast.Name):
+                # Do not repeat variables
+                if var not in task_args:
+                    task_args.append(var_ast)
+            else:
+                # Do not repeat variables
+                if var not in task_star_args:
+                    task_star_args.append(var)
+
+        # if __debug__:
+        #    logger.debug("Task function arguments:")
+        #    for ta in task_args:
+        #        logger.debug(ast.dump(ta))
+        #        logger.debug(astor.to_source(ta))
+        #    logger.debug("Task function star arguments:")
+        #    for tsa in task_star_args:
+        #        logger.debug(ast.dump(tsa))
+        #        logger.debug(astor.to_source(tsa))
+
+        # New task variables
+        self.task_counter_id += 1
+        task_name = "LT" + str(self.task_counter_id)
+        task_vararg = "args" if len(task_star_args) > 0 else None
+        len_var = task_name + "_args_size"
+
+        # Construct task header
+        task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args,
+                                                         len_var)
+
+        # Create task definition node
+        func_node = _LoopTasking._fix_loop_bounds(func_node)
+        # Replace internal task callees by no_task callees (updates task2func_code)
+        func_node = _UntaskCallees(self.task2headers, self.task2func_code).visit(func_node)
+        task_body = _LoopTasking._create_task_body_with_argutils(func_node, task_star_args, len_var)
+        new_task = ast.FunctionDef(name=task_name,
+                                   args=ast.arguments(args=task_args, vararg=task_vararg, kwarg=None, defaults=[]),
+                                   body=task_body,
+                                   decorator_list=[])
+        self.task2func_code[task_name] = new_task
+        self.task2headers[task_name] = task_header
+
+        if __debug__:
+            import astor
+            from pycompss.util.translators.astor_source_gen.pycompss_source_gen import PyCOMPSsSourceGen
+            logger.debug("New Taskified task:")
+            # logger.debug(ast.dump(new_task))
+            logger.debug(astor.to_source(new_task, pretty_source=PyCOMPSsSourceGen.long_line_ps))
+
+        # Modify the task call arguments
+        call_func = ast.Name(id=task_name)
+        call_args = []
+        for ta in task_args:
+            arg_name = ta.id
+            orig_call_arg = var2subscript[arg_name]
+            if isinstance(orig_call_arg, ast.Name):
+                # Argument is a plain variable, no changes
+                call_args.append(orig_call_arg)
+            elif isinstance(orig_call_arg, ast.Subscript):
+                # Argument is a subscript
+                call_arg = ast.ListComp(elt=orig_call_arg,
+                                        generators=[ast.comprehension(target=loop_ind, iter=loop_bounds, ifs=[])])
+                call_args.append(call_arg)
+            else:
+                # Unrecognised argument type
+                raise Py2PyCOMPSsException("[ERROR] Unrecognised call argument type " + str(type(orig_call_arg)))
+
+        # Replace the current node by a task callee
+        if len(task_star_args) == 0:
+            # Regular callee expression
+            new_node = ast.Expr(value=ast.Call(func=call_func,
+                                               args=call_args,
+                                               keywords=[],
+                                               starargs=None,
+                                               kwargs=None))
+            return new_node
+
+        # ELSE: Loop tasking callee expression
+        new_nodes = []
+
+        # Store operations for build and destroy chunks
+        # Add assign build chunks to new_nodes
+        chunked_task_star_args = []
+        unassign_loop_var = ast.Name(id=task_name + "_index")
+        unassign_nodes = []
+        star_arg_ind = 0
+        for var_name in task_star_args:
+            orig_call_arg = var2subscript[var_name]
+            if isinstance(orig_call_arg, ast.Name):
+                # Argument is a plain variable, no changes
+                chunked_task_star_args.append(orig_call_arg)
+            elif isinstance(orig_call_arg, ast.Subscript):
+                # Argument is a subscript
+                star_arg_name = task_name + "_aux_" + str(star_arg_ind)
+                star_arg_ind = star_arg_ind + 1
+                star_arg = ast.Name(id=star_arg_name)
+                # Store star_arg name
+                chunked_task_star_args.append(star_arg)
+                # Insert build assignation to new_nodes
+                assign_node = ast.Assign(targets=[star_arg],
+                                         value=ast.ListComp(elt=orig_call_arg,
+                                                            generators=[ast.comprehension(target=loop_ind,
+                                                                                          iter=loop_bounds,
+                                                                                          ifs=[])]))
+                new_nodes.append(assign_node)
+                # Store destroy assignation to later append to new_nodes
+                unassign_node = ast.Assign(targets=[orig_call_arg],
+                                           value=ast.Subscript(value=star_arg,
+                                                               slice=ast.Index(value=unassign_loop_var)))
+                unassign_nodes.append(unassign_node)
+
+            else:
+                # Unrecognised argument type
+                raise Py2PyCOMPSsException(
+                    "[ERROR] Unrecognised call argument type " + str(type(orig_call_arg)))
+
+        # Insert ArgUtils instantiation
+        argutils_var = ast.Name(id=task_name + "_argutils")
+        argutils_node = ast.Assign(targets=[argutils_var],
+                                   value=ast.Call(func=ast.Name(id="ArgUtils"),
+                                                  args=[],
+                                                  keywords=[],
+                                                  starargs=None,
+                                                  kwargs=None))
+        new_nodes.append(argutils_node)
+
+        # Flatten args
+        flat_args_var = ast.Name(id=task_name + "_flat_args")
+        flat_args_node = ast.Assign(targets=[flat_args_var],
+                                    value=ast.Call(func=ast.Attribute(value=argutils_var, attr="flatten"),
+                                                   args=chunked_task_star_args,
+                                                   keywords=[],
+                                                   starargs=None,
+                                                   kwargs=None))
+        new_nodes.append(flat_args_node)
+
+        # Insert Compute length
+        global_node = ast.Global(names=[len_var])
+        assign_global_node = ast.Assign(targets=[ast.Name(id=len_var)],
+                                        value=ast.Call(func=ast.Name(id="len"),
+                                                       args=[flat_args_var],
+                                                       keywords=[],
+                                                       starargs=None,
+                                                       kwargs=None))
+        new_nodes.append(global_node)
+        new_nodes.append(assign_global_node)
+
+        # Insert task call
+        new_args_var = ast.Name(id=task_name + "_new_args")
+        task_call_node = ast.Assign(targets=[new_args_var],
+                                    value=ast.Call(func=call_func,
+                                                   args=call_args,
+                                                   keywords=[],
+                                                   starargs=flat_args_var,
+                                                   kwargs=None))
+        new_nodes.append(task_call_node)
+
+        # Rebuild chunks from flat new arguments
+        rebuild_node = ast.Assign(targets=[ast.Tuple(elts=chunked_task_star_args)],
+                                  value=ast.Call(func=ast.Attribute(value=argutils_var, attr="rebuild"),
+                                                 args=[new_args_var],
+                                                 keywords=[],
+                                                 starargs=None,
+                                                 kwargs=None))
+        new_nodes.append(rebuild_node)
+
+        # Undo chunks to user subscripts
+        loop_var_init_node = ast.Assign(targets=[unassign_loop_var], value=ast.Num(n=0))
+        new_nodes.append(loop_var_init_node)
+
+        incr_index_node = ast.Assign(targets=[unassign_loop_var],
+                                     value=ast.BinOp(left=unassign_loop_var,
+                                                     op=ast.Add(),
+                                                     right=ast.Num(n=1)))
+        unassign_nodes.append(incr_index_node)
+        loop_unassign_node = ast.For(target=loop_ind, iter=loop_bounds, body=unassign_nodes, orelse=[])
+        new_nodes.append(loop_unassign_node)
+
+        # Assign to function return
+        return new_nodes
 
     @staticmethod
     def _get_for_level(node):
@@ -1187,35 +1201,13 @@ class _LoopTasking(ast.NodeTransformer):
         # Return all the outermost loops
         return current_for_level
 
-    def _remove_statements_from_tasks(self, node):
-        """
-        If present, removes the current node from the task list
-
-        :param node: Node to remove from the task list
-        """
-        # Process current node
-        if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name):
-                task_name = node.func.id
-                # Erase call if marked as task (it might be a non-task function call)
-                if task_name in self.task2headers.keys():
-                    del self.task2headers[task_name]
-
-        # Child recursion
-        for _, value in ast.iter_fields(node):
-            if isinstance(value, list):
-                for item in value:
-                    if isinstance(item, ast.AST):
-                        self._remove_statements_from_tasks(item)
-            elif isinstance(value, ast.AST):
-                self._remove_statements_from_tasks(value)
-
-    def _process_parameters(self, statement):
+    def _process_parameters(self, statement, loop_ind):
         """
         Processes all the directions of the parameters found in the given statement considering that they
          might be calls to existing tasks
 
         :param statement: AST node representing the head of the statement
+        :param loop_ind: Loop index
         :return fixed_in_vars: List of names of IN variables
         :return fixed_out_vars: List of names of OUT variables
         :return fixed_inout_vars: List of names of INOUT variables
@@ -1223,7 +1215,7 @@ class _LoopTasking(ast.NodeTransformer):
         :raise Py2PyCOMPSsException:
         """
 
-        in_vars, inout_vars, out_vars = self._get_access_vars(statement)
+        in_vars, inout_vars, out_vars = self._get_access_vars(statement, loop_ind)
         out_vars.extend(_LoopTasking._get_target_vars(statement))
 
         # Fix duplicate variables and directions
@@ -1317,11 +1309,12 @@ class _LoopTasking(ast.NodeTransformer):
         task_body = [global_node, rebuild_node, func_node, flatten_node]
         return task_body
 
-    def _get_access_vars(self, statement, is_target=False):
+    def _get_access_vars(self, statement, loop_ind, is_target=False):
         """
         Returns the accessed variable names within the given expression
 
         :param statement: AST node representing the head of the statement
+        :param loop_ind: Loop index
         :param is_target: Indicates whether the current node belongs to a target node or not
 
         :return in_vars: List of names of accessed variables
@@ -1336,16 +1329,19 @@ class _LoopTasking(ast.NodeTransformer):
 
         # Direct case
         if isinstance(statement, ast.Name):
-            if not is_target:
+            if not is_target and statement.id != loop_ind.id:
                 in_vars.append(statement.id)
 
             return in_vars, inout_vars, out_vars
 
         # Direct case
         if isinstance(statement, ast.Call):
+            if "id" in statement.func._fields:
+                call_name = statement.func.id
+            else:
+                call_name = None
             # Maybe its a call to a task we want to remove
-            call_name = statement.func.id
-            if call_name in self.task2headers.keys():
+            if call_name is not None and call_name in self.task2headers.keys():
                 # Retrieve task definition arguments and directions
                 task_def_arguments = self.task2func_code[call_name].args.args
                 task_def_args2directions = _LoopTasking._split_header(self.task2headers[call_name])
@@ -1355,50 +1351,58 @@ class _LoopTasking(ast.NodeTransformer):
                 for position, task_def_arg in enumerate(task_def_arguments):
                     arg_name = task_def_arg.id
                     arg_direction = task_def_args2directions[arg_name]
-                    call_name = _LoopTasking._get_var_name(task_call_args[position])
+
+                    call_names = _LoopTasking._get_var_names(task_call_args[position], loop_ind)
                     if arg_direction == "IN":
-                        in_vars.append(call_name)
+                        in_vars.extend(call_names)
                     elif arg_direction == "INOUT":
-                        inout_vars.append(call_name)
+                        inout_vars.extend(call_names)
                     else:
-                        out_vars.append(call_name)
+                        out_vars.extend(call_names)
 
                 return in_vars, inout_vars, out_vars
 
         # Child recursion
         for field, value in ast.iter_fields(statement):
-            if field == "func" or field == "keywords" or (isinstance(statement, ast.For) and field == "target"):
-                # Skip function names, var_args keywords, and loop indexes
+            if field in ["func", "op", "ops", "keywords"] or (isinstance(statement, ast.For) and field == "target"):
+                # Skip function names, operation nodes, var_args keywords, and loop indexes
                 pass
             else:
                 children_are_target = is_target or (field == "targets")
                 if isinstance(value, list):
                     for item in value:
                         if isinstance(item, ast.AST):
-                            iv, iov, ov = self._get_access_vars(item, children_are_target)
+                            iv, iov, ov = self._get_access_vars(item, loop_ind, children_are_target)
                             in_vars.extend(iv)
                             inout_vars.extend(iov)
                             out_vars.extend(ov)
                 elif isinstance(value, ast.AST):
-                    iv, iov, ov = self._get_access_vars(value, children_are_target)
+                    iv, iov, ov = self._get_access_vars(value, loop_ind, children_are_target)
                     in_vars.extend(iv)
                     inout_vars.extend(iov)
                     out_vars.extend(ov)
         return in_vars, inout_vars, out_vars
 
     @staticmethod
-    def _get_var_name(node):
+    def _get_var_names(node, loop_ind):
         """
         Returns the variable name of a Subscript or Name AST node
 
         :param node: Head node of the Subscript/Name statement
+        :param loop_ind: Loop index variable
         :return: String containing the name of the variable
         """
 
+        if isinstance(node, ast.Num):
+            return []
         if isinstance(node, ast.Name):
-            return node.id
+            if node.id != loop_ind.id:
+                return [node.id]
+            return []
         elif isinstance(node, ast.Subscript):
-            return _LoopTasking._get_var_name(node.value)
+            return _LoopTasking._get_var_names(node.value, loop_ind)
+        elif isinstance(node, ast.BinOp):
+            return _LoopTasking._get_var_names(node.left, loop_ind) + _LoopTasking._get_var_names(node.right, loop_ind)
         else:
             raise Py2PyCOMPSsException("[ERROR] Unrecognised type " + str(type(node)) + " on task argument")
 
@@ -1464,6 +1468,12 @@ class _LoopTasking(ast.NodeTransformer):
             for loop_body_statement in statement.body:
                 target_vars.extend(_LoopTasking._get_target_vars(loop_body_statement))
             return target_vars
+        elif isinstance(statement, ast.If):
+            # Process if body
+            target_vars = []
+            for if_body_statement in statement.body:
+                target_vars.extend(_LoopTasking._get_target_vars(if_body_statement))
+            return target_vars
         elif isinstance(statement, ast.Expr):
             # Process the value assignation
             return _LoopTasking._get_target_vars(statement.value)
@@ -1473,6 +1483,55 @@ class _LoopTasking(ast.NodeTransformer):
         else:
             # Unrecognised statement expression
             raise Py2PyCOMPSsException("[ERROR] Unrecognised expression on write operation " + str(type(statement)))
+
+
+#
+# Class Node transformer to change task callees by method callees
+#
+
+class _UntaskCallees(ast.NodeTransformer):
+    """
+    Node Transformer class to visit all the CALL to change task callees by method callees
+
+    Attributes:
+        - task2headers : Map containing the task name and its header
+        - task2func_code : Map containing the task name and its AST code representation
+    """
+
+    def __init__(self, task2headers, task2func_code):
+        self.task2headers = task2headers
+        self.task2func_code = task2func_code
+
+    def visit_Call(self, node):
+        """
+        Process the call node to modify the callee with the new task_function parameters
+
+        :param node: Call AST node
+        :return new_call: New Call AST node containing the modified task call
+        """
+
+        # Task calls can only use ast.Name as function
+        if isinstance(node.func, ast.Name):
+            task_name = node.func.id
+            # Check if the call name is registered as task
+            if task_name in self.task2headers.keys():
+                func_name = task_name + "_no_task"
+
+                # Create a new function entry if we haven't replaced the task before
+                if func_name not in self.task2func_code.keys():
+                    # Copy the task code and rename it
+                    import copy
+                    func_code = copy.deepcopy(self.task2func_code[task_name])
+                    func_code.name = func_name
+
+                    # Add the task as a function to write it later
+                    self.task2func_code[func_name] = func_code
+
+                # Always modify the callee
+                node.func = ast.Name(id=func_name)
+
+        # Return the current node (might have been modified)
+        return node
 
 
 #

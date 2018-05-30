@@ -12,11 +12,16 @@ def LT2(lbv, ubv, *args):
     global LT2_args_size
     var1, var2, var3 = ArgUtils.rebuild_args(args)
     for t3 in range(0, ubv + 1 - lbv):
-        S1(var1[t3], var2[t3], var3[t3])
+        S1_no_task(var1[t3], var2[t3], var3[t3])
     return ArgUtils.flatten_args(var1, var2, var3)
 
 
+@task(var2=IN, var3=IN, var1=INOUT)
 def S1(var2, var3, var1):
+    var1 += var2 * var3
+
+
+def S1_no_task(var2, var3, var1):
     var1 += var2 * var3
 
 

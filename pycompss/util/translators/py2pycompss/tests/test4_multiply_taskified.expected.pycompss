@@ -12,21 +12,36 @@ def LT4(lbv, ubv, *args):
     global LT4_args_size
     var2, var3, var4, var1 = ArgUtils.rebuild_args(args)
     for t3 in range(0, ubv + 1 - lbv):
-        var1[t3] = S1(var1[t3], var2[t3], var3[t3])
-        S2(var1[t3], var2[t3], var3[t3])
-        var1[t3], var4[t3] = S3(var1[t3], var2[t3], var3[t3])
+        var1[t3] = S1_no_task(var1[t3], var2[t3], var3[t3])
+        S2_no_task(var1[t3], var2[t3], var3[t3])
+        var1[t3], var4[t3] = S3_no_task(var1[t3], var2[t3], var3[t3])
     return ArgUtils.flatten_args(var2, var3, var4, var1)
 
 
+@task(var2=IN, var3=IN, var4=IN, returns=1)
 def S1(var2, var3, var4):
     return multiply(var2, var3, var4)
 
 
+def S1_no_task(var2, var3, var4):
+    return multiply(var2, var3, var4)
+
+
+@task(var1=IN, var2=IN, var3=IN)
 def S2(var1, var2, var3):
     multiply(var1, var2, var3)
 
 
+def S2_no_task(var1, var2, var3):
+    multiply(var1, var2, var3)
+
+
+@task(var3=IN, var4=IN, var5=IN, returns=2)
 def S3(var3, var4, var5):
+    return multiply(var3, var4, var5)
+
+
+def S3_no_task(var3, var4, var5):
     return multiply(var3, var4, var5)
 
 
