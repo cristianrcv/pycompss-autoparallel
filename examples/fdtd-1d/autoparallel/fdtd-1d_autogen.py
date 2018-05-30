@@ -58,16 +58,26 @@ def LT3(lbp, ubp, coef1, coef2, *args):
     global LT3_args_size
     var2, var4, var1, var3 = ArgUtils.rebuild_args(args)
     for t2 in range(0, ubp + 1 - lbp):
-        var1[t2] = S1(var1[t2], coef1, var2[t2], var3[t2])
-        var3[t2] = S2(var3[t2], coef2, var1[t2], var4[t2])
+        var1[t2] = S1_no_task(var1[t2], coef1, var2[t2], var3[t2])
+        var3[t2] = S2_no_task(var3[t2], coef2, var1[t2], var4[t2])
     return ArgUtils.flatten_args(var2, var4, var1, var3)
 
 
+@task(var2=IN, coef1=IN, var3=IN, var4=IN, returns=1)
 def S1(var2, coef1, var3, var4):
     return compute_e(var2, coef1, var3, var4)
 
 
+def S1_no_task(var2, coef1, var3, var4):
+    return compute_e(var2, coef1, var3, var4)
+
+
+@task(var2=IN, coef2=IN, var3=IN, var4=IN, returns=1)
 def S2(var2, coef2, var3, var4):
+    return compute_h(var2, coef2, var3, var4)
+
+
+def S2_no_task(var2, coef2, var3, var4):
     return compute_h(var2, coef2, var3, var4)
 
 

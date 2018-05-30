@@ -55,6 +55,25 @@ import math
 from pycompss.api.api import compss_barrier, compss_wait_on, compss_open
 from pycompss.api.task import task
 from pycompss.api.parameter import *
+from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
+
+
+@task(lbv=IN, ubv=IN, beta=IN, returns="LT3_args_size")
+def LT3(lbv, ubv, beta, *args):
+    global LT3_args_size
+    var1, = ArgUtils.rebuild_args(args)
+    for t3 in range(0, ubv + 1 - lbv):
+        var1[t3] = S1_no_task(var1[t3], beta)
+    return ArgUtils.flatten_args(var1)
+
+
+@task(lbv=IN, ubv=IN, alpha=IN, returns="LT4_args_size")
+def LT4(lbv, ubv, alpha, *args):
+    global LT4_args_size
+    var2, var3, var1 = ArgUtils.rebuild_args(args)
+    for t4 in range(0, ubv + 1 - lbv):
+        var1[t4] = S2_no_task(var1[t4], alpha, var2[t4], var3[t4])
+    return ArgUtils.flatten_args(var2, var3, var1)
 
 
 @task(var2=IN, beta=IN, returns=1)
@@ -62,8 +81,16 @@ def S1(var2, beta):
     return scale(var2, beta)
 
 
+def S1_no_task(var2, beta):
+    return scale(var2, beta)
+
+
 @task(var2=IN, alpha=IN, var3=IN, var4=IN, returns=1)
 def S2(var2, alpha, var3, var4):
+    return multiply(var2, alpha, var3, var4)
+
+
+def S2_no_task(var2, alpha, var3, var4):
     return multiply(var2, alpha, var3, var4)
 
 
@@ -90,8 +117,17 @@ def matmul(a, b, c, m_size, alpha, beta):
         for t2 in range(lbp, ubp + 1):
             lbv = 0
             ubv = m_size - 1
+            LT3_aux_0 = [c[t3][t2] for t3 in range(lbv, ubv + 1)]
+            LT3_argutils = ArgUtils()
+            LT3_flat_args = LT3_argutils.flatten(LT3_aux_0)
+            global LT3_args_size
+            LT3_args_size = len(LT3_flat_args)
+            LT3_new_args = LT3(lbv, ubv, beta, *LT3_flat_args)
+            LT3_aux_0, = LT3_argutils.rebuild(LT3_new_args)
+            LT3_index = 0
             for t3 in range(lbv, ubv + 1):
-                c[t3][t2] = S1(c[t3][t2], beta)
+                c[t3][t2] = LT3_aux_0[LT3_index]
+                LT3_index = LT3_index + 1
         lbp = 0
         ubp = m_size - 1
         for t2 in range(lbp, ubp + 1):
@@ -100,8 +136,21 @@ def matmul(a, b, c, m_size, alpha, beta):
             for t3 in range(0, m_size - 1 + 1):
                 lbv = 0
                 ubv = m_size - 1
+                LT4_aux_0 = [a[t4][t3] for t4 in range(lbv, ubv + 1)]
+                LT4_aux_1 = [b[t3][t2] for t4 in range(lbv, ubv + 1)]
+                LT4_aux_2 = [c[t4][t2] for t4 in range(lbv, ubv + 1)]
+                LT4_argutils = ArgUtils()
+                LT4_flat_args = LT4_argutils.flatten(LT4_aux_0, LT4_aux_1, LT4_aux_2)
+                global LT4_args_size
+                LT4_args_size = len(LT4_flat_args)
+                LT4_new_args = LT4(lbv, ubv, alpha, *LT4_flat_args)
+                LT4_aux_0, LT4_aux_1, LT4_aux_2 = LT4_argutils.rebuild(LT4_new_args)
+                LT4_index = 0
                 for t4 in range(lbv, ubv + 1):
-                    c[t4][t2] = S2(c[t4][t2], alpha, a[t4][t3], b[t3][t2])
+                    a[t4][t3] = LT4_aux_0[LT4_index]
+                    b[t3][t2] = LT4_aux_1[LT4_index]
+                    c[t4][t2] = LT4_aux_2[LT4_index]
+                    LT4_index = LT4_index + 1
     compss_barrier()
     if __debug__:
         c = compss_wait_on(c)

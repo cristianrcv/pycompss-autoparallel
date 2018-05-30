@@ -52,10 +52,24 @@ import math
 from pycompss.api.api import compss_barrier, compss_wait_on, compss_open
 from pycompss.api.task import task
 from pycompss.api.parameter import *
+from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
+
+
+@task(t1=IN, n_size=IN, returns="LT2_args_size")
+def LT2(t1, n_size, *args):
+    global LT2_args_size
+    var2, var3, var4, var5, var6, var7, var8, var9, var1 = ArgUtils.rebuild_args(args)
+    for t3 in range(0, t1 + n_size - 2 + 1 - (t1 + 1)):
+        var1[t3] = S1_no_task(var2[t3], var3[t3], var4[t3], var5[t3], var1[t3], var6[t3], var7[t3], var8[t3], var9[t3])
+    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var7, var8, var9, var1)
 
 
 @task(var2=IN, var3=IN, var4=IN, var5=IN, var6=IN, var7=IN, var8=IN, var9=IN, var10=IN, returns=1)
 def S1(var2, var3, var4, var5, var6, var7, var8, var9, var10):
+    return compute_distance(var2, var3, var4, var5, var6, var7, var8, var9, var10)
+
+
+def S1_no_task(var2, var3, var4, var5, var6, var7, var8, var9, var10):
     return compute_distance(var2, var3, var4, var5, var6, var7, var8, var9, var10)
 
 
@@ -77,11 +91,35 @@ def seidel(a, n_size, t_size):
             for t2 in range(lbp, ubp + 1):
                 lbp = t1 + 1
                 ubp = t1 + n_size - 2
+                LT2_aux_0 = [a[-t1 + 2 * t2 - 1][-t1 + t3 - 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_1 = [a[-t1 + 2 * t2 - 1][-t1 + t3] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_2 = [a[-t1 + 2 * t2 - 1][-t1 + t3 + 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_3 = [a[-t1 + 2 * t2][-t1 + t3 - 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_4 = [a[-t1 + 2 * t2][-t1 + t3 + 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_5 = [a[-t1 + 2 * t2 + 1][-t1 + t3 - 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_6 = [a[-t1 + 2 * t2 + 1][-t1 + t3] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_7 = [a[-t1 + 2 * t2 + 1][-t1 + t3 + 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_aux_8 = [a[-t1 + 2 * t2][-t1 + t3] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                LT2_argutils = ArgUtils()
+                LT2_flat_args = LT2_argutils.flatten(LT2_aux_0, LT2_aux_1, LT2_aux_2, LT2_aux_3, LT2_aux_4,
+                    LT2_aux_5, LT2_aux_6, LT2_aux_7, LT2_aux_8)
+                global LT2_args_size
+                LT2_args_size = len(LT2_flat_args)
+                LT2_new_args = LT2(t1, n_size, *LT2_flat_args)
+                (LT2_aux_0, LT2_aux_1, LT2_aux_2, LT2_aux_3, LT2_aux_4, LT2_aux_5, LT2_aux_6, LT2_aux_7, LT2_aux_8
+                    ) = LT2_argutils.rebuild(LT2_new_args)
+                LT2_index = 0
                 for t3 in range(t1 + 1, t1 + n_size - 2 + 1):
-                    a[-t1 + 2 * t2][-t1 + t3] = S1(a[-t1 + 2 * t2 - 1][-t1 + t3 - 1], a[-t1 + 2 * t2 - 1][-t1 + t3],
-                        a[-t1 + 2 * t2 - 1][-t1 + t3 + 1], a[-t1 + 2 * t2][-t1 + t3 - 1], a[-t1 + 2 * t2][-t1 + t3],
-                        a[-t1 + 2 * t2][-t1 + t3 + 1], a[-t1 + 2 * t2 + 1][-t1 + t3 - 1], a[-t1 + 2 * t2 + 1][-t1 +
-                        t3], a[-t1 + 2 * t2 + 1][-t1 + t3 + 1])
+                    a[-t1 + 2 * t2 - 1][-t1 + t3 - 1] = LT2_aux_0[LT2_index]
+                    a[-t1 + 2 * t2 - 1][-t1 + t3] = LT2_aux_1[LT2_index]
+                    a[-t1 + 2 * t2 - 1][-t1 + t3 + 1] = LT2_aux_2[LT2_index]
+                    a[-t1 + 2 * t2][-t1 + t3 - 1] = LT2_aux_3[LT2_index]
+                    a[-t1 + 2 * t2][-t1 + t3 + 1] = LT2_aux_4[LT2_index]
+                    a[-t1 + 2 * t2 + 1][-t1 + t3 - 1] = LT2_aux_5[LT2_index]
+                    a[-t1 + 2 * t2 + 1][-t1 + t3] = LT2_aux_6[LT2_index]
+                    a[-t1 + 2 * t2 + 1][-t1 + t3 + 1] = LT2_aux_7[LT2_index]
+                    a[-t1 + 2 * t2][-t1 + t3] = LT2_aux_8[LT2_index]
+                    LT2_index = LT2_index + 1
     compss_barrier()
     if __debug__:
         a = compss_wait_on(a)
