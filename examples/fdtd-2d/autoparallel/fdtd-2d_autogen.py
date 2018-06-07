@@ -62,7 +62,7 @@ def LT5(nx_size, coef1, *args):
     var2, var3, var1 = ArgUtils.rebuild_args(args)
     for t3 in range(0, nx_size - 1 + 1 - 1):
         var1[t3] = S2_no_task(var1[t3], coef1, var2[t3], var3[t3])
-    return ArgUtils.flatten_args(var2, var3, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t1=IN, nx_size=IN, coef1=IN, returns="LT6_args_size")
@@ -72,7 +72,7 @@ def LT6(t1, nx_size, coef1, *args):
     for t3 in range(0, int(math.floor(float(t1 + 2 * nx_size - 2) / float(2))) + 1 - int(math.ceil(float(t1 + 2) /
         float(2)))):
         var1[t3] = S2_no_task(var1[t3], coef1, var2[t3], var3[t3])
-    return ArgUtils.flatten_args(var2, var3, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t_size=IN, returns="LT7_args_size")
@@ -101,7 +101,7 @@ def LT9(t1, nx_size, coef1, *args):
     for t3 in range(0, int(math.floor(float(t1 + 2 * nx_size - 2) / float(2))) + 1 - int(math.ceil(float(t1 + 2) /
         float(2)))):
         var1[t3] = S2_no_task(var1[t3], coef1, var2[t3], var3[t3])
-    return ArgUtils.flatten_args(var2, var3, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t1=IN, t2=IN, nx_size=IN, coef1=IN, coef2=IN, returns="LT10_args_size")
@@ -112,7 +112,7 @@ def LT10(t1, t2, nx_size, coef1, coef2, *args):
         var1[t3] = S2_no_task(var1[t3], coef1, var2[t3], var3[t3])
         var4[t3] = S3_no_task(var4[t3], coef1, var2[t3], var5[t3])
         var6[t3] = S4_no_task(var6[t3], coef2, var7[t3], var8[t3], var9[t3], var10[t3])
-    return ArgUtils.flatten_args(var2, var3, var5, var7, var8, var9, var10, var1, var4, var6)
+    return ArgUtils.flatten_args(var1, var4, var6)
 
 
 @task(t1=IN, t2=IN, nx_size=IN, coef1=IN, coef2=IN, returns="LT11_args_size")
@@ -123,7 +123,7 @@ def LT11(t1, t2, nx_size, coef1, coef2, *args):
         var1[t3] = S2_no_task(var1[t3], coef1, var2[t3], var3[t3])
         var4[t3] = S3_no_task(var4[t3], coef1, var2[t3], var5[t3])
         var6[t3] = S4_no_task(var6[t3], coef2, var7[t3], var8[t3], var9[t3], var10[t3])
-    return ArgUtils.flatten_args(var2, var3, var5, var7, var8, var9, var10, var1, var4, var6)
+    return ArgUtils.flatten_args(var1, var4, var6)
 
 
 @task(lbp=IN, ubp=IN, coef1=IN, t1=IN, returns="LT12_args_size")
@@ -133,7 +133,7 @@ def LT12(lbp, ubp, coef1, t1, *args):
     for t2 in range(0, ubp + 1 - lbp):
         var1[t2] = S3_no_task(var1[t2], coef1, var2[t2], var3[t2])
         var4[t2] = S1_no_task(t1 - t2)
-    return ArgUtils.flatten_args(var2, var3, var4, var1)
+    return ArgUtils.flatten_args(var4, var1)
 
 
 @task(lbp=IN, ubp=IN, coef1=IN, t1=IN, returns="LT13_args_size")
@@ -143,7 +143,7 @@ def LT13(lbp, ubp, coef1, t1, *args):
     for t2 in range(0, ubp + 1 - lbp):
         var1[t2] = S3_no_task(var1[t2], coef1, var2[t2], var3[t2])
         var4[t2] = S1_no_task(t1 - t2)
-    return ArgUtils.flatten_args(var2, var3, var4, var1)
+    return ArgUtils.flatten_args(var4, var1)
 
 
 @task(t=IN, returns=1)
@@ -208,15 +208,12 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
             LT5_aux_1 = [hz[t3 - 1][0] for t3 in range(1, nx_size - 1 + 1)]
             LT5_aux_2 = [ey[t3][0] for t3 in range(1, nx_size - 1 + 1)]
             LT5_argutils = ArgUtils()
-            LT5_flat_args = LT5_argutils.flatten(LT5_aux_0, LT5_aux_1, LT5_aux_2)
             global LT5_args_size
-            LT5_args_size = len(LT5_flat_args)
+            LT5_flat_args, LT5_args_size = LT5_argutils.flatten(3, LT5_aux_0, LT5_aux_1, LT5_aux_2, LT5_aux_2)
             LT5_new_args = LT5(nx_size, coef1, *LT5_flat_args)
-            LT5_aux_0, LT5_aux_1, LT5_aux_2 = LT5_argutils.rebuild(LT5_new_args)
+            LT5_aux_2, = LT5_argutils.rebuild(LT5_new_args)
             LT5_index = 0
             for t3 in range(1, nx_size - 1 + 1):
-                hz[t3][0] = LT5_aux_0[LT5_index]
-                hz[t3 - 1][0] = LT5_aux_1[LT5_index]
                 ey[t3][0] = LT5_aux_2[LT5_index]
                 LT5_index = LT5_index + 1
         if nx_size >= 2 and ny_size == 1:
@@ -234,16 +231,13 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                     LT6_aux_2 = [ey[(-t1 + 2 * t3) / 2][0] for t3 in range(int(math.ceil(float(t1 + 2) / float(2))),
                         int(math.floor(float(t1 + 2 * nx_size - 2) / float(2))) + 1)]
                     LT6_argutils = ArgUtils()
-                    LT6_flat_args = LT6_argutils.flatten(LT6_aux_0, LT6_aux_1, LT6_aux_2)
                     global LT6_args_size
-                    LT6_args_size = len(LT6_flat_args)
+                    LT6_flat_args, LT6_args_size = LT6_argutils.flatten(3, LT6_aux_0, LT6_aux_1, LT6_aux_2, LT6_aux_2)
                     LT6_new_args = LT6(t1, nx_size, coef1, *LT6_flat_args)
-                    LT6_aux_0, LT6_aux_1, LT6_aux_2 = LT6_argutils.rebuild(LT6_new_args)
+                    LT6_aux_2, = LT6_argutils.rebuild(LT6_new_args)
                     LT6_index = 0
                     for t3 in range(int(math.ceil(float(t1 + 2) / float(2))), int(math.floor(float(t1 + 2 * nx_size -
                         2) / float(2))) + 1):
-                        hz[(-t1 + 2 * t3) / 2][0] = LT6_aux_0[LT6_index]
-                        hz[(-t1 + 2 * t3) / 2 - 1][0] = LT6_aux_1[LT6_index]
                         ey[(-t1 + 2 * t3) / 2][0] = LT6_aux_2[LT6_index]
                         LT6_index = LT6_index + 1
         if nx_size == 1 and ny_size >= 2:
@@ -253,9 +247,8 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
             ubp = 2 * t_size - 2
             LT7_aux_0 = [ey[0][0] for t1 in range(0, 2 * t_size - 2 + 1)]
             LT7_argutils = ArgUtils()
-            LT7_flat_args = LT7_argutils.flatten(LT7_aux_0)
             global LT7_args_size
-            LT7_args_size = len(LT7_flat_args)
+            LT7_flat_args, LT7_args_size = LT7_argutils.flatten(1, LT7_aux_0, LT7_aux_0)
             LT7_new_args = LT7(t_size, *LT7_flat_args)
             LT7_aux_0, = LT7_argutils.rebuild(LT7_new_args)
             LT7_index = 0
@@ -270,9 +263,8 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 ubp = min(int(math.floor(float(t1 + ny_size - 1) / float(2))), t1)
                 LT8_aux_0 = [ey[0][-t1 + 2 * t2] for t2 in range(lbp, ubp + 1)]
                 LT8_argutils = ArgUtils()
-                LT8_flat_args = LT8_argutils.flatten(LT8_aux_0)
                 global LT8_args_size
-                LT8_args_size = len(LT8_flat_args)
+                LT8_flat_args, LT8_args_size = LT8_argutils.flatten(1, LT8_aux_0, LT8_aux_0)
                 LT8_new_args = LT8(lbp, ubp, t1, *LT8_flat_args)
                 LT8_aux_0, = LT8_argutils.rebuild(LT8_new_args)
                 LT8_index = 0
@@ -294,16 +286,13 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                     LT9_aux_2 = [ey[(-t1 + 2 * t3) / 2][0] for t3 in range(int(math.ceil(float(t1 + 2) / float(2))),
                         int(math.floor(float(t1 + 2 * nx_size - 2) / float(2))) + 1)]
                     LT9_argutils = ArgUtils()
-                    LT9_flat_args = LT9_argutils.flatten(LT9_aux_0, LT9_aux_1, LT9_aux_2)
                     global LT9_args_size
-                    LT9_args_size = len(LT9_flat_args)
+                    LT9_flat_args, LT9_args_size = LT9_argutils.flatten(3, LT9_aux_0, LT9_aux_1, LT9_aux_2, LT9_aux_2)
                     LT9_new_args = LT9(t1, nx_size, coef1, *LT9_flat_args)
-                    LT9_aux_0, LT9_aux_1, LT9_aux_2 = LT9_argutils.rebuild(LT9_new_args)
+                    LT9_aux_2, = LT9_argutils.rebuild(LT9_new_args)
                     LT9_index = 0
                     for t3 in range(int(math.ceil(float(t1 + 2) / float(2))), int(math.floor(float(t1 + 2 * nx_size -
                         2) / float(2))) + 1):
-                        hz[(-t1 + 2 * t3) / 2][0] = LT9_aux_0[LT9_index]
-                        hz[(-t1 + 2 * t3) / 2 - 1][0] = LT9_aux_1[LT9_index]
                         ey[(-t1 + 2 * t3) / 2][0] = LT9_aux_2[LT9_index]
                         LT9_index = LT9_index + 1
                 lbp = int(math.ceil(float(t1 + 1) / float(2)))
@@ -334,22 +323,14 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                     LT10_aux_9 = [hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] for t3 in range(t1 - t2 + 1, t1 - t2 +
                         nx_size - 1 + 1)]
                     LT10_argutils = ArgUtils()
-                    LT10_flat_args = LT10_argutils.flatten(LT10_aux_0, LT10_aux_1, LT10_aux_2, LT10_aux_3,
-                        LT10_aux_4, LT10_aux_5, LT10_aux_6, LT10_aux_7, LT10_aux_8, LT10_aux_9)
                     global LT10_args_size
-                    LT10_args_size = len(LT10_flat_args)
+                    LT10_flat_args, LT10_args_size = LT10_argutils.flatten(10, LT10_aux_0, LT10_aux_1, LT10_aux_2,
+                        LT10_aux_3, LT10_aux_4, LT10_aux_5, LT10_aux_6, LT10_aux_7, LT10_aux_8, LT10_aux_9,
+                        LT10_aux_7, LT10_aux_8, LT10_aux_9)
                     LT10_new_args = LT10(t1, t2, nx_size, coef1, coef2, *LT10_flat_args)
-                    (LT10_aux_0, LT10_aux_1, LT10_aux_2, LT10_aux_3, LT10_aux_4, LT10_aux_5, LT10_aux_6, LT10_aux_7,
-                        LT10_aux_8, LT10_aux_9) = LT10_argutils.rebuild(LT10_new_args)
+                    LT10_aux_7, LT10_aux_8, LT10_aux_9 = LT10_argutils.rebuild(LT10_new_args)
                     LT10_index = 0
                     for t3 in range(t1 - t2 + 1, t1 - t2 + nx_size - 1 + 1):
-                        hz[-t1 + t2 + t3][-t1 + 2 * t2] = LT10_aux_0[LT10_index]
-                        hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2] = LT10_aux_1[LT10_index]
-                        hz[-t1 + t2 + t3][-t1 + 2 * t2 - 1] = LT10_aux_2[LT10_index]
-                        ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1 + 1] = LT10_aux_3[LT10_index]
-                        ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = LT10_aux_4[LT10_index]
-                        ey[-t1 + t2 + t3 - 1 + 1][-t1 + 2 * t2 - 1] = LT10_aux_5[LT10_index]
-                        ey[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = LT10_aux_6[LT10_index]
                         ey[-t1 + t2 + t3][-t1 + 2 * t2] = LT10_aux_7[LT10_index]
                         ex[-t1 + t2 + t3][-t1 + 2 * t2] = LT10_aux_8[LT10_index]
                         hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = LT10_aux_9[LT10_index]
@@ -386,22 +367,14 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                     LT11_aux_9 = [hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] for t3 in range(t1 - t2 + 1, t1 - t2 +
                         nx_size - 1 + 1)]
                     LT11_argutils = ArgUtils()
-                    LT11_flat_args = LT11_argutils.flatten(LT11_aux_0, LT11_aux_1, LT11_aux_2, LT11_aux_3,
-                        LT11_aux_4, LT11_aux_5, LT11_aux_6, LT11_aux_7, LT11_aux_8, LT11_aux_9)
                     global LT11_args_size
-                    LT11_args_size = len(LT11_flat_args)
+                    LT11_flat_args, LT11_args_size = LT11_argutils.flatten(10, LT11_aux_0, LT11_aux_1, LT11_aux_2,
+                        LT11_aux_3, LT11_aux_4, LT11_aux_5, LT11_aux_6, LT11_aux_7, LT11_aux_8, LT11_aux_9,
+                        LT11_aux_7, LT11_aux_8, LT11_aux_9)
                     LT11_new_args = LT11(t1, t2, nx_size, coef1, coef2, *LT11_flat_args)
-                    (LT11_aux_0, LT11_aux_1, LT11_aux_2, LT11_aux_3, LT11_aux_4, LT11_aux_5, LT11_aux_6, LT11_aux_7,
-                        LT11_aux_8, LT11_aux_9) = LT11_argutils.rebuild(LT11_new_args)
+                    LT11_aux_7, LT11_aux_8, LT11_aux_9 = LT11_argutils.rebuild(LT11_new_args)
                     LT11_index = 0
                     for t3 in range(t1 - t2 + 1, t1 - t2 + nx_size - 1 + 1):
-                        hz[-t1 + t2 + t3][-t1 + 2 * t2] = LT11_aux_0[LT11_index]
-                        hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2] = LT11_aux_1[LT11_index]
-                        hz[-t1 + t2 + t3][-t1 + 2 * t2 - 1] = LT11_aux_2[LT11_index]
-                        ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1 + 1] = LT11_aux_3[LT11_index]
-                        ex[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = LT11_aux_4[LT11_index]
-                        ey[-t1 + t2 + t3 - 1 + 1][-t1 + 2 * t2 - 1] = LT11_aux_5[LT11_index]
-                        ey[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = LT11_aux_6[LT11_index]
                         ey[-t1 + t2 + t3][-t1 + 2 * t2] = LT11_aux_7[LT11_index]
                         ex[-t1 + t2 + t3][-t1 + 2 * t2] = LT11_aux_8[LT11_index]
                         hz[-t1 + t2 + t3 - 1][-t1 + 2 * t2 - 1] = LT11_aux_9[LT11_index]
@@ -419,15 +392,13 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 LT12_aux_2 = [ey[0][-t1 + 2 * t2] for t2 in range(lbp, ubp + 1)]
                 LT12_aux_3 = [ex[0][-t1 + 2 * t2] for t2 in range(lbp, ubp + 1)]
                 LT12_argutils = ArgUtils()
-                LT12_flat_args = LT12_argutils.flatten(LT12_aux_0, LT12_aux_1, LT12_aux_2, LT12_aux_3)
                 global LT12_args_size
-                LT12_args_size = len(LT12_flat_args)
+                LT12_flat_args, LT12_args_size = LT12_argutils.flatten(4, LT12_aux_0, LT12_aux_1, LT12_aux_2,
+                    LT12_aux_3, LT12_aux_2, LT12_aux_3)
                 LT12_new_args = LT12(lbp, ubp, coef1, t1, *LT12_flat_args)
-                LT12_aux_0, LT12_aux_1, LT12_aux_2, LT12_aux_3 = LT12_argutils.rebuild(LT12_new_args)
+                LT12_aux_2, LT12_aux_3 = LT12_argutils.rebuild(LT12_new_args)
                 LT12_index = 0
                 for t2 in range(lbp, ubp + 1):
-                    hz[0][-t1 + 2 * t2] = LT12_aux_0[LT12_index]
-                    hz[0][-t1 + 2 * t2 - 1] = LT12_aux_1[LT12_index]
                     ey[0][-t1 + 2 * t2] = LT12_aux_2[LT12_index]
                     ex[0][-t1 + 2 * t2] = LT12_aux_3[LT12_index]
                     LT12_index = LT12_index + 1
@@ -442,15 +413,13 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
                 LT13_aux_2 = [ey[0][-t1 + 2 * t2] for t2 in range(lbp, ubp + 1)]
                 LT13_aux_3 = [ex[0][-t1 + 2 * t2] for t2 in range(lbp, ubp + 1)]
                 LT13_argutils = ArgUtils()
-                LT13_flat_args = LT13_argutils.flatten(LT13_aux_0, LT13_aux_1, LT13_aux_2, LT13_aux_3)
                 global LT13_args_size
-                LT13_args_size = len(LT13_flat_args)
+                LT13_flat_args, LT13_args_size = LT13_argutils.flatten(4, LT13_aux_0, LT13_aux_1, LT13_aux_2,
+                    LT13_aux_3, LT13_aux_2, LT13_aux_3)
                 LT13_new_args = LT13(lbp, ubp, coef1, t1, *LT13_flat_args)
-                LT13_aux_0, LT13_aux_1, LT13_aux_2, LT13_aux_3 = LT13_argutils.rebuild(LT13_new_args)
+                LT13_aux_2, LT13_aux_3 = LT13_argutils.rebuild(LT13_new_args)
                 LT13_index = 0
                 for t2 in range(lbp, ubp + 1):
-                    hz[0][-t1 + 2 * t2] = LT13_aux_0[LT13_index]
-                    hz[0][-t1 + 2 * t2 - 1] = LT13_aux_1[LT13_index]
                     ey[0][-t1 + 2 * t2] = LT13_aux_2[LT13_index]
                     ex[0][-t1 + 2 * t2] = LT13_aux_3[LT13_index]
                     LT13_index = LT13_index + 1

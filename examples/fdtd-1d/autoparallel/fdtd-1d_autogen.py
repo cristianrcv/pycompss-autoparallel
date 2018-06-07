@@ -60,7 +60,7 @@ def LT3(lbp, ubp, coef1, coef2, *args):
     for t2 in range(0, ubp + 1 - lbp):
         var1[t2] = S1_no_task(var1[t2], coef1, var2[t2], var3[t2])
         var3[t2] = S2_no_task(var3[t2], coef2, var1[t2], var4[t2])
-    return ArgUtils.flatten_args(var2, var4, var1, var3)
+    return ArgUtils.flatten_args(var1, var3)
 
 
 @task(var2=IN, coef1=IN, var3=IN, var4=IN, returns=1)
@@ -105,15 +105,13 @@ def fdtd_1d(e, h, n_size, t_size, coef1, coef2):
             LT3_aux_2 = [e[-t1 + 2 * t2] for t2 in range(lbp, ubp + 1)]
             LT3_aux_3 = [h[-t1 + 2 * t2 - 1] for t2 in range(lbp, ubp + 1)]
             LT3_argutils = ArgUtils()
-            LT3_flat_args = LT3_argutils.flatten(LT3_aux_0, LT3_aux_1, LT3_aux_2, LT3_aux_3)
             global LT3_args_size
-            LT3_args_size = len(LT3_flat_args)
+            LT3_flat_args, LT3_args_size = LT3_argutils.flatten(4, LT3_aux_0, LT3_aux_1, LT3_aux_2, LT3_aux_3,
+                LT3_aux_2, LT3_aux_3)
             LT3_new_args = LT3(lbp, ubp, coef1, coef2, *LT3_flat_args)
-            LT3_aux_0, LT3_aux_1, LT3_aux_2, LT3_aux_3 = LT3_argutils.rebuild(LT3_new_args)
+            LT3_aux_2, LT3_aux_3 = LT3_argutils.rebuild(LT3_new_args)
             LT3_index = 0
             for t2 in range(lbp, ubp + 1):
-                h[-t1 + 2 * t2] = LT3_aux_0[LT3_index]
-                e[-t1 + 2 * t2 - 1] = LT3_aux_1[LT3_index]
                 e[-t1 + 2 * t2] = LT3_aux_2[LT3_index]
                 h[-t1 + 2 * t2 - 1] = LT3_aux_3[LT3_index]
                 LT3_index = LT3_index + 1

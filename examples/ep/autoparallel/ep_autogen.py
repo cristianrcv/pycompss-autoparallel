@@ -89,9 +89,8 @@ def ep(mat, n_size, m_size, coef1, coef2):
             ubv = n_size - 1
             LT2_aux_0 = [mat[t2][t1] for t2 in range(lbv, ubv + 1)]
             LT2_argutils = ArgUtils()
-            LT2_flat_args = LT2_argutils.flatten(LT2_aux_0)
             global LT2_args_size
-            LT2_args_size = len(LT2_flat_args)
+            LT2_flat_args, LT2_args_size = LT2_argutils.flatten(1, LT2_aux_0, LT2_aux_0)
             LT2_new_args = LT2(lbv, ubv, coef1, coef2, *LT2_flat_args)
             LT2_aux_0, = LT2_argutils.rebuild(LT2_new_args)
             LT2_index = 0

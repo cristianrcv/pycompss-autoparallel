@@ -62,7 +62,7 @@ def LT3(n_size, coef, *args):
     var2, var3, var4, var5, var6, var1 = ArgUtils.rebuild_args(args)
     for t3 in range(0, n_size - 2 + 1 - 1):
         var1[t3] = S1_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t1=IN, n_size=IN, coef=IN, returns="LT4_args_size")
@@ -72,7 +72,7 @@ def LT4(t1, n_size, coef, *args):
     for t3 in range(0, int(math.floor(float(2 * t1 + 3 * n_size - 8) / float(3))) + 1 - int(math.ceil(float(2 * t1 +
         1) / float(3)))):
         var1[t3] = S1_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t1=IN, t2=IN, n_size=IN, coef=IN, returns="LT5_args_size")
@@ -82,7 +82,7 @@ def LT5(t1, t2, n_size, coef, *args):
     for t3 in range(0, 2 * t1 - 2 * t2 + n_size - 2 + 1 - (2 * t1 - 2 * t2 + 2)):
         var1[t3] = S1_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
         var7[t3] = S2_no_task(coef, var8[t3], var9[t3], var10[t3], var11[t3], var12[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var8, var9, var10, var11, var12, var1, var7)
+    return ArgUtils.flatten_args(var1, var7)
 
 
 @task(t_size=IN, coef=IN, returns="LT6_args_size")
@@ -94,7 +94,7 @@ def LT6(t_size, coef, *args):
             var1[t1] = S1_no_task(coef, var2[t1], var3[t1], var4[t1], var5[t1], var6[t1])
         if (2 * t1 + 2) % 3 == 0:
             var2[t1] = S2_no_task(coef, var1[t1], var7[t1], var8[t1], var9[t1], var10[t1])
-    return ArgUtils.flatten_args(var3, var4, var5, var6, var7, var8, var9, var10, var2, var1)
+    return ArgUtils.flatten_args(var2, var1)
 
 
 @task(t1=IN, t2=IN, n_size=IN, coef=IN, returns="LT7_args_size")
@@ -104,7 +104,7 @@ def LT7(t1, t2, n_size, coef, *args):
     for t3 in range(0, 2 * t1 - 2 * t2 + n_size - 2 + 1 - (2 * t1 - 2 * t2 + 2)):
         var1[t3] = S1_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
         var7[t3] = S2_no_task(coef, var8[t3], var9[t3], var10[t3], var11[t3], var12[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var8, var9, var10, var11, var12, var1, var7)
+    return ArgUtils.flatten_args(var1, var7)
 
 
 @task(t1=IN, n_size=IN, coef=IN, returns="LT8_args_size")
@@ -114,7 +114,7 @@ def LT8(t1, n_size, coef, *args):
     for t3 in range(0, int(math.floor(float(2 * t1 + 3 * n_size - 8) / float(3))) + 1 - int(math.ceil(float(2 * t1 +
         1) / float(3)))):
         var1[t3] = S1_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t1=IN, t2=IN, n_size=IN, coef=IN, returns="LT9_args_size")
@@ -124,7 +124,7 @@ def LT9(t1, t2, n_size, coef, *args):
     for t3 in range(0, 2 * t1 - 2 * t2 + n_size - 2 + 1 - (2 * t1 - 2 * t2 + 2)):
         var1[t3] = S1_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
         var7[t3] = S2_no_task(coef, var8[t3], var9[t3], var10[t3], var11[t3], var12[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var8, var9, var10, var11, var12, var1, var7)
+    return ArgUtils.flatten_args(var1, var7)
 
 
 @task(t1=IN, n_size=IN, coef=IN, returns="LT10_args_size")
@@ -134,7 +134,7 @@ def LT10(t1, n_size, coef, *args):
     for t3 in range(0, int(math.floor(float(2 * t1 + n_size - 1) / float(3))) + 1 - int(math.ceil(float(2 * t1 - 2 *
         n_size + 8) / float(3)))):
         var1[t3] = S2_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t1=IN, t2=IN, n_size=IN, coef=IN, returns="LT11_args_size")
@@ -144,7 +144,7 @@ def LT11(t1, t2, n_size, coef, *args):
     for t3 in range(0, 2 * t1 - 2 * t2 + n_size - 2 + 1 - (2 * t1 - 2 * t2 + 2)):
         var1[t3] = S1_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
         var7[t3] = S2_no_task(coef, var8[t3], var9[t3], var10[t3], var11[t3], var12[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var8, var9, var10, var11, var12, var1, var7)
+    return ArgUtils.flatten_args(var1, var7)
 
 
 @task(t1=IN, n_size=IN, coef=IN, returns="LT12_args_size")
@@ -154,7 +154,7 @@ def LT12(t1, n_size, coef, *args):
     for t3 in range(0, int(math.floor(float(2 * t1 + n_size - 1) / float(3))) + 1 - int(math.ceil(float(2 * t1 - 2 *
         n_size + 8) / float(3)))):
         var1[t3] = S2_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(t_size=IN, n_size=IN, coef=IN, returns="LT13_args_size")
@@ -163,7 +163,7 @@ def LT13(t_size, n_size, coef, *args):
     var2, var3, var4, var5, var6, var1 = ArgUtils.rebuild_args(args)
     for t3 in range(0, n_size + 2 * t_size - 3 + 1 - 2 * t_size):
         var1[t3] = S2_no_task(coef, var2[t3], var3[t3], var4[t3], var5[t3], var6[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var5, var6, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(coef=IN, var2=IN, var3=IN, var4=IN, var5=IN, var6=IN, returns=1)
@@ -207,18 +207,13 @@ def jacobi_2d(a, b, n_size, t_size, coef):
         LT3_aux_4 = [a[t3 - 1][1] for t3 in range(1, n_size - 2 + 1)]
         LT3_aux_5 = [b[t3][1] for t3 in range(1, n_size - 2 + 1)]
         LT3_argutils = ArgUtils()
-        LT3_flat_args = LT3_argutils.flatten(LT3_aux_0, LT3_aux_1, LT3_aux_2, LT3_aux_3, LT3_aux_4, LT3_aux_5)
         global LT3_args_size
-        LT3_args_size = len(LT3_flat_args)
+        LT3_flat_args, LT3_args_size = LT3_argutils.flatten(6, LT3_aux_0, LT3_aux_1, LT3_aux_2, LT3_aux_3, LT3_aux_4,
+            LT3_aux_5, LT3_aux_5)
         LT3_new_args = LT3(n_size, coef, *LT3_flat_args)
-        LT3_aux_0, LT3_aux_1, LT3_aux_2, LT3_aux_3, LT3_aux_4, LT3_aux_5 = LT3_argutils.rebuild(LT3_new_args)
+        LT3_aux_5, = LT3_argutils.rebuild(LT3_new_args)
         LT3_index = 0
         for t3 in range(1, n_size - 2 + 1):
-            a[t3][1] = LT3_aux_0[LT3_index]
-            a[t3][1 - 1] = LT3_aux_1[LT3_index]
-            a[t3][1 + 1] = LT3_aux_2[LT3_index]
-            a[1 + t3][1] = LT3_aux_3[LT3_index]
-            a[t3 - 1][1] = LT3_aux_4[LT3_index]
             b[t3][1] = LT3_aux_5[LT3_index]
             LT3_index = LT3_index + 1
         lbp = 2
@@ -240,19 +235,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                 LT4_aux_5 = [b[(-2 * t1 + 3 * t3 + 2) / 3][1] for t3 in range(int(math.ceil(float(2 * t1 + 1) /
                     float(3))), int(math.floor(float(2 * t1 + 3 * n_size - 8) / float(3))) + 1)]
                 LT4_argutils = ArgUtils()
-                LT4_flat_args = LT4_argutils.flatten(LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3, LT4_aux_4, LT4_aux_5)
                 global LT4_args_size
-                LT4_args_size = len(LT4_flat_args)
+                LT4_flat_args, LT4_args_size = LT4_argutils.flatten(6, LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3,
+                    LT4_aux_4, LT4_aux_5, LT4_aux_5)
                 LT4_new_args = LT4(t1, n_size, coef, *LT4_flat_args)
-                LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3, LT4_aux_4, LT4_aux_5 = LT4_argutils.rebuild(LT4_new_args)
+                LT4_aux_5, = LT4_argutils.rebuild(LT4_new_args)
                 LT4_index = 0
                 for t3 in range(int(math.ceil(float(2 * t1 + 1) / float(3))), int(math.floor(float(2 * t1 + 3 *
                     n_size - 8) / float(3))) + 1):
-                    a[(-2 * t1 + 3 * t3 + 2) / 3][1] = LT4_aux_0[LT4_index]
-                    a[(-2 * t1 + 3 * t3 + 2) / 3][1 - 1] = LT4_aux_1[LT4_index]
-                    a[(-2 * t1 + 3 * t3 + 2) / 3][1 + 1] = LT4_aux_2[LT4_index]
-                    a[1 + (-2 * t1 + 3 * t3 + 2) / 3][1] = LT4_aux_3[LT4_index]
-                    a[(-2 * t1 + 3 * t3 + 2) / 3 - 1][1] = LT4_aux_4[LT4_index]
                     b[(-2 * t1 + 3 * t3 + 2) / 3][1] = LT4_aux_5[LT4_index]
                     LT4_index = LT4_index + 1
             lbp = int(math.ceil(float(2 * t1 + 2) / float(3)))
@@ -287,25 +277,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                 LT5_aux_11 = [a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] for t3 in range(2 * t1 - 2 * t2 + 2,
                     2 * t1 - 2 * t2 + n_size - 2 + 1)]
                 LT5_argutils = ArgUtils()
-                LT5_flat_args = LT5_argutils.flatten(LT5_aux_0, LT5_aux_1, LT5_aux_2, LT5_aux_3, LT5_aux_4,
-                    LT5_aux_5, LT5_aux_6, LT5_aux_7, LT5_aux_8, LT5_aux_9, LT5_aux_10, LT5_aux_11)
                 global LT5_args_size
-                LT5_args_size = len(LT5_flat_args)
+                LT5_flat_args, LT5_args_size = LT5_argutils.flatten(12, LT5_aux_0, LT5_aux_1, LT5_aux_2, LT5_aux_3,
+                    LT5_aux_4, LT5_aux_5, LT5_aux_6, LT5_aux_7, LT5_aux_8, LT5_aux_9, LT5_aux_10, LT5_aux_11,
+                    LT5_aux_10, LT5_aux_11)
                 LT5_new_args = LT5(t1, t2, n_size, coef, *LT5_flat_args)
-                (LT5_aux_0, LT5_aux_1, LT5_aux_2, LT5_aux_3, LT5_aux_4, LT5_aux_5, LT5_aux_6, LT5_aux_7, LT5_aux_8,
-                    LT5_aux_9, LT5_aux_10, LT5_aux_11) = LT5_argutils.rebuild(LT5_new_args)
+                LT5_aux_10, LT5_aux_11 = LT5_argutils.rebuild(LT5_new_args)
                 LT5_index = 0
                 for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
-                    a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT5_aux_0[LT5_index]
-                    a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1] = LT5_aux_1[LT5_index]
-                    a[-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 * t2)] = LT5_aux_2[LT5_index]
-                    a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2] = LT5_aux_3[LT5_index]
-                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2] = LT5_aux_4[LT5_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT5_aux_5[LT5_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1] = LT5_aux_6[LT5_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)] = LT5_aux_7[LT5_index]
-                    b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1] = LT5_aux_8[LT5_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1] = LT5_aux_9[LT5_index]
                     b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT5_aux_10[LT5_index]
                     a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT5_aux_11[LT5_index]
                     LT5_index = LT5_index + 1
@@ -326,23 +305,13 @@ def jacobi_2d(a, b, n_size, t_size, coef):
             LT6_aux_8 = [a[1][1] for t1 in range(2, 3 * t_size - 2 + 1)]
             LT6_aux_9 = [b[1][1] for t1 in range(2, 3 * t_size - 2 + 1)]
             LT6_argutils = ArgUtils()
-            LT6_flat_args = LT6_argutils.flatten(LT6_aux_0, LT6_aux_1, LT6_aux_2, LT6_aux_3, LT6_aux_4, LT6_aux_5,
-                LT6_aux_6, LT6_aux_7, LT6_aux_8, LT6_aux_9)
             global LT6_args_size
-            LT6_args_size = len(LT6_flat_args)
+            LT6_flat_args, LT6_args_size = LT6_argutils.flatten(10, LT6_aux_0, LT6_aux_1, LT6_aux_2, LT6_aux_3,
+                LT6_aux_4, LT6_aux_5, LT6_aux_6, LT6_aux_7, LT6_aux_8, LT6_aux_9, LT6_aux_8, LT6_aux_9)
             LT6_new_args = LT6(t_size, coef, *LT6_flat_args)
-            (LT6_aux_0, LT6_aux_1, LT6_aux_2, LT6_aux_3, LT6_aux_4, LT6_aux_5, LT6_aux_6, LT6_aux_7, LT6_aux_8,
-                LT6_aux_9) = LT6_argutils.rebuild(LT6_new_args)
+            LT6_aux_8, LT6_aux_9 = LT6_argutils.rebuild(LT6_new_args)
             LT6_index = 0
             for t1 in range(2, 3 * t_size - 2 + 1):
-                a[1][1 - 1] = LT6_aux_0[LT6_index]
-                a[1][1 + 1] = LT6_aux_1[LT6_index]
-                a[1 + 1][1] = LT6_aux_2[LT6_index]
-                a[1 - 1][1] = LT6_aux_3[LT6_index]
-                b[1][1 - 1] = LT6_aux_4[LT6_index]
-                b[1][1 + 1] = LT6_aux_5[LT6_index]
-                b[1 + 1][1] = LT6_aux_6[LT6_index]
-                b[1 - 1][1] = LT6_aux_7[LT6_index]
                 a[1][1] = LT6_aux_8[LT6_index]
                 b[1][1] = LT6_aux_9[LT6_index]
                 LT6_index = LT6_index + 1
@@ -381,25 +350,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                 LT7_aux_11 = [a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] for t3 in range(2 * t1 - 2 * t2 + 2,
                     2 * t1 - 2 * t2 + n_size - 2 + 1)]
                 LT7_argutils = ArgUtils()
-                LT7_flat_args = LT7_argutils.flatten(LT7_aux_0, LT7_aux_1, LT7_aux_2, LT7_aux_3, LT7_aux_4,
-                    LT7_aux_5, LT7_aux_6, LT7_aux_7, LT7_aux_8, LT7_aux_9, LT7_aux_10, LT7_aux_11)
                 global LT7_args_size
-                LT7_args_size = len(LT7_flat_args)
+                LT7_flat_args, LT7_args_size = LT7_argutils.flatten(12, LT7_aux_0, LT7_aux_1, LT7_aux_2, LT7_aux_3,
+                    LT7_aux_4, LT7_aux_5, LT7_aux_6, LT7_aux_7, LT7_aux_8, LT7_aux_9, LT7_aux_10, LT7_aux_11,
+                    LT7_aux_10, LT7_aux_11)
                 LT7_new_args = LT7(t1, t2, n_size, coef, *LT7_flat_args)
-                (LT7_aux_0, LT7_aux_1, LT7_aux_2, LT7_aux_3, LT7_aux_4, LT7_aux_5, LT7_aux_6, LT7_aux_7, LT7_aux_8,
-                    LT7_aux_9, LT7_aux_10, LT7_aux_11) = LT7_argutils.rebuild(LT7_new_args)
+                LT7_aux_10, LT7_aux_11 = LT7_argutils.rebuild(LT7_new_args)
                 LT7_index = 0
                 for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
-                    a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT7_aux_0[LT7_index]
-                    a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1] = LT7_aux_1[LT7_index]
-                    a[-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 * t2)] = LT7_aux_2[LT7_index]
-                    a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2] = LT7_aux_3[LT7_index]
-                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2] = LT7_aux_4[LT7_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT7_aux_5[LT7_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1] = LT7_aux_6[LT7_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)] = LT7_aux_7[LT7_index]
-                    b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1] = LT7_aux_8[LT7_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1] = LT7_aux_9[LT7_index]
                     b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT7_aux_10[LT7_index]
                     a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT7_aux_11[LT7_index]
                     LT7_index = LT7_index + 1
@@ -426,21 +384,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                     LT8_aux_5 = [b[(-2 * t1 + 3 * t3 + 2) / 3][1] for t3 in range(int(math.ceil(float(2 * t1 + 1) /
                         float(3))), int(math.floor(float(2 * t1 + 3 * n_size - 8) / float(3))) + 1)]
                     LT8_argutils = ArgUtils()
-                    LT8_flat_args = LT8_argutils.flatten(LT8_aux_0, LT8_aux_1, LT8_aux_2, LT8_aux_3, LT8_aux_4,
-                        LT8_aux_5)
                     global LT8_args_size
-                    LT8_args_size = len(LT8_flat_args)
+                    LT8_flat_args, LT8_args_size = LT8_argutils.flatten(6, LT8_aux_0, LT8_aux_1, LT8_aux_2,
+                        LT8_aux_3, LT8_aux_4, LT8_aux_5, LT8_aux_5)
                     LT8_new_args = LT8(t1, n_size, coef, *LT8_flat_args)
-                    LT8_aux_0, LT8_aux_1, LT8_aux_2, LT8_aux_3, LT8_aux_4, LT8_aux_5 = LT8_argutils.rebuild(LT8_new_args
-                        )
+                    LT8_aux_5, = LT8_argutils.rebuild(LT8_new_args)
                     LT8_index = 0
                     for t3 in range(int(math.ceil(float(2 * t1 + 1) / float(3))), int(math.floor(float(2 * t1 + 3 *
                         n_size - 8) / float(3))) + 1):
-                        a[(-2 * t1 + 3 * t3 + 2) / 3][1] = LT8_aux_0[LT8_index]
-                        a[(-2 * t1 + 3 * t3 + 2) / 3][1 - 1] = LT8_aux_1[LT8_index]
-                        a[(-2 * t1 + 3 * t3 + 2) / 3][1 + 1] = LT8_aux_2[LT8_index]
-                        a[1 + (-2 * t1 + 3 * t3 + 2) / 3][1] = LT8_aux_3[LT8_index]
-                        a[(-2 * t1 + 3 * t3 + 2) / 3 - 1][1] = LT8_aux_4[LT8_index]
                         b[(-2 * t1 + 3 * t3 + 2) / 3][1] = LT8_aux_5[LT8_index]
                         LT8_index = LT8_index + 1
                 lbp = int(math.ceil(float(2 * t1 + 2) / float(3)))
@@ -475,25 +426,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                     LT9_aux_11 = [a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] for t3 in range(2 * t1 - 2 * t2 +
                         2, 2 * t1 - 2 * t2 + n_size - 2 + 1)]
                     LT9_argutils = ArgUtils()
-                    LT9_flat_args = LT9_argutils.flatten(LT9_aux_0, LT9_aux_1, LT9_aux_2, LT9_aux_3, LT9_aux_4,
-                        LT9_aux_5, LT9_aux_6, LT9_aux_7, LT9_aux_8, LT9_aux_9, LT9_aux_10, LT9_aux_11)
                     global LT9_args_size
-                    LT9_args_size = len(LT9_flat_args)
+                    LT9_flat_args, LT9_args_size = LT9_argutils.flatten(12, LT9_aux_0, LT9_aux_1, LT9_aux_2,
+                        LT9_aux_3, LT9_aux_4, LT9_aux_5, LT9_aux_6, LT9_aux_7, LT9_aux_8, LT9_aux_9, LT9_aux_10,
+                        LT9_aux_11, LT9_aux_10, LT9_aux_11)
                     LT9_new_args = LT9(t1, t2, n_size, coef, *LT9_flat_args)
-                    (LT9_aux_0, LT9_aux_1, LT9_aux_2, LT9_aux_3, LT9_aux_4, LT9_aux_5, LT9_aux_6, LT9_aux_7,
-                        LT9_aux_8, LT9_aux_9, LT9_aux_10, LT9_aux_11) = LT9_argutils.rebuild(LT9_new_args)
+                    LT9_aux_10, LT9_aux_11 = LT9_argutils.rebuild(LT9_new_args)
                     LT9_index = 0
                     for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
-                        a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT9_aux_0[LT9_index]
-                        a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1] = LT9_aux_1[LT9_index]
-                        a[-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 * t2)] = LT9_aux_2[LT9_index]
-                        a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2] = LT9_aux_3[LT9_index]
-                        a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2] = LT9_aux_4[LT9_index]
-                        b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT9_aux_5[LT9_index]
-                        b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1] = LT9_aux_6[LT9_index]
-                        b[-2 * t1 + 2 * t2 + t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)] = LT9_aux_7[LT9_index]
-                        b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1] = LT9_aux_8[LT9_index]
-                        b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1] = LT9_aux_9[LT9_index]
                         b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT9_aux_10[LT9_index]
                         a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT9_aux_11[LT9_index]
                         LT9_index = LT9_index + 1
@@ -522,21 +462,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                         ceil(float(2 * t1 - 2 * n_size + 8) / float(3))), int(math.floor(float(2 * t1 + n_size - 1) /
                         float(3))) + 1)]
                     LT10_argutils = ArgUtils()
-                    LT10_flat_args = LT10_argutils.flatten(LT10_aux_0, LT10_aux_1, LT10_aux_2, LT10_aux_3,
-                        LT10_aux_4, LT10_aux_5)
                     global LT10_args_size
-                    LT10_args_size = len(LT10_flat_args)
+                    LT10_flat_args, LT10_args_size = LT10_argutils.flatten(6, LT10_aux_0, LT10_aux_1, LT10_aux_2,
+                        LT10_aux_3, LT10_aux_4, LT10_aux_5, LT10_aux_5)
                     LT10_new_args = LT10(t1, n_size, coef, *LT10_flat_args)
-                    LT10_aux_0, LT10_aux_1, LT10_aux_2, LT10_aux_3, LT10_aux_4, LT10_aux_5 = LT10_argutils.rebuild(
-                        LT10_new_args)
+                    LT10_aux_5, = LT10_argutils.rebuild(LT10_new_args)
                     LT10_index = 0
                     for t3 in range(int(math.ceil(float(2 * t1 - 2 * n_size + 8) / float(3))), int(math.floor(float(
                         2 * t1 + n_size - 1) / float(3))) + 1):
-                        b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = LT10_aux_0[LT10_index]
-                        b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2 - 1] = LT10_aux_1[LT10_index]
-                        b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][1 + (n_size - 2)] = LT10_aux_2[LT10_index]
-                        b[1 + (-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = LT10_aux_3[LT10_index]
-                        b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3 - 1][n_size - 2] = LT10_aux_4[LT10_index]
                         a[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = LT10_aux_5[LT10_index]
                         LT10_index = LT10_index + 1
         lbp = max(n_size - 1, 3 * t_size - 1)
@@ -574,25 +507,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                 LT11_aux_11 = [a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] for t3 in range(2 * t1 - 2 * t2 + 
                     2, 2 * t1 - 2 * t2 + n_size - 2 + 1)]
                 LT11_argutils = ArgUtils()
-                LT11_flat_args = LT11_argutils.flatten(LT11_aux_0, LT11_aux_1, LT11_aux_2, LT11_aux_3, LT11_aux_4,
-                    LT11_aux_5, LT11_aux_6, LT11_aux_7, LT11_aux_8, LT11_aux_9, LT11_aux_10, LT11_aux_11)
                 global LT11_args_size
-                LT11_args_size = len(LT11_flat_args)
+                LT11_flat_args, LT11_args_size = LT11_argutils.flatten(12, LT11_aux_0, LT11_aux_1, LT11_aux_2,
+                    LT11_aux_3, LT11_aux_4, LT11_aux_5, LT11_aux_6, LT11_aux_7, LT11_aux_8, LT11_aux_9, LT11_aux_10,
+                    LT11_aux_11, LT11_aux_10, LT11_aux_11)
                 LT11_new_args = LT11(t1, t2, n_size, coef, *LT11_flat_args)
-                (LT11_aux_0, LT11_aux_1, LT11_aux_2, LT11_aux_3, LT11_aux_4, LT11_aux_5, LT11_aux_6, LT11_aux_7,
-                    LT11_aux_8, LT11_aux_9, LT11_aux_10, LT11_aux_11) = LT11_argutils.rebuild(LT11_new_args)
+                LT11_aux_10, LT11_aux_11 = LT11_argutils.rebuild(LT11_new_args)
                 LT11_index = 0
                 for t3 in range(2 * t1 - 2 * t2 + 2, 2 * t1 - 2 * t2 + n_size - 2 + 1):
-                    a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT11_aux_0[LT11_index]
-                    a[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2 - 1] = LT11_aux_1[LT11_index]
-                    a[-2 * t1 + 2 * t2 + t3][1 + (-2 * t1 + 3 * t2)] = LT11_aux_2[LT11_index]
-                    a[1 + (-2 * t1 + 2 * t2 + t3)][-2 * t1 + 3 * t2] = LT11_aux_3[LT11_index]
-                    a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2] = LT11_aux_4[LT11_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT11_aux_5[LT11_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1 - 1] = LT11_aux_6[LT11_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1][1 + (-2 * t1 + 3 * t2 - 1)] = LT11_aux_7[LT11_index]
-                    b[1 + (-2 * t1 + 2 * t2 + t3 - 1)][-2 * t1 + 3 * t2 - 1] = LT11_aux_8[LT11_index]
-                    b[-2 * t1 + 2 * t2 + t3 - 1 - 1][-2 * t1 + 3 * t2 - 1] = LT11_aux_9[LT11_index]
                     b[-2 * t1 + 2 * t2 + t3][-2 * t1 + 3 * t2] = LT11_aux_10[LT11_index]
                     a[-2 * t1 + 2 * t2 + t3 - 1][-2 * t1 + 3 * t2 - 1] = LT11_aux_11[LT11_index]
                     LT11_index = LT11_index + 1
@@ -621,21 +543,14 @@ def jacobi_2d(a, b, n_size, t_size, coef):
                     float(2 * t1 - 2 * n_size + 8) / float(3))), int(math.floor(float(2 * t1 + n_size - 1) / float(3
                     ))) + 1)]
                 LT12_argutils = ArgUtils()
-                LT12_flat_args = LT12_argutils.flatten(LT12_aux_0, LT12_aux_1, LT12_aux_2, LT12_aux_3, LT12_aux_4,
-                    LT12_aux_5)
                 global LT12_args_size
-                LT12_args_size = len(LT12_flat_args)
+                LT12_flat_args, LT12_args_size = LT12_argutils.flatten(6, LT12_aux_0, LT12_aux_1, LT12_aux_2,
+                    LT12_aux_3, LT12_aux_4, LT12_aux_5, LT12_aux_5)
                 LT12_new_args = LT12(t1, n_size, coef, *LT12_flat_args)
-                LT12_aux_0, LT12_aux_1, LT12_aux_2, LT12_aux_3, LT12_aux_4, LT12_aux_5 = LT12_argutils.rebuild(
-                    LT12_new_args)
+                LT12_aux_5, = LT12_argutils.rebuild(LT12_new_args)
                 LT12_index = 0
                 for t3 in range(int(math.ceil(float(2 * t1 - 2 * n_size + 8) / float(3))), int(math.floor(float(2 *
                     t1 + n_size - 1) / float(3))) + 1):
-                    b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = LT12_aux_0[LT12_index]
-                    b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2 - 1] = LT12_aux_1[LT12_index]
-                    b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][1 + (n_size - 2)] = LT12_aux_2[LT12_index]
-                    b[1 + (-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = LT12_aux_3[LT12_index]
-                    b[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3 - 1][n_size - 2] = LT12_aux_4[LT12_index]
                     a[(-2 * t1 + 3 * t3 + 2 * n_size - 5) / 3][n_size - 2] = LT12_aux_5[LT12_index]
                     LT12_index = LT12_index + 1
         lbp = 2 * t_size
@@ -647,18 +562,13 @@ def jacobi_2d(a, b, n_size, t_size, coef):
         LT13_aux_4 = [b[t3 - 2 * t_size + 1 - 1][n_size - 2] for t3 in range(2 * t_size, n_size + 2 * t_size - 3 + 1)]
         LT13_aux_5 = [a[t3 - 2 * t_size + 1][n_size - 2] for t3 in range(2 * t_size, n_size + 2 * t_size - 3 + 1)]
         LT13_argutils = ArgUtils()
-        LT13_flat_args = LT13_argutils.flatten(LT13_aux_0, LT13_aux_1, LT13_aux_2, LT13_aux_3, LT13_aux_4, LT13_aux_5)
         global LT13_args_size
-        LT13_args_size = len(LT13_flat_args)
+        LT13_flat_args, LT13_args_size = LT13_argutils.flatten(6, LT13_aux_0, LT13_aux_1, LT13_aux_2, LT13_aux_3,
+            LT13_aux_4, LT13_aux_5, LT13_aux_5)
         LT13_new_args = LT13(t_size, n_size, coef, *LT13_flat_args)
-        LT13_aux_0, LT13_aux_1, LT13_aux_2, LT13_aux_3, LT13_aux_4, LT13_aux_5 = LT13_argutils.rebuild(LT13_new_args)
+        LT13_aux_5, = LT13_argutils.rebuild(LT13_new_args)
         LT13_index = 0
         for t3 in range(2 * t_size, n_size + 2 * t_size - 3 + 1):
-            b[t3 - 2 * t_size + 1][n_size - 2] = LT13_aux_0[LT13_index]
-            b[t3 - 2 * t_size + 1][n_size - 2 - 1] = LT13_aux_1[LT13_index]
-            b[t3 - 2 * t_size + 1][1 + (n_size - 2)] = LT13_aux_2[LT13_index]
-            b[1 + (t3 - 2 * t_size + 1)][n_size - 2] = LT13_aux_3[LT13_index]
-            b[t3 - 2 * t_size + 1 - 1][n_size - 2] = LT13_aux_4[LT13_index]
             a[t3 - 2 * t_size + 1][n_size - 2] = LT13_aux_5[LT13_index]
             LT13_index = LT13_index + 1
     compss_barrier()

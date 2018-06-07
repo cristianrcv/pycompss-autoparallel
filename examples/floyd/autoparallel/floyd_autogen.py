@@ -65,7 +65,7 @@ def LT2(lbp, ubp, *args):
     var2, var3, var1 = ArgUtils.rebuild_args(args)
     for t3 in range(0, ubp + 1 - lbp):
         var1[t3] = S1_no_task(var1[t3], var2[t3], var3[t3])
-    return ArgUtils.flatten_args(var2, var3, var1)
+    return ArgUtils.flatten_args(var1)
 
 
 @task(var2=IN, var3=IN, var4=IN, returns=1)
@@ -99,15 +99,12 @@ def floyd(d, n_size):
                 LT2_aux_1 = [d[t1][t2 - t3] for t3 in range(lbp, ubp + 1)]
                 LT2_aux_2 = [d[t3][t2 - t3] for t3 in range(lbp, ubp + 1)]
                 LT2_argutils = ArgUtils()
-                LT2_flat_args = LT2_argutils.flatten(LT2_aux_0, LT2_aux_1, LT2_aux_2)
                 global LT2_args_size
-                LT2_args_size = len(LT2_flat_args)
+                LT2_flat_args, LT2_args_size = LT2_argutils.flatten(3, LT2_aux_0, LT2_aux_1, LT2_aux_2, LT2_aux_2)
                 LT2_new_args = LT2(lbp, ubp, *LT2_flat_args)
-                LT2_aux_0, LT2_aux_1, LT2_aux_2 = LT2_argutils.rebuild(LT2_new_args)
+                LT2_aux_2, = LT2_argutils.rebuild(LT2_new_args)
                 LT2_index = 0
                 for t3 in range(lbp, ubp + 1):
-                    d[t3][t1] = LT2_aux_0[LT2_index]
-                    d[t1][t2 - t3] = LT2_aux_1[LT2_index]
                     d[t3][t2 - t3] = LT2_aux_2[LT2_index]
                     LT2_index = LT2_index + 1
     compss_barrier()
