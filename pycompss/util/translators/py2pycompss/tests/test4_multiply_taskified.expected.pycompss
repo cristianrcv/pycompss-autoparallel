@@ -15,7 +15,7 @@ def LT4(lbv, ubv, *args):
         var1[t3] = S1_no_task(var1[t3], var2[t3], var3[t3])
         S2_no_task(var1[t3], var2[t3], var3[t3])
         var1[t3], var4[t3] = S3_no_task(var1[t3], var2[t3], var3[t3])
-    return ArgUtils.flatten_args(var2, var3, var4, var1)
+    return ArgUtils.flatten_args(var4, var1)
 
 
 @task(var2=IN, var3=IN, var4=IN, returns=1)
@@ -71,15 +71,13 @@ def matmul(m_size, n_size, k_size, b_size, debug):
                 LT4_aux_2 = [d[t3][t1] for t3 in range(lbv, ubv + 1)]
                 LT4_aux_3 = [c[t3][t1] for t3 in range(lbv, ubv + 1)]
                 LT4_argutils = ArgUtils()
-                LT4_flat_args = LT4_argutils.flatten(LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3)
                 global LT4_args_size
-                LT4_args_size = len(LT4_flat_args)
+                LT4_flat_args, LT4_args_size = LT4_argutils.flatten(4, LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3,
+                    LT4_aux_2, LT4_aux_3)
                 LT4_new_args = LT4(lbv, ubv, *LT4_flat_args)
-                LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3 = LT4_argutils.rebuild(LT4_new_args)
+                LT4_aux_2, LT4_aux_3 = LT4_argutils.rebuild(LT4_new_args)
                 LT4_index = 0
                 for t3 in range(lbv, ubv + 1):
-                    a[t3][t2] = LT4_aux_0[LT4_index]
-                    b[t2][t1] = LT4_aux_1[LT4_index]
                     d[t3][t1] = LT4_aux_2[LT4_index]
                     c[t3][t1] = LT4_aux_3[LT4_index]
                     LT4_index = LT4_index + 1

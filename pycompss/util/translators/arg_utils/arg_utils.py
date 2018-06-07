@@ -27,22 +27,36 @@ class ArgUtils(object):
         Initialize internal ArgUtils structures
         """
 
-        self.flat_args = None
+        self.out_flat_args = None
 
-    def flatten(self, *args):
+    def flatten(self, in_vars_len, *args):
         """
-        Flats the given arguments and stores them inside the ArgUtils object
+        Flats all the arguments store in star_args. The flatten version of the arguments marked
+        as IN is returned and the flat version of the arguments marked as OUT is stored internally.
 
+        :param in_vars_len: Number of IN vars on *args
         :param args: List of arguments to flat
-        :return: Flattened list
+        :return: Tuple<List, Int> : A list containing the flattened IN vars and the size of the OUT flat vars
         """
+
+        in_vars = args[:in_vars_len]
+        out_vars = args[in_vars_len:]
 
         if __debug__:
-            logger.debug("Storing flatten Args")
+            logger.debug("Flattening input args")
+            # logger.debug(in_vars)
 
-        self.flat_args = ArgUtils.flatten_args(*args)
+        in_flat_args = ArgUtils.flatten_args(*in_vars)
 
-        return self.flat_args
+        if __debug__:
+            logger.debug("Storing flattened output args")
+            # logger.debug(out_vars)
+
+        self.out_flat_args = ArgUtils.flatten_args(*out_vars)
+        out_len = len(self.out_flat_args)
+
+        # Return in_args flattened
+        return in_flat_args, out_len
 
     def rebuild(self, out_args):
         """
@@ -57,9 +71,9 @@ class ArgUtils(object):
             logger.debug("Rebuilding Args with FO")
 
         # Check FO list has same size as the original arguments
-        assert len(self.flat_args) == len(out_args)
+        assert len(self.out_flat_args) == len(out_args)
 
-        return ArgUtils.rebuild_args(out_args, original_args=self.flat_args)
+        return ArgUtils.rebuild_args(out_args, original_args=self.out_flat_args)
 
     @staticmethod
     def flatten_args(*args):
@@ -97,7 +111,8 @@ class ArgUtils(object):
         """
         Rebuilds the given flatten list into nested objects
 
-        :param out_args: Flat list of new objects
+        :param args: Flat list of new objects
+        :param original_args: Optional list of original structure
         :return: List of complex objects
         """
 

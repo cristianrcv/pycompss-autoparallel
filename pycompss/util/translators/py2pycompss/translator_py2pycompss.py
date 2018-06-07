@@ -987,44 +987,58 @@ class _LoopTasking(ast.NodeTransformer):
 
         # Create new function arguments
         task_args = []
-        task_star_args = []
+        in_task_star_args = []
+        inout_task_star_args = []
         for var in in_vars + out_vars + inout_vars:
             var_ast = ast.Name(id=var)
-            # Add plan variables to task header and subscript variables to star_args
+            # Add plain variables to task header
             if isinstance(var2subscript[var], ast.Name):
                 # Do not repeat variables
                 if var not in task_args:
                     task_args.append(var_ast)
             else:
-                # Do not repeat variables
-                if var not in task_star_args:
-                    task_star_args.append(var)
+                # Add subscript variables to star_args (as task input or task output)
+                if var in in_vars:
+                    if var not in in_task_star_args:
+                        in_task_star_args.append(var)
+                elif var in out_vars:
+                    # TODO: Out variables are not supported, convert to INOUT
+                    if var not in inout_task_star_args:
+                        inout_task_star_args.append(var)
+                elif var in inout_vars:
+                    if var not in inout_task_star_args:
+                        inout_task_star_args.append(var)
 
         # if __debug__:
+        #    import astor
         #    logger.debug("Task function arguments:")
         #    for ta in task_args:
         #        logger.debug(ast.dump(ta))
         #        logger.debug(astor.to_source(ta))
-        #    logger.debug("Task function star arguments:")
-        #    for tsa in task_star_args:
-        #        logger.debug(ast.dump(tsa))
-        #        logger.debug(astor.to_source(tsa))
+        #    logger.debug("Task function IN star arguments:")
+        #    for tsa in in_task_star_args:
+        #        logger.debug(tsa)
+        #    logger.debug("Task function INOUT star arguments:")
+        #    for tsa in inout_task_star_args:
+        #        logger.debug(tsa)
 
         # New task variables
         self.task_counter_id += 1
         task_name = "LT" + str(self.task_counter_id)
-        task_vararg = "args" if len(task_star_args) > 0 else None
+        task_vararg = "args" if len(in_task_star_args + inout_task_star_args) > 0 else None
         len_var = task_name + "_args_size"
 
         # Construct task header
-        task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args,
+        task_header = Py2PyCOMPSs._construct_task_header(in_vars, out_vars, inout_vars, return_vars,
+                                                         in_task_star_args + inout_task_star_args,
                                                          len_var)
 
         # Create task definition node
         func_node = _LoopTasking._fix_loop_bounds(func_node)
         # Replace internal task callees by no_task callees (updates task2func_code)
         func_node = _UntaskCallees(self.task2headers, self.task2func_code).visit(func_node)
-        task_body = _LoopTasking._create_task_body_with_argutils(func_node, task_star_args, len_var)
+        task_body = _LoopTasking._create_task_body_with_argutils(func_node, in_task_star_args, inout_task_star_args,
+                                                                 len_var)
         new_task = ast.FunctionDef(name=task_name,
                                    args=ast.arguments(args=task_args, vararg=task_vararg, kwarg=None, defaults=[]),
                                    body=task_body,
@@ -1058,7 +1072,7 @@ class _LoopTasking(ast.NodeTransformer):
                 raise Py2PyCOMPSsException("[ERROR] Unrecognised call argument type " + str(type(orig_call_arg)))
 
         # Replace the current node by a task callee
-        if len(task_star_args) == 0:
+        if len(in_task_star_args) == 0 and len(inout_task_star_args) == 0:
             # Regular callee expression
             new_node = ast.Expr(value=ast.Call(func=call_func,
                                                args=call_args,
@@ -1072,22 +1086,27 @@ class _LoopTasking(ast.NodeTransformer):
 
         # Store operations for build and destroy chunks
         # Add assign build chunks to new_nodes
-        chunked_task_star_args = []
+        chunked_in_task_star_args = []
+        chunked_out_task_star_args = []
         unassign_loop_var = ast.Name(id=task_name + "_index")
         unassign_nodes = []
         star_arg_ind = 0
-        for var_name in task_star_args:
+        for var_name in in_task_star_args + inout_task_star_args:
             orig_call_arg = var2subscript[var_name]
             if isinstance(orig_call_arg, ast.Name):
                 # Argument is a plain variable, no changes
-                chunked_task_star_args.append(orig_call_arg)
+                chunked_in_task_star_args.append(orig_call_arg)
+                if var_name in inout_task_star_args:
+                    chunked_out_task_star_args.append(orig_call_arg)
             elif isinstance(orig_call_arg, ast.Subscript):
                 # Argument is a subscript
                 star_arg_name = task_name + "_aux_" + str(star_arg_ind)
                 star_arg_ind = star_arg_ind + 1
                 star_arg = ast.Name(id=star_arg_name)
                 # Store star_arg name
-                chunked_task_star_args.append(star_arg)
+                chunked_in_task_star_args.append(star_arg)
+                if var_name in inout_task_star_args:
+                    chunked_out_task_star_args.append(star_arg)
                 # Insert build assignation to new_nodes
                 assign_node = ast.Assign(targets=[star_arg],
                                          value=ast.ListComp(elt=orig_call_arg,
@@ -1096,11 +1115,11 @@ class _LoopTasking(ast.NodeTransformer):
                                                                                           ifs=[])]))
                 new_nodes.append(assign_node)
                 # Store destroy assignation to later append to new_nodes
-                unassign_node = ast.Assign(targets=[orig_call_arg],
-                                           value=ast.Subscript(value=star_arg,
-                                                               slice=ast.Index(value=unassign_loop_var)))
-                unassign_nodes.append(unassign_node)
-
+                if var_name in inout_task_star_args:
+                    unassign_node = ast.Assign(targets=[orig_call_arg],
+                                               value=ast.Subscript(value=star_arg,
+                                                                   slice=ast.Index(value=unassign_loop_var)))
+                    unassign_nodes.append(unassign_node)
             else:
                 # Unrecognised argument type
                 raise Py2PyCOMPSsException(
@@ -1115,27 +1134,29 @@ class _LoopTasking(ast.NodeTransformer):
                                                   starargs=None,
                                                   kwargs=None))
         new_nodes.append(argutils_node)
+        # logger.debug("ArgUtils Node:")
+        # logger.debug(astor.to_source(argutils_node))
+
+        # Insert Global node for length
+        global_node = ast.Global(names=[len_var])
+        new_nodes.append(global_node)
+        # logger.debug("Global Node:")
+        # logger.debug(astor.to_source(global_node))
 
         # Flatten args
         flat_args_var = ast.Name(id=task_name + "_flat_args")
-        flat_args_node = ast.Assign(targets=[flat_args_var],
+        args_for_call_flat_args = [ast.Num(n=len(
+            chunked_in_task_star_args))] + chunked_in_task_star_args + chunked_out_task_star_args
+        flat_args_node = ast.Assign(targets=[ast.Tuple(elts=[flat_args_var, ast.Name(id=len_var)])],
                                     value=ast.Call(func=ast.Attribute(value=argutils_var, attr="flatten"),
-                                                   args=chunked_task_star_args,
+                                                   args=args_for_call_flat_args,
                                                    keywords=[],
                                                    starargs=None,
                                                    kwargs=None))
-        new_nodes.append(flat_args_node)
 
-        # Insert Compute length
-        global_node = ast.Global(names=[len_var])
-        assign_global_node = ast.Assign(targets=[ast.Name(id=len_var)],
-                                        value=ast.Call(func=ast.Name(id="len"),
-                                                       args=[flat_args_var],
-                                                       keywords=[],
-                                                       starargs=None,
-                                                       kwargs=None))
-        new_nodes.append(global_node)
-        new_nodes.append(assign_global_node)
+        new_nodes.append(flat_args_node)
+        # logger.debug("Flat Args Node:")
+        # logger.debug(astor.to_source(flat_args_node))
 
         # Insert task call
         new_args_var = ast.Name(id=task_name + "_new_args")
@@ -1146,27 +1167,36 @@ class _LoopTasking(ast.NodeTransformer):
                                                    starargs=flat_args_var,
                                                    kwargs=None))
         new_nodes.append(task_call_node)
+        # logger.debug("Task Call Node:")
+        # logger.debug(astor.to_source(task_call_node))
 
         # Rebuild chunks from flat new arguments
-        rebuild_node = ast.Assign(targets=[ast.Tuple(elts=chunked_task_star_args)],
-                                  value=ast.Call(func=ast.Attribute(value=argutils_var, attr="rebuild"),
-                                                 args=[new_args_var],
-                                                 keywords=[],
-                                                 starargs=None,
-                                                 kwargs=None))
-        new_nodes.append(rebuild_node)
+        if len(chunked_out_task_star_args) > 0:
+            rebuild_node = ast.Assign(targets=[ast.Tuple(elts=chunked_out_task_star_args)],
+                                      value=ast.Call(func=ast.Attribute(value=argutils_var, attr="rebuild"),
+                                                     args=[new_args_var],
+                                                     keywords=[],
+                                                     starargs=None,
+                                                     kwargs=None))
+            new_nodes.append(rebuild_node)
+            # logger.debug("Rebuild Node:")
+            # logger.debug(astor.to_source(rebuild_node))
 
         # Undo chunks to user subscripts
-        loop_var_init_node = ast.Assign(targets=[unassign_loop_var], value=ast.Num(n=0))
-        new_nodes.append(loop_var_init_node)
+        if len(unassign_nodes) > 0:
+            loop_var_init_node = ast.Assign(targets=[unassign_loop_var], value=ast.Num(n=0))
+            new_nodes.append(loop_var_init_node)
 
-        incr_index_node = ast.Assign(targets=[unassign_loop_var],
-                                     value=ast.BinOp(left=unassign_loop_var,
-                                                     op=ast.Add(),
-                                                     right=ast.Num(n=1)))
-        unassign_nodes.append(incr_index_node)
-        loop_unassign_node = ast.For(target=loop_ind, iter=loop_bounds, body=unassign_nodes, orelse=[])
-        new_nodes.append(loop_unassign_node)
+            incr_index_node = ast.Assign(targets=[unassign_loop_var],
+                                         value=ast.BinOp(left=unassign_loop_var,
+                                                         op=ast.Add(),
+                                                         right=ast.Num(n=1)))
+            unassign_nodes.append(incr_index_node)
+
+            loop_unassign_node = ast.For(target=loop_ind, iter=loop_bounds, body=unassign_nodes, orelse=[])
+            new_nodes.append(loop_unassign_node)
+            # logger.debug("Loop Unassign Node:")
+            # logger.debug(astor.to_source(loop_unassign_node))
 
         # Assign to function return
         return new_nodes
@@ -1270,21 +1300,25 @@ class _LoopTasking(ast.NodeTransformer):
         return func_node
 
     @staticmethod
-    def _create_task_body_with_argutils(func_node, var_list, len_var):
+    def _create_task_body_with_argutils(func_node, in_var_list, inout_var_list, len_var):
         """
         Creates the body of a LoopTasking function by adding the rebuild and flatten calls before and after the loop
         execution
 
         :param func_node: Node containing the loop execution
-        :param var_list: List of stared variables
+        :param in_var_list: List of IN stared variables
+        :param inout_var_list: List of INOUT stared variables
         :param len_var: Name of the global length variable
         :return: <List<ast.Node>> Containing the task body representation
         """
 
         # Construct an ast var list
-        ast_var_list = []
-        for var_name in var_list:
-            ast_var_list.append(ast.Name(id=var_name))
+        in_ast_var_list = []
+        for var_name in in_var_list + inout_var_list:
+            in_ast_var_list.append(ast.Name(id=var_name))
+        out_ast_var_list = []
+        for var_name in inout_var_list:
+            out_ast_var_list.append(ast.Name(id=var_name))
 
         # Construct the global length  node
         global_node = ast.Global(names=[len_var])
@@ -1295,11 +1329,11 @@ class _LoopTasking(ast.NodeTransformer):
                                      keywords=[],
                                      starargs=None,
                                      kwargs=None)
-        rebuild_node = ast.Assign(targets=[ast.Tuple(elts=ast_var_list)], value=rebuild_args_call)
+        rebuild_node = ast.Assign(targets=[ast.Tuple(elts=in_ast_var_list)], value=rebuild_args_call)
 
         # Construct the flatten variables for return node
         flatten_args_call = ast.Call(func=ast.Attribute(value=ast.Name(id="ArgUtils"), attr="flatten_args"),
-                                     args=ast_var_list,
+                                     args=out_ast_var_list,
                                      keywords=[],
                                      starargs=None,
                                      kwargs=None)
