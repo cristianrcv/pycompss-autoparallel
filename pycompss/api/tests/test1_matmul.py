@@ -74,4 +74,5 @@ if __name__ == "__main__":
     endTime = time.time()
 
     # Log results and time
-    print "Elapsed Time {} (s)".format(endTime - startTime)
+    total_time = endTime - startTime
+    print("TOTAL_TIME " + str(total_time))
