@@ -41,11 +41,11 @@
   log_level=off
 
   #        REFERENCE  MAX_PAR
-  NXSIZES=(50)
-  NYSIZES=(50)
-  TSIZES=(4)
-  NUM_NODES=(2)
-  EXEC_TIMES=(90)
+  NXSIZES=(   50 50)
+  NYSIZES=(   50 50)
+  TSIZES=(    4  4)
+  NUM_NODES=( 2  3)
+  EXEC_TIMES=(10 10)
 
   cpus_per_node=48
 

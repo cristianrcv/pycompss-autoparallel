@@ -41,7 +41,7 @@
   #        REFERENCE   MAX_PAR
   MSIZES=(     32)
   NUM_NODES=(  2)
-  EXEC_TIMES=( 70)
+  EXEC_TIMES=( 20)
 
   cpus_per_node=48
 

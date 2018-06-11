@@ -40,10 +40,10 @@
   log_level=off
 
   #        REFERENCE  MAX_PAR
-  NSIZES=(     100     40)
-  TSIZES=(     100     100)
-  NUM_NODES=(  2       2)
-  EXEC_TIMES=( 30      30)
+  NSIZES=(     40  100 100 100)
+  TSIZES=(     100 100 100 100)
+  NUM_NODES=(  2   2   3   5)
+  EXEC_TIMES=( 15  25  20  15)
 
   cpus_per_node=48
 

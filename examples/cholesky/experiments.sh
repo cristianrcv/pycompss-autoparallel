@@ -40,10 +40,10 @@
   log_level=off
 
   #        REFERENCE   MAX_PAR
-  MSIZES=(     16      6)
-  BSIZES=(     2048    2048)
-  NUM_NODES=(  2       2)
-  EXEC_TIMES=( 10      10)
+  MSIZES=(     16   16   16)
+  BSIZES=(     2048 2048 2048)
+  NUM_NODES=(  2    3    5)
+  EXEC_TIMES=( 15   10   8)
 
   cpus_per_node=48
 

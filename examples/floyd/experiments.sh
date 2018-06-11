@@ -41,7 +41,7 @@
   #        REFERENCE  MAX_PAR
   NSIZES=(     20)
   NUM_NODES=(  2)
-  EXEC_TIMES=( 90)
+  EXEC_TIMES=( 15)
 
   cpus_per_node=48
 
