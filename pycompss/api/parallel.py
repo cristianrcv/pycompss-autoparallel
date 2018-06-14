@@ -361,7 +361,7 @@ class TestParallelDecorator(unittest.TestCase):
         p = parallel()
         try:
             # We don't retrieve new_func because we are not gonna import it (COMPSs is off)
-            p._translate(func, True)
+            p._translate(func, False)
         except CodeReplacerException as cre:
             logger.info("Catch CodeReplacerException because COMPSs is not initialized. CONTINUING")
             if __debug__:
