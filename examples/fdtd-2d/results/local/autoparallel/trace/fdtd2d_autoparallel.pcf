@@ -233,19 +233,10 @@ EVENT_TYPE
 VALUES
 0      End
 1      create_entry
-2      LT5
-3      LT6
-4      LT7
-5      LT8
-6      LT9
-7      LT10
-8      LT11
-9      LT12
-10      LT13
-11      S1
-12      S2
-13      S3
-14      S4
+2      S1
+3      S2
+4      S3
+5      S4
 
 
 EVENT_TYPE

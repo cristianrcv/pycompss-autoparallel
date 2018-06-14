@@ -148,7 +148,7 @@ Synchro1 -> Synchro2;
 16 -> Synchro2;
 19 -> Synchro2;
 30 -> Synchro2;
-15 -> Synchro2;
+14 -> Synchro2;
 23 -> Synchro2;
 18 -> Synchro2;
 26 -> Synchro2;
@@ -156,11 +156,11 @@ Synchro1 -> Synchro2;
 31 -> Synchro2;
 27 -> Synchro2;
 24 -> Synchro2;
-14 -> Synchro2;
+13 -> Synchro2;
 25 -> Synchro2;
 28 -> Synchro2;
 21 -> Synchro2;
-13 -> Synchro2;
+15 -> Synchro2;
 17 -> Synchro2;  }
   subgraph legend {
     rank=sink;
