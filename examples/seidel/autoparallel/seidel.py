@@ -46,6 +46,7 @@ def create_entry(i, j, n_size):
 # MAIN FUNCTION
 ############################################
 
+# @parallel()
 @parallel(taskify_loop_level=1)
 def seidel(a, n_size, t_size):
     # Debug

@@ -45,6 +45,7 @@ def create_entry(index, n_size):
 # MAIN FUNCTION
 ############################################
 
+# @parallel()
 @parallel(taskify_loop_level=1)
 def ep(mat, n_size, m_size, coef1, coef2):
     # Debug
