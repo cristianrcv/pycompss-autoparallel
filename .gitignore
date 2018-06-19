@@ -117,6 +117,8 @@ examples/matmul/matmul_autogen.py
 # Intermediate trace files
 examples/**/results/local/trace/python/
 
-# MareNostrum trace files
+# MareNostrum trace files and results (except ods summary)
 mn_b?/
-/results/
+/results/*
+!/results/experiments.ods
+
