@@ -41,6 +41,7 @@
     --cpus_per_node="${cpus_per_node}" \
     --worker_in_master_cpus=0 \
     --node_memory=50000 \
+    --scheduler=es.bsc.compss.scheduler.fifoDataScheduler.FIFODataScheduler \
     \
     --tracing="${tracing}" \
     --graph="${graph}" \
