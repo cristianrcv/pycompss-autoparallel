@@ -56,7 +56,7 @@ def test_main(mat, n_size):
     index = 4
     for i in range(2, n_size):
         mat[i] = compute_mat(n_size)
-        display(mat[index], n_size)
+        display(mat[index])
 
     # Debug result
     if __debug__:
@@ -81,18 +81,9 @@ def compute_mat(n_size):
     # print "TIME: " + str(tm*1000) + " ms"
 
 
-def display(elem, n_size):
-    is_ok = elem == n_size
-
+def display(elem):
     # Display value inside task
     print("GOT: " + str(elem))
-    print("EXPECTED: " + str(n_size))
-    print("RESULT: " + str(is_ok))
-
-    # Raise exception if required
-    if not is_ok:
-        # raise Exception("ERROR: Invalid element value received")
-        pass
 
 
 ############################################
