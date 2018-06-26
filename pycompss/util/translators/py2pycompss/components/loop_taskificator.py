@@ -26,16 +26,19 @@ class LoopTaskificator(ast.NodeTransformer):
     Node Transformer class to visit all the FOR loops and taskify them if required
 
     Attributes:
+        - cloog_vars :
         - taskify_loop_level : Depth level of for loop to taskify
         - task_counter_id : Task counter
         - task2headers : Map containing the task name and its header
         - task2func_code : Map containing the task name and its AST code representation
     """
 
+    # Static attribute List of control flow CLooG variables
+    _cloog_vars = ["lbp", "ubp", "lbv", "ubv"]
+
     def __init__(self, taskify_loop_level, task_counter_id, task2headers, task2func_code):
         """
         Initializes the _LoopTasking internal structures
-
         :param taskify_loop_level: Depth level of for loop to taskify
         :param task_counter_id: Task counter
         :param task2headers: Map containing the task names and their headers
@@ -381,6 +384,16 @@ class LoopTaskificator(ast.NodeTransformer):
         loop_ind_ids = [li.id for li in loops_info.keys()]
         in_vars, inout_vars = self._get_access_vars(node, loop_ind_ids, False)
 
+        # Remove CLooG control variables assignment
+        written, readen = LoopTaskificator._get_cloog_vars(node, False, 0)
+        for var_name, read_level in readen.items():
+            if var_name in written:
+                write_level = written[var_name]
+                if read_level < write_level:
+                    in_vars.append(var_name)
+            else:
+                in_vars.append(var_name)
+
         # Fix duplicate variables and directions
         fixed_in_vars = []
         fixed_inout_vars = []
@@ -394,13 +407,6 @@ class LoopTaskificator(ast.NodeTransformer):
         for iov in inout_vars:
             if iov not in fixed_inout_vars:
                 fixed_inout_vars.append(iov)
-
-        # Remove assignations to CLooG control vars
-        cloog_vars = ["lbp", "ubp", "lbv", "ubv"]
-        for cv in cloog_vars:
-            if cv in fixed_inout_vars:
-                # Variable has been set inside the loops, erase it
-                fixed_inout_vars.remove(cv)
 
         # Return variables
         return fixed_in_vars, fixed_inout_vars
@@ -424,7 +430,7 @@ class LoopTaskificator(ast.NodeTransformer):
         # Direct case
         if isinstance(statement, ast.Name):
             var_name = statement.id
-            if var_name not in loop_ind_ids:
+            if var_name not in loop_ind_ids and var_name not in LoopTaskificator._cloog_vars:
                 if is_target:
                     inout_vars.append(var_name)
                 else:
@@ -492,6 +498,65 @@ class LoopTaskificator(ast.NodeTransformer):
                     in_vars.extend(iv)
                     inout_vars.extend(iov)
         return in_vars, inout_vars
+
+    @staticmethod
+    def _get_cloog_vars(statement, is_target, for_level):
+        written = {}
+        readen = {}
+
+        # Base case
+        if isinstance(statement, ast.Name):
+            var_name = statement.id
+            if var_name in LoopTaskificator._cloog_vars:
+                if is_target:
+                    # We are assigning a CLooG var on depth = for_level
+                    written[var_name] = for_level
+                else:
+                    # We are assigning a CLooG var on depth = for_level
+                    readen[var_name] = for_level
+            return written, readen
+
+        # Child recursion
+        for field, value in ast.iter_fields(statement):
+            if isinstance(statement, ast.For) and field == "body":
+                for_level = for_level + 1
+
+            if field in ["func", "op", "ops", "keywords"] or (isinstance(statement, ast.For) and field == "target"):
+                # Skip function names, operation nodes, var_args keywords, and loop indexes
+                pass
+            else:
+                children_are_target = is_target or (field == "targets")
+                if isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, ast.AST):
+                            wr, r = LoopTaskificator._get_cloog_vars(item, children_are_target, for_level)
+                            for wr_var, wr_depth in wr.items():
+                                if wr_var in written.keys():
+                                    if wr_depth < written[wr_var]:
+                                        written[wr_var] = wr_depth
+                                else:
+                                    written[wr_var] = wr_depth
+                            for r_var, r_depth in r.items():
+                                if r_var in readen.keys():
+                                    if r_depth < readen[r_var]:
+                                        readen[r_var] = r_depth
+                                else:
+                                    readen[r_var] = r_depth
+                elif isinstance(value, ast.AST):
+                    wr, r = LoopTaskificator._get_cloog_vars(value, children_are_target, for_level)
+                    for wr_var, wr_depth in wr.items():
+                        if wr_var in written.keys():
+                            if wr_depth < written[wr_var]:
+                                written[wr_var] = wr_depth
+                        else:
+                            written[wr_var] = wr_depth
+                    for r_var, r_depth in r.items():
+                        if r_var in readen.keys():
+                            if r_depth < readen[r_var]:
+                                readen[r_var] = r_depth
+                        else:
+                            readen[r_var] = r_depth
+        return written, readen
 
     @staticmethod
     def _get_var_names(node, loop_ind_ids):
@@ -588,11 +653,12 @@ class LoopTaskificator(ast.NodeTransformer):
         self.task2func_code[task_name] = new_task
         self.task2headers[task_name] = task_header
         if __debug__:
+            from pycompss.util.translators.astor_source_gen.pycompss_source_gen import PyCOMPSsSourceGen
             import astor
             logger.debug("- New Task Header:")
             logger.debug(task_header)
             logger.debug("- New task:")
-            logger.debug(astor.to_source(new_task))
+            logger.debug(astor.to_source(new_task, pretty_source=PyCOMPSsSourceGen.long_line_ps))
 
     @staticmethod
     def _create_task_body_with_argutils(func_node, in_var_list, inout_var_list, len_var):
@@ -787,9 +853,6 @@ class _SubscriptInformation(object):
             - lbs : Expression for minimum lower bound of any dimension of an access to any subscript
             - ubs : Expression for maximum upper bound of any dimension of an access to any subscript
             - steps : Expression for the gcb step size of any dimension of an access to any subscript
-            - lbs_no_cloog : Expression for lbs without CLooG variables
-            - ubs_no_cloog : Expression for ubs without CLooG variables
-            - steps_no_cloog : Expression for steps without CLooG variables
     """
 
     def __init__(self, loops_info, subscript_accesses_info, node):
@@ -801,10 +864,16 @@ class _SubscriptInformation(object):
         :param node: Head of the AST For expression
         """
 
+        # Create the loop generators
         self.loops_info = loops_info
         loop_generators = [ast.comprehension(target=loop_ind, iter=loop_bounds, ifs=[]) for loop_ind, loop_bounds in
-                           self.loops_info.items()]
+                           sorted(self.loops_info.items())]
 
+        # Fix the appearance of cloog variables
+        rcv = _RewriteCloogVars(node)
+        fixed_loop_generators = [rcv.set_level(ind).visit(lg) for ind, lg in enumerate(loop_generators)]
+
+        # Compute lower and upper bounds, and steps
         self.lbs = {}
         self.ubs = {}
         self.steps = {}
@@ -819,7 +888,8 @@ class _SubscriptInformation(object):
 
                 # Subscript access minimum Lower Bound
                 min_val_of_dim_accesses = [ast.Call(func=ast.Name(id="min"),
-                                                    args=[ast.GeneratorExp(elt=access, generators=loop_generators)],
+                                                    args=[
+                                                        ast.GeneratorExp(elt=access, generators=fixed_loop_generators)],
                                                     keywords=[],
                                                     starargs=None,
                                                     kwargs=None) for access in dim_accesses]
@@ -832,7 +902,8 @@ class _SubscriptInformation(object):
 
                 # Subscript access maximum Upper Bound
                 max_val_of_dim_accesses = [ast.Call(func=ast.Name(id="max"),
-                                                    args=[ast.GeneratorExp(elt=access, generators=loop_generators)],
+                                                    args=[
+                                                        ast.GeneratorExp(elt=access, generators=fixed_loop_generators)],
                                                     keywords=[],
                                                     starargs=None,
                                                     kwargs=None) for access in dim_accesses]
@@ -853,34 +924,6 @@ class _SubscriptInformation(object):
             self.lbs[subscript_name] = min_lb_exprs
             self.ubs[subscript_name] = max_ub_exprs
             self.steps[subscript_name] = steps_exprs
-
-        # Store a fixed copy of lbs, ubs, and steps without cloog variables
-        import copy
-        rcv = _RewriteCloogVars(node)
-        self.lbs_no_cloog = {}
-        for subscript_name, exprs in self.lbs.items():
-            fixed_exprs = []
-            for expr in exprs:
-                new_expr = copy.deepcopy(expr)
-                new_expr = rcv.visit(new_expr)
-                fixed_exprs.append(new_expr)
-            self.lbs_no_cloog[subscript_name] = fixed_exprs
-        self.ubs_no_cloog = {}
-        for subscript_name, exprs in self.ubs.items():
-            fixed_exprs = []
-            for expr in exprs:
-                new_expr = copy.deepcopy(expr)
-                new_expr = rcv.visit(new_expr)
-                fixed_exprs.append(new_expr)
-            self.ubs_no_cloog[subscript_name] = fixed_exprs
-        self.steps_no_cloog = {}
-        for subscript_name, exprs in self.steps.items():
-            fixed_exprs = []
-            for expr in exprs:
-                new_expr = copy.deepcopy(expr)
-                new_expr = rcv.visit(new_expr)
-                fixed_exprs.append(new_expr)
-            self.steps_no_cloog[subscript_name] = fixed_exprs
 
     def get_loops_info(self):
         """
@@ -908,15 +951,6 @@ class _SubscriptInformation(object):
             current_access_subscript = current_access_subscript.value
         access = list(reversed(access))
 
-        # Create access lbs
-        loop_generators = [ast.comprehension(target=loop_ind, iter=loop_bounds, ifs=[]) for loop_ind, loop_bounds in
-                           self.loops_info.items()]
-        access_lbs = [ast.Call(func=ast.Name(id="min"),
-                               args=[ast.GeneratorExp(elt=a, generators=loop_generators)],
-                               keywords=[],
-                               starargs=None,
-                               kwargs=None) for a in access]
-
         # Create chunk access
         new_chunk_access = None
         for index in range(dim):
@@ -940,9 +974,9 @@ class _SubscriptInformation(object):
         :return: Expression for chunking
         """
 
-        lbs = self.lbs_no_cloog[var_name]
-        ubs = self.ubs_no_cloog[var_name]
-        steps = self.steps_no_cloog[var_name]
+        lbs = self.lbs[var_name]
+        ubs = self.ubs[var_name]
+        steps = self.steps[var_name]
         dim = len(lbs)
 
         # Subscript access
@@ -984,9 +1018,9 @@ class _SubscriptInformation(object):
         :return: The for expression to un-chunk the chunk variable to its original subscript
         """
 
-        lbs = self.lbs_no_cloog[orig_var_name]
-        ubs = self.ubs_no_cloog[orig_var_name]
-        steps = self.steps_no_cloog[orig_var_name]
+        lbs = self.lbs[orig_var_name]
+        ubs = self.ubs[orig_var_name]
+        steps = self.steps[orig_var_name]
         dim = len(lbs)
 
         # Subscript access
@@ -1059,16 +1093,29 @@ class _RewriteCloogVars(ast.NodeTransformer):
         :param for_node: Head FOR Ast Node
         """
 
-        # List of cloog vars to detect
-        self.cloog_var_names = ["lbp", "ubp", "lbv", "ubv"]
-
         # Map containing the expression of set CLooG vars
         # Notice that if a variable is not set inside the loop tasks, it won't appear on this map
-        self.cloog_vars = self._search_cloog_vars(for_node)
+        # Map => KV = {level:assign, level:assign, ...}
+        self.cloog_vars = self._search_cloog_vars(for_node, 0)
+
+        # if __debug__:
+        #     import astor
+        #     logger.debug("CLooG Variables:")
+        #     for var, assignations in self.cloog_vars.items():
+        #         logger.debug("- " + str(var) + ":")
+        #         for level, assign in assignations.items():
+        #             logger.debug(str(level) + " -> " + str(astor.to_source(assign)))
+
+        # Set current for level to default value
+        self.current_for_level = None
+
+    def set_level(self, for_level):
+        self.current_for_level = for_level
+        return self
 
     def visit_Name(self, node):
         """
-        When found a usage of a CLooG variable, replace by its expreassion if it has been modified inside the
+        When found a usage of a CLooG variable, replace by its expression if it has been modified inside the
         task loops. The node remains intact otherwise
 
         :param node: Node containing usage of a CLooG variable
@@ -1076,13 +1123,25 @@ class _RewriteCloogVars(ast.NodeTransformer):
         """
 
         if node.id in self.cloog_vars.keys():
-            # Get expression for cloog variable
-            expr = self.cloog_vars[node.id]
-            return ast.copy_location(expr, node)
+            # Get assignations per level
+            assignations = self.cloog_vars[node.id]
+            # Get current for level
+            for_level = self.current_for_level
+            # Search for the nearest assignation
+            found = False
+            expr = node
+            while for_level >= 0 and not found:
+                if for_level in assignations.keys():
+                    found = True
+                    expr = assignations[for_level]
+                for_level = for_level - 1
+            # Return the expression of the CLooG variable if it was set
+            if found:
+                return ast.copy_location(expr, node)
 
         return node
 
-    def _search_cloog_vars(self, node):
+    def _search_cloog_vars(self, node, for_level):
         """
         Searches a node recursively to found assignations to CLooG variables. When found, it stores its expression
 
@@ -1099,14 +1158,17 @@ class _RewriteCloogVars(ast.NodeTransformer):
                 target_var = target_vars[0]
                 if isinstance(target_var, ast.Name):
                     target_var_name = target_var.id
-                    if target_var_name in self.cloog_var_names:
+                    if target_var_name in LoopTaskificator._cloog_vars:
                         # Expression for a CLooG variable
-                        cloog_vars[target_var_name] = node.value
+                        cloog_vars[target_var_name] = {for_level: node.value}
             # No need over children
             return cloog_vars
 
         # Child recursion
         for field, value in ast.iter_fields(node):
+            if isinstance(node, ast.For) and field == "body":
+                for_level = for_level + 1
+
             if field == "func" or field == "keywords":
                 # Skip function names and var_args keywords
                 pass
@@ -1114,11 +1176,21 @@ class _RewriteCloogVars(ast.NodeTransformer):
                 if isinstance(value, list):
                     for item in value:
                         if isinstance(item, ast.AST):
-                            cv = self._search_cloog_vars(item)
-                            cloog_vars.update(cv)
+                            cv = self._search_cloog_vars(item, for_level)
+                            for var, assignations in cv.items():
+                                new_assignations = assignations
+                                if var in cloog_vars.keys():
+                                    # Internal map (level -> assign) cannot contain repeated values
+                                    new_assignations.update(cloog_vars[var])
+                                cloog_vars[var] = new_assignations
                 elif isinstance(value, ast.AST):
-                    cv = self._search_cloog_vars(value)
-                    cloog_vars.update(cv)
+                    cv = self._search_cloog_vars(value, for_level)
+                    for var, assignations in cv.items():
+                        new_assignations = assignations
+                        if var in cloog_vars.keys():
+                            # Internal map (level -> assign) cannot contain repeated values
+                            new_assignations.update(cloog_vars[var])
+                        cloog_vars[var] = new_assignations
         return cloog_vars
 
 
