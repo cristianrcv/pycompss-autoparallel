@@ -47,7 +47,7 @@ def create_entry(i, j, n_size):
 ############################################
 
 # @parallel()
-@parallel(taskify_loop_level=1)
+@parallel(pluto_extra_flags=["--tile"], taskify_loop_level=3)
 def seidel(a, n_size, t_size):
     # Debug
     if __debug__:

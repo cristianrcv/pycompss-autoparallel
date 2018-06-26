@@ -50,8 +50,8 @@ def create_entry(n_size, is_zero):
 # MAIN FUNCTION
 ############################################
 
-# @parallel(taskify_loop_level=1)
-@parallel()
+# @parallel()
+@parallel(pluto_extra_flags=["--tile"], taskify_loop_level=3)
 def floyd(d, n_size):
     # Debug
     if __debug__:

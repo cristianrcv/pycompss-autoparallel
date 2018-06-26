@@ -24,7 +24,7 @@
 
   # Application arguments
   NSIZE=8
-  TSIZE=1
+  TSIZE=2
 
   export ComputingUnits=1
 

@@ -44,8 +44,8 @@ def create_entry(index, n_size):
 # MAIN FUNCTION
 ############################################
 
-# @parallel(taskify_loop_level=1)
-@parallel()
+# @parallel()
+@parallel(pluto_extra_flags=["--tile"], taskify_loop_level=2)
 def fdtd_1d(e, h, n_size, t_size, coef1, coef2):
     # Debug
     if __debug__:
