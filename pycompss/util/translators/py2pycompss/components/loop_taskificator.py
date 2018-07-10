@@ -163,7 +163,7 @@ class LoopTaskificator(ast.NodeTransformer):
         #     import astor
         #     logger.debug("- Loop information:")
         #     for k, v in loops_info.items():
-        #         # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
+        #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
         #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
 
         # Get information about subscript accesses on task code
@@ -174,7 +174,9 @@ class LoopTaskificator(ast.NodeTransformer):
         #     logger.debug("- Subscripts Accesses:")
         #     for var_name, values in subscripts_accesses.items():
         #         for a in values:
+        #             logger.debug(str(var_name) + ": " + str([str(astor.dump_tree(dim)) for dim in a]))
         #             logger.debug(str(var_name) + ": " + str([str(astor.to_source(dim)) for dim in a]))
+
         subscripts_info = _SubscriptInformation(loops_info, subscripts_accesses, node)
         # if __debug__:
         #     logger.debug("- Subscripts information:")
@@ -864,74 +866,60 @@ class _SubscriptInformation(object):
         :param node: Head of the AST For expression
         """
 
-        # Create the loop generators
-        self.loops_info = loops_info
-        loop_generators = [ast.comprehension(target=loop_ind, iter=loop_bounds, ifs=[]) for loop_ind, loop_bounds in
-                           sorted(self.loops_info.items())]
-
-        # Fix the appearance of cloog variables
+        # TODO:
+        # Fix the appearance of cloog variables in loops information
+        # rcv = _RewriteCloogVars(node)
+        # fixed_loop_generators = [rcv.set_level(ind).visit(lg) for ind, lg in enumerate(loop_generators)]
+        if __debug__:
+            import astor
+            logger.debug("- PREV Loop information:")
+            for k, v in loops_info.items():
+                # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
+                logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
         rcv = _RewriteCloogVars(node)
-        fixed_loop_generators = [rcv.set_level(ind).visit(lg) for ind, lg in enumerate(loop_generators)]
+        fixed_loops_info = {}
+        for depth_index, loop_ind_var in enumerate(sorted(loops_info.keys())):
+            loop_bounds = loops_info[loop_ind_var]
+            fixed_loop_bounds = rcv.set_level(depth_index).visit(loop_bounds)
+            fixed_loops_info[loop_ind_var] = fixed_loop_bounds
+        if __debug__:
+            import astor
+            logger.debug("- FIXED Loop information:")
+            for k, v in fixed_loops_info.items():
+                # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
+                logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
 
-        # Compute lower and upper bounds, and steps
-        self.lbs = {}
-        self.ubs = {}
-        self.steps = {}
-        for subscript_name, subscript_accesses in subscript_accesses_info.items():
-            min_lb_exprs = []
-            max_ub_exprs = []
-            steps_exprs = []
+        # Compute lbs and ubs
+        from pycompss.util.translators.py2pycompss.components.calculator import Calculator
+        self.original_accesses, self.subs2glob_lbs, self.subs2glob_ubs, self.subs2lbs, self.subs2ubs = \
+            Calculator.compute_lex_bounds(fixed_loops_info, subscript_accesses_info)
 
-            num_dims = len(subscript_accesses[0])
-            for dim in range(num_dims):
-                dim_accesses = [access[dim] for access in subscript_accesses]
-
-                # Subscript access minimum Lower Bound
-                min_val_of_dim_accesses = [ast.Call(func=ast.Name(id="min"),
-                                                    args=[
-                                                        ast.GeneratorExp(elt=access, generators=fixed_loop_generators)],
-                                                    keywords=[],
-                                                    starargs=None,
-                                                    kwargs=None) for access in dim_accesses]
-                min_lb_current_dim = ast.Call(func=ast.Name(id="min"),
-                                              args=[ast.List(elts=min_val_of_dim_accesses)],
-                                              keywords=[],
-                                              starargs=None,
-                                              kwargs=None)
-                min_lb_exprs.append(min_lb_current_dim)
-
-                # Subscript access maximum Upper Bound
-                max_val_of_dim_accesses = [ast.Call(func=ast.Name(id="max"),
-                                                    args=[
-                                                        ast.GeneratorExp(elt=access, generators=fixed_loop_generators)],
-                                                    keywords=[],
-                                                    starargs=None,
-                                                    kwargs=None) for access in dim_accesses]
-                max_ub_current_dim = ast.BinOp(left=ast.Call(func=ast.Name(id="max"),
-                                                             args=[ast.List(elts=max_val_of_dim_accesses)],
-                                                             keywords=[],
-                                                             starargs=None,
-                                                             kwargs=None),
-                                               op=ast.Add(),
-                                               right=ast.Num(n=1))
-                max_ub_exprs.append(max_ub_current_dim)
-
-                # Subscript step size
-                # TODO: Compute GCD of step size
-                steps_current_dim = ast.Num(n=1)
-                steps_exprs.append(steps_current_dim)
-
-            self.lbs[subscript_name] = min_lb_exprs
-            self.ubs[subscript_name] = max_ub_exprs
-            self.steps[subscript_name] = steps_exprs
-
-    def get_loops_info(self):
-        """
-        Returns the loops information (variables and bounds)
-
-        :return: Returns the loops information (variables and bounds)
-        """
-        return self.loops_info
+        if __debug__:
+            import astor
+            logger.debug("Registered Accesses:")
+            for subscript_name, original_accesses in self.original_accesses.items():
+                logger.debug("- Subscript: " + subscript_name)
+                for a in original_accesses:
+                    # logger.debug(str([str(astor.dump_tree(dim)) for dim in a]))
+                    logger.debug(str([str(astor.to_source(dim)) for dim in a]))
+            logger.debug("Registered Global LBS:")
+            for subscript_name, lbs in self.subs2glob_lbs.items():
+                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+                    [str(astor.to_source(dim_expr)) for dim_expr in lbs]))
+            logger.debug("Registered Global UBS:")
+            for subscript_name, ubs in self.subs2glob_ubs.items():
+                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+                    [str(astor.to_source(dim_expr)) for dim_expr in ubs]))
+            logger.debug("Registered LBS:")
+            for subscript_name, accesses_lbs in self.subs2lbs.items():
+                logger.debug("Subscript " + str(subscript_name))
+                for lb in accesses_lbs:
+                    logger.debug(str([str(astor.to_source(dim_expr)) for dim_expr in lb]))
+            logger.debug("Registered UBS:")
+            for subscript_name, accesses_ubs in self.subs2ubs.items():
+                logger.debug("Subscript " + str(subscript_name))
+                for ub in accesses_ubs:
+                    logger.debug(str([str(astor.to_source(dim_expr)) for dim_expr in ub]))
 
     def get_chunk_access(self, var_name, current_access_subscript):
         """
@@ -941,8 +929,6 @@ class _SubscriptInformation(object):
         :param current_access_subscript: Subscript representing the original access
         :return: Modified access to the subscript according to chunks
         """
-        lbs = self.lbs[var_name]
-        dim = len(lbs)
 
         # Extract original subscript accesses for each dimension
         access = []
@@ -951,12 +937,23 @@ class _SubscriptInformation(object):
             current_access_subscript = current_access_subscript.value
         access = list(reversed(access))
 
+        access_index = -1
+        for index, orig_access in enumerate(self.original_accesses[var_name]):
+            if _SubscriptInformation._equal_accesses(access, orig_access):
+                access_index = index
+                break
+        if access_index == -1:
+            raise Py2PyCOMPSsLoopTaskificatorException("ERROR: Unregistered access")
+
+        access_lbs = self.subs2lbs[var_name][access_index]
+        dim = len(access_lbs)
+
         # Create chunk access
         new_chunk_access = None
         for index in range(dim):
             new_index = ast.BinOp(left=access[index],
                                   op=ast.Sub(),
-                                  right=lbs[index])
+                                  right=access_lbs[index])
             if new_chunk_access is None:
                 new_chunk_access = ast.Subscript(value=ast.Name(id=var_name),
                                                  slice=ast.Index(value=new_index))
@@ -974,9 +971,8 @@ class _SubscriptInformation(object):
         :return: Expression for chunking
         """
 
-        lbs = self.lbs[var_name]
-        ubs = self.ubs[var_name]
-        steps = self.steps[var_name]
+        lbs = self.subs2glob_lbs[var_name]
+        ubs = self.subs2glob_ubs[var_name]
         dim = len(lbs)
 
         # Subscript access
@@ -995,8 +991,7 @@ class _SubscriptInformation(object):
         for index in reversed(range(dim)):
             generators_list = [ast.comprehension(target=ast.Name(id="gv" + str(index)),
                                                  iter=ast.Call(func=ast.Name(id="range"),
-                                                               args=[lbs[index], ubs[index],
-                                                                     steps[index]],
+                                                               args=[lbs[index], ubs[index], ast.Num(n=1)],
                                                                keywords=[],
                                                                starargs=None,
                                                                kwargs=None),
@@ -1018,9 +1013,8 @@ class _SubscriptInformation(object):
         :return: The for expression to un-chunk the chunk variable to its original subscript
         """
 
-        lbs = self.lbs[orig_var_name]
-        ubs = self.ubs[orig_var_name]
-        steps = self.steps[orig_var_name]
+        lbs = self.subs2glob_lbs[orig_var_name]
+        ubs = self.subs2glob_ubs[orig_var_name]
         dim = len(lbs)
 
         # Subscript access
@@ -1054,7 +1048,7 @@ class _SubscriptInformation(object):
                                          value=chunk_var_access)
                 loop = ast.For(target=ast.Name(id=gen_var),
                                iter=ast.Call(func=ast.Name(id="range"),
-                                             args=[lbs[index], ubs[index], steps[index]],
+                                             args=[lbs[index], ubs[index], ast.Num(n=1)],
                                              keywords=[],
                                              starargs=None,
                                              kwargs=None),
@@ -1063,7 +1057,7 @@ class _SubscriptInformation(object):
             else:
                 loop = ast.For(target=ast.Name(id=gen_var),
                                iter=ast.Call(func=ast.Name(id="range"),
-                                             args=[lbs[index], ubs[index], steps[index]],
+                                             args=[lbs[index], ubs[index], ast.Num(n=1)],
                                              keywords=[],
                                              starargs=None,
                                              kwargs=None),
@@ -1071,6 +1065,20 @@ class _SubscriptInformation(object):
                                orelse=[])
 
         return loop
+
+    @staticmethod
+    def _equal_accesses(plain_access_list, index_access_list):
+        # Check that accesses have the same number of dimensions
+        if len(plain_access_list) != len(index_access_list):
+            return False
+
+        # Check each dimension
+        for i in range(len(plain_access_list)):
+            if str(ast.dump(plain_access_list[i])) != str(ast.dump(index_access_list[i].value)):
+                return False
+
+        # All dimensions match
+        return True
 
 
 #
