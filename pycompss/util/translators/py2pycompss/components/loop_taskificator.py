@@ -866,28 +866,24 @@ class _SubscriptInformation(object):
         :param node: Head of the AST For expression
         """
 
-        # TODO:
-        # Fix the appearance of cloog variables in loops information
-        # rcv = _RewriteCloogVars(node)
-        # fixed_loop_generators = [rcv.set_level(ind).visit(lg) for ind, lg in enumerate(loop_generators)]
-        if __debug__:
-            import astor
-            logger.debug("- PREV Loop information:")
-            for k, v in loops_info.items():
-                # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
-                logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
+        # if __debug__:
+        #     import astor
+        #     logger.debug("- PREV Loop information:")
+        #     for k, v in loops_info.items():
+        #         # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
+        #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
         rcv = _RewriteCloogVars(node)
         fixed_loops_info = {}
         for depth_index, loop_ind_var in enumerate(sorted(loops_info.keys())):
             loop_bounds = loops_info[loop_ind_var]
             fixed_loop_bounds = rcv.set_level(depth_index).visit(loop_bounds)
             fixed_loops_info[loop_ind_var] = fixed_loop_bounds
-        if __debug__:
-            import astor
-            logger.debug("- FIXED Loop information:")
-            for k, v in fixed_loops_info.items():
-                # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
-                logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
+        # if __debug__:
+        #     import astor
+        #     logger.debug("- FIXED Loop information:")
+        #     for k, v in fixed_loops_info.items():
+        #         # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
+        #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
 
         # Compute lbs and ubs
         from pycompss.util.translators.py2pycompss.components.calculator import Calculator
