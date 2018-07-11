@@ -61,7 +61,8 @@ class Calculator(object):
         :param subscript_accesses_info: Map between subscript names and all its access expressions
         :return: A map of the form Map<String, (Integer, AST, List<BasicISLSet>)> containing the number
         of dimensions, the original access and the basic ISL sets of each access of each subscript
-        Two maps of the form Map<String, (Int,BasicISLSet)> containing the global min/max ISL sets of each subscript
+        Two maps of the form Map<String, (Int,List<BasicISLSet>)> containing the global min/max ISL sets of each
+        subscript
         """
 
         if __debug__:
@@ -76,13 +77,13 @@ class Calculator(object):
                     # logger.debug(str(var_name) + ": " + str([str(astor.dump_tree(dim)) for dim in a]))
                     logger.debug(str(var_name) + ": " + str([str(astor.to_source(dim)) for dim in a]))
 
-        # Global loop information (defining space)
+        # Global loop information (defining the three spaces)
         global_min_isl_builder = _IslSetBuilder()
         global_min_isl_builder.set_variables([loop_ind.id for loop_ind in loops_info.keys()])
         for loop_ind, loop_bounds in loops_info.items():
             loop_ind_varname = loop_ind.id
             global_min_isl_builder.add_constraint(2, loop_ind_varname, loop_bounds.args[0])
-            global_min_isl_builder.add_constraint(3, loop_ind_varname, loop_bounds.args[1])
+            global_min_isl_builder.add_constraint(4, loop_ind_varname, loop_bounds.args[1])
         import copy
         global_max_isl_builder = copy.deepcopy(global_min_isl_builder)
         specific_access_isl_builder = copy.deepcopy(global_min_isl_builder)
@@ -94,53 +95,63 @@ class Calculator(object):
         subscript2isl_global_max = {}
         for subscript_name, subscript_accesses in subscript_accesses_info.items():
             num_dims = len(subscript_accesses[0])
-            # Add a variable per subscript dimension
-            global_min_isl_builder.set_global_variables(num_dims)
-            global_max_isl_builder.set_global_variables(num_dims)
             # Process each access
             accesses_isl_set = []
+            mins_isl_set = []
+            maxs_isl_set = []
             for access in subscript_accesses:
                 # Add a variable per subscript dimension
                 specific_access_isl_builder.set_acccess_variables(num_dims)
+                global_min_isl_builder.set_global_variables(num_dims)
+                global_max_isl_builder.set_global_variables(num_dims)
 
                 # Add a constraint for each subscript dimension
                 for dim_id, dim_access_ast in enumerate(access):
                     specific_access_isl_builder.add_access_constraint(dim_id, dim_access_ast.value)
                     global_min_isl_builder.add_global_constraint(2, dim_id, dim_access_ast.value)
-                    global_max_isl_builder.add_global_constraint(3, dim_id, dim_access_ast.value)
+                    global_max_isl_builder.add_global_constraint(4, dim_id, dim_access_ast.value)
 
                 # Generate the specific access ISL object and store it
                 isl_access = specific_access_isl_builder.build_isl_set()
-                if __debug__:
-                    logger.debug("ISL Access Object:")
-                    logger.debug(isl_access)
+                # if __debug__:
+                #     logger.debug("ISL Access Object:")
+                #     logger.debug(isl_access)
                 accesses_isl_set.append(isl_access)
+
+                # Generate the global access ISL object and store it
+                min_isl_access = global_min_isl_builder.build_isl_set()
+                # if __debug__:
+                #     logger.debug("ISL MIN Access Object:")
+                #     logger.debug(min_isl_access)
+                mins_isl_set.append(min_isl_access)
+
+                # Generate the global access ISL object and store it
+                max_isl_access = global_max_isl_builder.build_isl_set()
+                # if __debug__:
+                #     logger.debug("ISL MAX Access Object:")
+                #     logger.debug(max_isl_access)
+                maxs_isl_set.append(max_isl_access)
 
                 # Clear specific access information from global object
                 specific_access_isl_builder.clear_access_variables()
                 specific_access_isl_builder.clear_access_constraints()
+
+                # Clear specific access information from global MIN object
+                global_min_isl_builder.clear_global_variables()
+                global_min_isl_builder.clear_global_constraints()
+
+                # Clear specific access information from global MAX object
+                global_max_isl_builder.clear_global_variables()
+                global_max_isl_builder.clear_global_constraints()
+
             # Store the per access information
             subscript2isl_per_access[subscript_name] = num_dims, subscript_accesses, accesses_isl_set
 
-            # Generate the global access ISL object and store it
-            global_min_isl_access = global_min_isl_builder.build_isl_set()
-            if __debug__:
-                logger.debug("ISL MIN Access Object:")
-                logger.debug(global_min_isl_access)
-            subscript2isl_global_min[subscript_name] = num_dims, global_min_isl_access
+            # Store the per access information to global MIN
+            subscript2isl_global_min[subscript_name] = num_dims, mins_isl_set
 
-            # Generate the global access ISL object and store it
-            global_max_isl_access = global_max_isl_builder.build_isl_set()
-            if __debug__:
-                logger.debug("ISL MAX Access Object:")
-                logger.debug(global_max_isl_access)
-            subscript2isl_global_max[subscript_name] = num_dims, global_max_isl_access
-
-            # Clear specific access information from global objects
-            global_min_isl_builder.clear_global_variables()
-            global_min_isl_builder.clear_global_constraints()
-            global_max_isl_builder.clear_global_variables()
-            global_max_isl_builder.clear_global_constraints()
+            # Store the per access information to global MAX
+            subscript2isl_global_max[subscript_name] = num_dims, maxs_isl_set
 
         # if __debug__:
         #     import astor
@@ -154,16 +165,16 @@ class Calculator(object):
         #         logger.debug("  isl_sets -> " + str(accesses_isl_set))
         #     logger.debug("Subscript To ISL Global Min Info:")
         #     for subscript_name, info in subscript2isl_global_min.items():
-        #         num_dims, gl_min = info
+        #         num_dims, accesses_isl_set = info
         #         logger.debug("- Subscript " + str(subscript_name))
         #         logger.debug("  num_dims -> " + str(num_dims))
-        #         logger.debug("  isl_sets -> " + str(gl_min))
+        #         logger.debug("  isl_sets -> " + str(accesses_isl_set))
         #     logger.debug("Subscript To ISL Global Max Info:")
         #     for subscript_name, info in subscript2isl_global_max.items():
-        #         num_dims, gl_max = info
+        #         num_dims, accesses_isl_set = info
         #         logger.debug("- Subscript " + str(subscript_name))
         #         logger.debug("  num_dims -> " + str(num_dims))
-        #         logger.debug("  isl_sets -> " + str(gl_max))
+        #         logger.debug("  isl_sets -> " + str(accesses_isl_set))
 
         return subscript2isl_per_access, subscript2isl_global_min, subscript2isl_global_max
 
@@ -173,10 +184,10 @@ class Calculator(object):
         Computes the lexmin and lexmax expressions of all the given subscript accesses
 
         :param subscript2isl_per_access: A map of the form Map<String, (Integer, AST, List<BasicISLSet>)> containing
-         the number of dimensions, the original access and the basic ISL sets of each access of each subscript
-        :return: Two maps of the form Map<String, List<List<AST>> containing the lexmin and
-         lexmax expressions for all the dimensions of all the accesses of each subscript and one Map of the form
-         Map<String,List<AST>> containing the original accesses
+        the number of dimensions, the original access and the basic ISL sets of each access of each subscript
+        :return: Two maps of the form Map<String, List<List<AST>> containing the lexmin and lexmax expressions for
+        all the dimensions of all the accesses of each subscript and one Map of the form
+        Map<String,List<AST>> containing the original accesses
         """
 
         # if __debug__:
@@ -232,12 +243,12 @@ class Calculator(object):
         # Return lists of minimums and maximums of each dimension of each access per each subscript variable
         if __debug__:
             import astor
-            logger.debug("ORIG ACCESS:")
-            for subscript_name, original_accesses in subscript2original_access.items():
-                logger.debug("- Subscript: " + subscript_name)
-                for a in original_accesses:
-                    # logger.debug(str([str(astor.dump_tree(dim)) for dim in a]))
-                    logger.debug(str([str(astor.to_source(dim)) for dim in a]))
+            # logger.debug("ORIG ACCESS:")
+            # for subscript_name, original_accesses in subscript2original_access.items():
+            #     logger.debug("- Subscript: " + subscript_name)
+            #     for a in original_accesses:
+            #         # logger.debug(str([str(astor.dump_tree(dim)) for dim in a]))
+            #         logger.debug(str([str(astor.to_source(dim)) for dim in a]))
             logger.debug("LEXMIN:")
             for subscript_name, lbs in subscript2access_lexmin.items():
                 logger.debug("- Subscript: " + subscript_name)
@@ -256,37 +267,43 @@ class Calculator(object):
         """
         Computes the global lexmin and lexmax expressions of all the given subscript accesses
 
-        :param subscript2isl_global_min: A map of the form Map<String, (Int,BasicISLSet)> containing the global min
-         ISL sets of each subscript
-        :param subscript2isl_global_max: A map of the form Map<String, (Int,BasicISLSet)> containing the global max
-         ISL sets of each subscript
+        :param subscript2isl_global_min: A map of the form Map<String, (Int,List<BasicISLSet>)> containing the global
+        min ISL sets of each subscript
+        :param subscript2isl_global_max: A map of the form Map<String, (Int,List<BasicISLSet>)> containing the global
+        max ISL sets of each subscript
         :return: Two maps of the form Map<String, List<List<AST>> containing the global lexmin and lexmax expressions
         for all the dimensions of each subscript
         """
-
+        #
         # if __debug__:
         #     import astor
         #     logger.debug("Global Lexmin/Lexmax from:")
         #     logger.debug("Subscript To ISL Global Min Info:")
         #     for subscript_name, info in subscript2isl_global_min.items():
-        #         num_dims, gl_min = info
+        #         num_dims, accesses_isl_set = info
         #         logger.debug("- Subscript " + str(subscript_name))
         #         logger.debug("  num_dims -> " + str(num_dims))
-        #         logger.debug("  isl_sets -> " + str(gl_min))
+        #         logger.debug("  isl_sets -> " + str(accesses_isl_set))
         #     logger.debug("Subscript To ISL Global Max Info:")
         #     for subscript_name, info in subscript2isl_global_max.items():
-        #         num_dims, gl_max = info
+        #         num_dims, accesses_isl_set = info
         #         logger.debug("- Subscript " + str(subscript_name))
         #         logger.debug("  num_dims -> " + str(num_dims))
-        #         logger.debug("  isl_sets -> " + str(gl_max))
+        #         logger.debug("  isl_sets -> " + str(accesses_isl_set))
 
-        # TODO: Find a way to max/min shitty expressions
-
-        # Per subscript, compute global lexmin
+        # Compute global lexmin
         subscript2global_lexmin = {}
-        for subscript_name, info in subscript2isl_global_min.items():
-            num_dims, isl_gl_min = info
-            # Obtain global minimum (maximum of all the tmpX <= cnstr)
+        for subscript_name, value in subscript2isl_global_min.items():
+            num_dims, accesses_isl_set = value
+            # Unify each subscript access to global space
+            isl_gl_min = None
+            for access_isl in accesses_isl_set:
+                if isl_gl_min is None:
+                    isl_gl_min = access_isl
+                else:
+                    isl_gl_min = isl_gl_min.union(access_isl)
+
+            # Obtain global minimum (minimum of union tmpX >= access_cnstr)
             lex_min = isl_gl_min.lexmin_pw_multi_aff()
             # if __debug__:
             #     logger.debug("ISL Global min Object:")
@@ -303,15 +320,23 @@ class Calculator(object):
             # Store global minimum
             subscript2global_lexmin[subscript_name] = global_min_ast
 
-        # Per subscript, compute global lexmax
+        # Compute global lexmax
         subscript2global_lexmax = {}
-        for subscript_name, info in subscript2isl_global_max.items():
-            num_dims, isl_gl_max = info
-            # Obtain lexmax (minimum of all the tmpX > cnstr)
+        for subscript_name, value in subscript2isl_global_max.items():
+            num_dims, accesses_isl_set = value
+            # Process each subscript access
+            isl_gl_max = None
+            for access_isl in accesses_isl_set:
+                if isl_gl_max is None:
+                    isl_gl_max = access_isl
+                else:
+                    isl_gl_max = isl_gl_max.union(access_isl)
+
+            # Obtain global minimum (maximum of union tmpX <= access_cnstr)
             lex_max = isl_gl_max.lexmax_pw_multi_aff()
             # if __debug__:
-            #     logger.debug("ISL Global max Object:")
-            #     logger.debug(lex_max)
+            #     logger.debug("ISL Global min Object:")
+            #     logger.debug(lex_min)
 
             # Process each component (dimension) of the access
             global_max_ast = []
@@ -321,7 +346,7 @@ class Calculator(object):
                 max_dim_ast = Calculator._build_ast(max_dim_expr)
                 global_max_ast.append(max_dim_ast)
 
-            # Store global maximum
+            # Store global minimum
             subscript2global_lexmax[subscript_name] = global_max_ast
 
         # Return lists of global minimums and maximums per each subscript variable
@@ -958,10 +983,10 @@ class TestCalculator(unittest.TestCase):
 
         # Compute expected accesses
         expected_dims = 2
-        a1 = "[M, N] -> { [d0, d1, t2, t1] : t2 = 1 + d1 and 2t1 = -1 + d0 and 0 < d0 < 2N and -1 <= d1 <= -2 + M }"
-        a1b = "[N, M] -> { [d0, d1, t1, t2] : 2t1 = -1 + d0 and t2 = 1 + d1 and 0 < d0 < 2N and -1 <= d1 <= -2 + M }"
-        a2 = "[M, N] -> { [d0, d1, t2, t1] : t2 = 5 + d0 and t1 = 5 + d1 and -5 <= d0 <= -6 + M and -5 <= d1 <= -6 + N }"
-        a2b = "[N, M] -> { [d0, d1, t1, t2] : t1 = 5 + d1 and t2 = 5 + d0 and -5 <= d0 <= -6 + M and -5 <= d1 <= -6 + N }"
+        a10 = "[M, N] -> { [d0, d1, t2, t1] : t2 = 1 + d1 and 2t1 = -1 + d0 and 0 < d0 <= 1 + 2N and -1 <= d1 < M }"
+        a11 = "[N, M] -> { [d0, d1, t1, t2] : 2t1 = -1 + d0 and t2 = 1 + d1 and 0 < d0 <= 1 + 2N and -1 <= d1 < M }"
+        a20 = "[M, N] -> { [d0, d1, t2, t1] : t2 = 5 + d0 and t1 = 5 + d1 and -5 <= d0 <= -5 + M and -5 <= d1 <= -5 + N }"
+        a21 = "[N, M] -> { [d0, d1, t1, t2] : t1 = 5 + d1 and t2 = 5 + d0 and -5 <= d0 <= -5 + M and -5 <= d1 <= -5 + N }"
 
         # Check per access result
         self.assertEqual(subscript2isl_per_access["mat"][0], expected_dims)
@@ -969,16 +994,25 @@ class TestCalculator(unittest.TestCase):
             self.assertEqual(str(ast.dump(subscript2isl_per_access["mat"][1][0][index])), str(ast.dump(dim_acces)))
         for index, dim_acces in enumerate(access2):
             self.assertEqual(str(ast.dump(subscript2isl_per_access["mat"][1][1][index])), str(ast.dump(dim_acces)))
-        self.assertIn(subscript2isl_per_access["mat"][2][0].__str__(), [a1, a1b])
-        self.assertIn(subscript2isl_per_access["mat"][2][1].__str__(), [a2, a2b])
+        self.assertIn(subscript2isl_per_access["mat"][2][0].__str__(), [a10, a11])
+        self.assertIn(subscript2isl_per_access["mat"][2][1].__str__(), [a20, a21])
 
         # Check global result
-        g1 = "[N, M] -> { [g0, g1, t1, t2] : t1 >= 5 + g1 and 0 <= t1 < N and 2t1 >= -1 + g0 and t2 >= 5 + g0 and t2 > g1 and 0 <= t2 < M }"
-        g2 = "[N, M] -> { [g0, g1, t1, t2] : 0 <= t1 <= 5 + g1 and t1 < N and 2t1 < g0 and 0 <= t2 <= 1 + g1 and t2 <= 5 + g0 and t2 < M }"
+        gmin_10_0 = "[M, N] -> { [g0, g1, t2, t1] : 0 <= t2 <= 1 + g1 and t2 <= M and 0 <= t1 <= N and 2t1 < g0 }"
+        gmin_10_1 = "[N, M] -> { [g0, g1, t1, t2] : 0 <= t1 <= N and 2t1 < g0 and 0 <= t2 <= 1 + g1 and t2 <= M }"
+        gmin_11_0 = "[M, N] -> { [g0, g1, t2, t1] : 0 <= t2 <= 5 + g0 and t2 <= M and 0 <= t1 <= 5 + g1 and t1 <= N }"
+        gmin_11_1 = "[N, M] -> { [g0, g1, t1, t2] : 0 <= t1 <= 5 + g1 and t1 <= N and 0 <= t2 <= 5 + g0 and t2 <= M }"
+        gmax_10_0 = "[M, N] -> { [g0, g1, t2, t1] : t2 > g1 and 0 <= t2 <= M and 0 <= t1 <= N and 2t1 >= -1 + g0 }"
+        gmax_10_1 = "[N, M] -> { [g0, g1, t1, t2] : 0 <= t1 <= N and 2t1 >= -1 + g0 and t2 > g1 and 0 <= t2 <= M }"
+        gmax_11_0 = "[M, N] -> { [g0, g1, t2, t1] : t2 >= 5 + g0 and 0 <= t2 <= M and t1 >= 5 + g1 and 0 <= t1 <= N }"
+        gmax_11_1 = "[N, M] -> { [g0, g1, t1, t2] : t1 >= 5 + g1 and 0 <= t1 <= N and t2 >= 5 + g0 and 0 <= t2 <= M }"
+
         self.assertEqual(subscript2isl_global_min["mat"][0], expected_dims)
-        self.assertEqual(str(subscript2isl_global_min["mat"][1]), g1)
+        self.assertIn(str(subscript2isl_global_min["mat"][1][0]), [gmin_10_0, gmin_10_1])
+        self.assertIn(str(subscript2isl_global_min["mat"][1][1]), [gmin_11_0, gmin_11_1])
         self.assertEqual(subscript2isl_global_max["mat"][0], expected_dims)
-        self.assertEqual(str(subscript2isl_global_max["mat"][1]), g2)
+        self.assertIn(str(subscript2isl_global_max["mat"][1][0]), [gmax_10_0, gmax_10_1])
+        self.assertIn(str(subscript2isl_global_max["mat"][1][1]), [gmax_11_0, gmax_11_1])
 
     def test_full(self):
         # Construct loops information
@@ -1022,74 +1056,36 @@ class TestCalculator(unittest.TestCase):
 
         a1 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
             ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
-                        ops=[ast.Gt()],
-                        comparators=[ast.Num(n=0)]),
-            ast.Compare(left=ast.Name(id='M', ctx=ast.Load()),
                         ops=[ast.GtE()],
-                        comparators=[ast.BinOp(left=ast.Num(n=6),
+                        comparators=[ast.Num(n=0)]),
+            ast.Compare(left=ast.Num(n=0),
+                        ops=[ast.LtE(), ast.LtE()],
+                        comparators=[ast.Name(id='M', ctx=ast.Load()),
+                                     ast.BinOp(left=ast.Num(n=6),
                                                op=ast.Add(),
                                                right=ast.BinOp(left=ast.Num(n=2),
                                                                op=ast.Mult(),
                                                                right=ast.Name(id='N', ctx=ast.Load())))])]),
-                       body=ast.BinOp(left=ast.Num(n=-6),
+                       body=ast.BinOp(left=ast.Num(n=1),
                                       op=ast.Add(),
-                                      right=ast.Name(id='M', ctx=ast.Load())),
-                       orelse=ast.IfExp(test=ast.BoolOp(op=ast.And(),
-                                                        values=[
-                                                            ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
-                                                                        ops=[ast.Gt()],
-                                                                        comparators=[ast.Num(n=0)]),
-                                                            ast.Compare(left=ast.Name(id='M', ctx=ast.Load()),
-                                                                        ops=[ast.GtE()],
-                                                                        comparators=[
-                                                                            ast.BinOp(left=ast.Num(n=-3),
-                                                                                      op=ast.Add(),
-                                                                                      right=ast.Name(id='N',
-                                                                                                     ctx=ast.Load()))]),
-                                                            ast.Compare(left=ast.Num(n=0),
-                                                                        ops=[ast.Lt(), ast.LtE()],
-                                                                        comparators=[
-                                                                            ast.Name(id='M', ctx=ast.Load()),
-                                                                            ast.BinOp(left=ast.Num(n=5),
-                                                                                      op=ast.Add(),
-                                                                                      right=ast.BinOp(left=ast.Num(n=2),
-                                                                                                      op=ast.Mult(),
-                                                                                                      right=ast.Name(
-                                                                                                          id='N',
-                                                                                                          ctx=ast.Load()
-                                                                                                      )))])]),
-                                        body=ast.BinOp(left=ast.Num(n=-1),
-                                                       op=ast.Add(),
-                                                       right=ast.BinOp(left=ast.Num(n=2),
-                                                                       op=ast.Mult(),
-                                                                       right=ast.Name(id='N', ctx=ast.Load()))),
-                                        orelse=ast.BinOp(left=ast.Num(n=-1),
-                                                         op=ast.Add(),
-                                                         right=ast.BinOp(left=ast.Num(n=2),
-                                                                         op=ast.Mult(),
-                                                                         right=ast.Name(id='N', ctx=ast.Load())))))
-
+                                      right=ast.BinOp(left=ast.Num(n=2),
+                                                      op=ast.Mult(),
+                                                      right=ast.Name(id='N', ctx=ast.Load()))),
+                       orelse=ast.BinOp(left=ast.Num(n=-5), op=ast.Add(), right=ast.Name(id='M', ctx=ast.Load())))
         a2 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
-            ast.Compare(left=ast.Name(id='N', ctx=ast.Load()), ops=[ast.Gt()], comparators=[ast.Num(n=0)]),
-            ast.Compare(left=ast.Name(id='M', ctx=ast.Load()), ops=[ast.GtE()], comparators=[
-                ast.BinOp(left=ast.Num(n=6), op=ast.Add(), right=ast.BinOp(left=ast.Num(n=2), op=ast.Mult(),
-                                                                           right=ast.Name(id='N', ctx=ast.Load())))])]),
-                       body=ast.BinOp(left=ast.Num(n=-2), op=ast.Add(), right=ast.Name(id='M', ctx=ast.Load())),
-                       orelse=ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
-                           ast.Compare(left=ast.Name(id='N', ctx=ast.Load()), ops=[ast.Gt()],
-                                       comparators=[ast.Num(n=0)]),
-                           ast.Compare(left=ast.Name(id='M', ctx=ast.Load()), ops=[ast.GtE()], comparators=[
-                               ast.BinOp(left=ast.Num(n=-3), op=ast.Add(), right=ast.Name(id='N', ctx=ast.Load()))]),
-                           ast.Compare(left=ast.Num(n=0), ops=[ast.Lt(), ast.LtE()],
-                                       comparators=[ast.Name(id='M', ctx=ast.Load()),
-                                                    ast.BinOp(left=ast.Num(n=5), op=ast.Add(),
-                                                              right=ast.BinOp(left=ast.Num(n=2), op=ast.Mult(),
-                                                                              right=ast.Name(id='N',
-                                                                                             ctx=ast.Load())))])]),
-                                        body=ast.BinOp(left=ast.Num(n=-2), op=ast.Add(),
-                                                       right=ast.Name(id='M', ctx=ast.Load())),
-                                        orelse=ast.BinOp(left=ast.Num(n=-6), op=ast.Add(),
-                                                         right=ast.Name(id='N', ctx=ast.Load()))))
+            ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
+                        ops=[ast.GtE()],
+                        comparators=[ast.Num(n=0)]),
+            ast.Compare(left=ast.Num(n=0),
+                        ops=[ast.LtE(), ast.LtE()],
+                        comparators=[ast.Name(id='M', ctx=ast.Load()),
+                                     ast.BinOp(left=ast.Num(n=6),
+                                               op=ast.Add(),
+                                               right=ast.BinOp(left=ast.Num(n=2),
+                                                               op=ast.Mult(),
+                                                               right=ast.Name(id='N', ctx=ast.Load())))])]),
+                       body=ast.BinOp(left=ast.Num(n=-1), op=ast.Add(), right=ast.Name(id='M', ctx=ast.Load())),
+                       orelse=ast.BinOp(left=ast.Num(n=-5), op=ast.Add(), right=ast.Name(id='N', ctx=ast.Load())))
 
         self.assertEqual(str(ast.dump(subs2glob_max["mat"][0])), str(ast.dump(a1)))
         self.assertEqual(str(ast.dump(subs2glob_max["mat"][1])), str(ast.dump(a2)))
@@ -1101,24 +1097,23 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(str(ast.dump(subs2mins["mat"][1][1])), str(ast.dump(ast.Num(n=-5))))
 
         self.assertEqual(str(ast.dump(subs2maxs["mat"][0][0])), str(
+            ast.dump(ast.BinOp(left=ast.Num(n=1),
+                               op=ast.Add(),
+                               right=ast.BinOp(left=ast.Num(n=2),
+                                               op=ast.Mult(),
+                                               right=ast.Name(id='N', ctx=ast.Load()))))))
+        self.assertEqual(str(ast.dump(subs2maxs["mat"][0][1])), str(
             ast.dump(ast.BinOp(left=ast.Num(n=-1),
                                op=ast.Add(),
-                               right=ast.BinOp(
-                                   left=ast.Num(n=2),
-                                   op=ast.Mult(),
-                                   right=ast.Name(id="N", ctx=ast.Load()))))))
-        self.assertEqual(str(ast.dump(subs2maxs["mat"][0][1])), str(
-            ast.dump(ast.BinOp(left=ast.Num(n=-2),
-                               op=ast.Add(),
-                               right=ast.Name(id="M", ctx=ast.Load())))))
+                               right=ast.Name(id='M', ctx=ast.Load())))))
         self.assertEqual(str(ast.dump(subs2maxs["mat"][1][0])), str(
-            ast.dump(ast.BinOp(left=ast.Num(n=-6),
+            ast.dump(ast.BinOp(left=ast.Num(n=-5),
                                op=ast.Add(),
-                               right=ast.Name(id="M", ctx=ast.Load())))))
+                               right=ast.Name(id='M', ctx=ast.Load())))))
         self.assertEqual(str(ast.dump(subs2maxs["mat"][1][1])), str(
-            ast.dump(ast.BinOp(left=ast.Num(n=-6),
+            ast.dump(ast.BinOp(left=ast.Num(n=-5),
                                op=ast.Add(),
-                               right=ast.Name(id="N", ctx=ast.Load())))))
+                               right=ast.Name(id='N', ctx=ast.Load())))))
 
 
 #
