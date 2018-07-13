@@ -468,10 +468,11 @@ class LoopTaskificator(ast.NodeTransformer):
                 task_call_args = statement.args
                 # Process all arguments
                 for position, task_def_arg in enumerate(task_def_arguments):
+                    call_arg = task_call_args[position]
                     arg_name = task_def_arg.id
                     arg_direction = task_def_args2directions[arg_name]
 
-                    call_names = LoopTaskificator._get_var_names(task_call_args[position], loop_ind_ids)
+                    call_names = LoopTaskificator._get_var_names(call_arg, loop_ind_ids)
                     if arg_direction == "IN":
                         in_vars.extend(call_names)
                     elif arg_direction == "INOUT":
@@ -479,6 +480,12 @@ class LoopTaskificator(ast.NodeTransformer):
                     else:
                         # OUT VARS ARE ADDED AS INOUT
                         inout_vars.extend(call_names)
+
+                    # If the current callee parameter is a subscript, add its subscripts indexes as in
+                    if isinstance(call_arg, ast.Subscript):
+                        iv, iov = self._get_access_vars(call_arg.slice, loop_ind_ids, False)
+                        in_vars.extend(iv)
+                        inout_vars.extend(iov)
 
                 return in_vars, inout_vars
 
@@ -889,6 +896,17 @@ class _SubscriptInformation(object):
         from pycompss.util.translators.py2pycompss.components.calculator import Calculator
         self.original_accesses, self.subs2glob_lbs, self.subs2glob_ubs, self.subs2lbs, self.subs2ubs = \
             Calculator.compute_lex_bounds(fixed_loops_info, subscript_accesses_info)
+
+        # Fix upper bounds for iteration variables (t_i) that are not inside the task loops
+        for subscript_name, ubs in self.subs2glob_ubs.items():
+            new_ubs = []
+            for dim_expr in ubs:
+                new_dim_expr = dim_expr
+                if isinstance(dim_expr, ast.Name):
+                    if dim_expr.id.startswith("t"):
+                        new_dim_expr = ast.BinOp(left=dim_expr, op=ast.Add(), right=ast.Num(n=1))
+                new_ubs.append(new_dim_expr)
+            self.subs2glob_ubs[subscript_name] = new_ubs
 
         if __debug__:
             import astor
