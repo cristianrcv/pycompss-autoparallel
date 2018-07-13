@@ -112,24 +112,27 @@ class Calculator(object):
                     global_max_isl_builder.add_global_constraint(4, dim_id, dim_access_ast.value)
 
                 # Generate the specific access ISL object and store it
+                if __debug__:
+                    logger.debug("ISL Access Builder:")
+                    logger.debug(str(specific_access_isl_builder))
                 isl_access = specific_access_isl_builder.build_isl_set()
-                # if __debug__:
-                #     logger.debug("ISL Access Object:")
-                #     logger.debug(isl_access)
+                if __debug__:
+                    logger.debug("ISL Access Object:")
+                    logger.debug(isl_access)
                 accesses_isl_set.append(isl_access)
 
                 # Generate the global access ISL object and store it
                 min_isl_access = global_min_isl_builder.build_isl_set()
-                # if __debug__:
-                #     logger.debug("ISL MIN Access Object:")
-                #     logger.debug(min_isl_access)
+                if __debug__:
+                    logger.debug("ISL MIN Access Object:")
+                    logger.debug(min_isl_access)
                 mins_isl_set.append(min_isl_access)
 
                 # Generate the global access ISL object and store it
                 max_isl_access = global_max_isl_builder.build_isl_set()
-                # if __debug__:
-                #     logger.debug("ISL MAX Access Object:")
-                #     logger.debug(max_isl_access)
+                if __debug__:
+                    logger.debug("ISL MAX Access Object:")
+                    logger.debug(max_isl_access)
                 maxs_isl_set.append(max_isl_access)
 
                 # Clear specific access information from global object
@@ -671,8 +674,10 @@ class _IslSetBuilder:
         rpc = _RemovePythonCasts()
         node_clean = rpc.visit(node_clean)
         # if __debug__:
+        #     import astor
         #     logger.debug("Clean PythonCasts node:")
-        #     logger.debug(ast.dump(node_clean))
+        #     # logger.debug(ast.dump(node_clean))
+        #     logger.debug(astor.to_source(node_clean))
 
         # Remove min/max expressions if required
         num_minmax = _IslSetBuilder._count_minmax(node_clean)
@@ -688,8 +693,10 @@ class _IslSetBuilder:
                 new_node_ast = rmm.visit(new_node_ast)
                 # Add new node to the list of expressions
                 # if __debug__:
+                #     import astor
                 #     logger.debug("Clean min/max node:")
-                #     logger.debug(ast.dump(new_node_ast))
+                #     # logger.debug(ast.dump(new_node_ast))
+                #     logger.debug(astor.to_source(new_node_ast))
                 exprs_ast.append(new_node_ast)
             return exprs_ast
 
@@ -699,15 +706,15 @@ class _IslSetBuilder:
     @staticmethod
     def _count_minmax(node):
         # Base case
+        count = 0
         if isinstance(node, ast.Call):
             call_func = node.func
             if isinstance(call_func, ast.Name):
                 func_name = call_func.id
                 if func_name == "min" or func_name == "max":
-                    return 1
+                    count = 1
 
         # Child recursion
-        count = 0
         for field, value in ast.iter_fields(node):
             if field == "func" or field == "keywords":
                 # Skip function names and var_args keywords
@@ -803,6 +810,10 @@ class _RemoveMinMax(ast.NodeTransformer):
                 # Replace node
                 import copy
                 op = copy.deepcopy(node.args[minmax_index])
+
+                # Visit nested min/max
+                op = self.visit(op)
+
                 return ast.copy_location(op, node)
 
         # No need to modify it
@@ -906,6 +917,82 @@ class TestCalculator(unittest.TestCase):
                           right=ast.Num(n=1))
         self.assertEqual(str(ast.dump(exprs[0])), str(ast.dump(expr0)))
         self.assertEqual(str(ast.dump(exprs[1])), str(ast.dump(expr1)))
+
+    def test_extract_exprs_nested(self):
+        # Create main AST node
+        node_ast = ast.BinOp(left=ast.Call(func=ast.Name(id='min', ctx=ast.Load()),
+                                           args=[ast.Call(func=ast.Name(id='min', ctx=ast.Load()),
+                                                          args=[ast.BinOp(left=ast.BinOp(left=ast.Num(n=4),
+                                                                                         op=ast.Mult(),
+                                                                                         right=ast.Name(id='t2',
+                                                                                                        ctx=ast.Load())),
+                                                                          op=ast.Add(),
+                                                                          right=ast.Num(n=2)),
+                                                                ast.BinOp(left=ast.Name(id='t_size', ctx=ast.Load()),
+                                                                          op=ast.Sub(),
+                                                                          right=ast.Num(n=1))],
+                                                          keywords=[],
+                                                          starargs=None,
+                                                          kwargs=None),
+                                                 ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Num(n=2),
+                                                                                         op=ast.Mult(),
+                                                                                         right=ast.Name(id='t1',
+                                                                                                        ctx=ast.Load())),
+                                                                          op=ast.Sub(),
+                                                                          right=ast.BinOp(left=ast.Num(n=2),
+                                                                                          op=ast.Mult(),
+                                                                                          right=ast.Name(id='t2',
+                                                                                                         ctx=ast.Load()))),
+                                                           op=ast.Add(), right=ast.Num(n=1))],
+                                           keywords=[],
+                                           starargs=None,
+                                           kwargs=None),
+                             op=ast.Add(),
+                             right=ast.Num(n=1))
+
+        # Perform extraction
+        exprs = _IslSetBuilder._extract_exprs_without_minmax(node_ast)
+
+        # Check result
+        expr0 = ast.BinOp(
+            left=ast.BinOp(left=ast.BinOp(left=ast.Num(n=4),
+                                          op=ast.Mult(),
+                                          right=ast.Name(id='t2', ctx=ast.Load())),
+                           op=ast.Add(),
+                           right=ast.Num(n=2)),
+            op=ast.Add(),
+            right=ast.Num(n=1))
+        expr1 = ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Num(n=2),
+                                                                       op=ast.Mult(),
+                                                                       right=ast.Name(id='t1', ctx=ast.Load())),
+                                                        op=ast.Sub(),
+                                                        right=ast.BinOp(left=ast.Num(n=2),
+                                                                        op=ast.Mult(),
+                                                                        right=ast.Name(id='t2', ctx=ast.Load()))),
+                                         op=ast.Add(),
+                                         right=ast.Num(n=1)),
+                          op=ast.Add(),
+                          right=ast.Num(n=1))
+        expr2 = ast.BinOp(left=ast.BinOp(left=ast.Name(id='t_size', ctx=ast.Load()),
+                                         op=ast.Sub(),
+                                         right=ast.Num(n=1)),
+                          op=ast.Add(),
+                          right=ast.Num(n=1))
+        expr3 = ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Num(n=2),
+                                                                       op=ast.Mult(),
+                                                                       right=ast.Name(id='t1', ctx=ast.Load())),
+                                                        op=ast.Sub(),
+                                                        right=ast.BinOp(left=ast.Num(n=2),
+                                                                        op=ast.Mult(),
+                                                                        right=ast.Name(id='t2', ctx=ast.Load()))),
+                                         op=ast.Add(),
+                                         right=ast.Num(n=1)),
+                          op=ast.Add(),
+                          right=ast.Num(n=1))
+        self.assertEqual(str(ast.dump(exprs[0])), str(ast.dump(expr0)))
+        self.assertEqual(str(ast.dump(exprs[1])), str(ast.dump(expr1)))
+        self.assertEqual(str(ast.dump(exprs[2])), str(ast.dump(expr2)))
+        self.assertEqual(str(ast.dump(exprs[3])), str(ast.dump(expr3)))
 
     def test_compute_lex_minmax(self):
         # Create test access sets for 2d matrix mat
