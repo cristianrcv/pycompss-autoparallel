@@ -894,8 +894,8 @@ class _SubscriptInformation(object):
 
         # Compute lbs and ubs
         from pycompss.util.translators.py2pycompss.components.calculator import Calculator
-        self.original_accesses, self.subs2glob_lbs, self.subs2glob_ubs, self.subs2lbs, self.subs2ubs = \
-            Calculator.compute_lex_bounds(fixed_loops_info, subscript_accesses_info)
+        self.subs2glob_lbs, self.subs2glob_ubs = Calculator.compute_lex_bounds(fixed_loops_info,
+                                                                               subscript_accesses_info)
 
         # Fix upper bounds for iteration variables (t_i) that are not inside the task loops
         for subscript_name, ubs in self.subs2glob_ubs.items():
@@ -908,32 +908,16 @@ class _SubscriptInformation(object):
                 new_ubs.append(new_dim_expr)
             self.subs2glob_ubs[subscript_name] = new_ubs
 
-        if __debug__:
-            import astor
-            logger.debug("Registered Accesses:")
-            for subscript_name, original_accesses in self.original_accesses.items():
-                logger.debug("- Subscript: " + subscript_name)
-                for a in original_accesses:
-                    # logger.debug(str([str(astor.dump_tree(dim)) for dim in a]))
-                    logger.debug(str([str(astor.to_source(dim)) for dim in a]))
-            logger.debug("Registered Global LBS:")
-            for subscript_name, lbs in self.subs2glob_lbs.items():
-                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
-                    [str(astor.to_source(dim_expr)) for dim_expr in lbs]))
-            logger.debug("Registered Global UBS:")
-            for subscript_name, ubs in self.subs2glob_ubs.items():
-                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
-                    [str(astor.to_source(dim_expr)) for dim_expr in ubs]))
-            logger.debug("Registered LBS:")
-            for subscript_name, accesses_lbs in self.subs2lbs.items():
-                logger.debug("Subscript " + str(subscript_name))
-                for lb in accesses_lbs:
-                    logger.debug(str([str(astor.to_source(dim_expr)) for dim_expr in lb]))
-            logger.debug("Registered UBS:")
-            for subscript_name, accesses_ubs in self.subs2ubs.items():
-                logger.debug("Subscript " + str(subscript_name))
-                for ub in accesses_ubs:
-                    logger.debug(str([str(astor.to_source(dim_expr)) for dim_expr in ub]))
+        # if __debug__:
+        #     import astor
+        #     logger.debug("Registered Global LBS:")
+        #     for subscript_name, lbs in self.subs2glob_lbs.items():
+        #         logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+        #             [str(astor.to_source(dim_expr)) for dim_expr in lbs]))
+        #     logger.debug("Registered Global UBS:")
+        #     for subscript_name, ubs in self.subs2glob_ubs.items():
+        #         logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+        #             [str(astor.to_source(dim_expr)) for dim_expr in ubs]))
 
     def get_chunk_access(self, var_name, current_access_subscript):
         """
@@ -951,15 +935,8 @@ class _SubscriptInformation(object):
             current_access_subscript = current_access_subscript.value
         access = list(reversed(access))
 
-        access_index = -1
-        for index, orig_access in enumerate(self.original_accesses[var_name]):
-            if _SubscriptInformation._equal_accesses(access, orig_access):
-                access_index = index
-                break
-        if access_index == -1:
-            raise Py2PyCOMPSsLoopTaskificatorException("ERROR: Unregistered access")
-
-        access_lbs = self.subs2lbs[var_name][access_index]
+        # Get lower bounds
+        access_lbs = self.subs2glob_lbs[var_name]
         dim = len(access_lbs)
 
         # Create chunk access

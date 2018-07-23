@@ -31,9 +31,8 @@ class Calculator(object):
 
         :param loops_info: Information about loop bounds and indexes
         :param subscript_accesses_info: Map between subscript names and all its access expressions
-        :return: Two maps of the form Map<String, List<List<AST>> containing the lexmin and
-        lexmax expressions for all the dimensions of all the accesses of each subscript and one Map of the form
-        Map<String,List<AST>> containing the original accesses
+        :return: Two maps of the form Map<String, List<List<AST>> containing the global lexmin and lexmax expressions
+        for all the dimensions of each subscript
         """
 
         # Per each subscript, store a ISL object representing each of its accesses
@@ -42,15 +41,15 @@ class Calculator(object):
             loops_info, subscript_accesses_info)
 
         # Per each subscript, compute the lexmin and lexmax of all the dimensions of all its accesses
-        subscript2acclexmin, subscript2acclexmax, original_accesses = Calculator._compute_lex_minmax(
-            subscript2isl_per_access)
+        # subscript2acclexmin, subscript2acclexmax, original_accesses = Calculator._compute_lex_minmax(
+        #    subscript2isl_per_access)
 
         # Per each subscript, compute global lexmin and lexmax
         subscript2globlexmin, subscript2globlexmax = Calculator._compute_global_lex_minmax(subscript2isl_global_min,
                                                                                            subscript2isl_global_max)
 
         # Return lists of minimums and maximums of each dimension of each access per each subscript variable
-        return original_accesses, subscript2globlexmin, subscript2globlexmax, subscript2acclexmin, subscript2acclexmax
+        return subscript2globlexmin, subscript2globlexmax
 
     @staticmethod
     def _convert_to_isl(loops_info, subscript_accesses_info):
@@ -112,27 +111,27 @@ class Calculator(object):
                     global_max_isl_builder.add_global_constraint(4, dim_id, dim_access_ast.value)
 
                 # Generate the specific access ISL object and store it
-                if __debug__:
-                    logger.debug("ISL Access Builder:")
-                    logger.debug(str(specific_access_isl_builder))
+                # if __debug__:
+                #     logger.debug("ISL Access Builder:")
+                #     logger.debug(str(specific_access_isl_builder))
                 isl_access = specific_access_isl_builder.build_isl_set()
-                if __debug__:
-                    logger.debug("ISL Access Object:")
-                    logger.debug(isl_access)
+                # if __debug__:
+                #     logger.debug("ISL Access Object:")
+                #     logger.debug(isl_access)
                 accesses_isl_set.append(isl_access)
 
                 # Generate the global access ISL object and store it
                 min_isl_access = global_min_isl_builder.build_isl_set()
-                if __debug__:
-                    logger.debug("ISL MIN Access Object:")
-                    logger.debug(min_isl_access)
+                # if __debug__:
+                #     logger.debug("ISL MIN Access Object:")
+                #     logger.debug(min_isl_access)
                 mins_isl_set.append(min_isl_access)
 
                 # Generate the global access ISL object and store it
                 max_isl_access = global_max_isl_builder.build_isl_set()
-                if __debug__:
-                    logger.debug("ISL MAX Access Object:")
-                    logger.debug(max_isl_access)
+                # if __debug__:
+                #     logger.debug("ISL MAX Access Object:")
+                #     logger.debug(max_isl_access)
                 maxs_isl_set.append(max_isl_access)
 
                 # Clear specific access information from global object
@@ -355,14 +354,14 @@ class Calculator(object):
         # Return lists of global minimums and maximums per each subscript variable
         if __debug__:
             import astor
-            logger.debug("GLOBAL LEXMIN:")
+            logger.debug("Registered Global LBS:")
             for subscript_name, lbs in subscript2global_lexmin.items():
-                logger.debug("- Subscript: " + subscript_name)
-                logger.debug(str([str(astor.to_source(minimum_of_dim)) for minimum_of_dim in lbs]))
-            logger.debug("GLOBAL LEXMAX:")
+                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+                    [str(astor.to_source(dim_expr)) for dim_expr in lbs]))
+            logger.debug("Registered Global UBS:")
             for subscript_name, ubs in subscript2global_lexmax.items():
-                logger.debug("- Subscript: " + subscript_name)
-                logger.debug(str([str(astor.to_source(minimum_of_dim)) for minimum_of_dim in ubs]))
+                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+                    [str(astor.to_source(dim_expr)) for dim_expr in ubs]))
 
         return subscript2global_lexmin, subscript2global_lexmax
 
@@ -769,7 +768,12 @@ class _RemovePythonCasts(ast.NodeTransformer):
                 if module_name == "math" and (func_name == "floor" or func_name == "ceil"):
                     # Replace node
                     import copy
-                    op = copy.deepcopy(node.args[0])
+                    op = ast.Call(func=ast.Name(id=func_name),
+                                  args=[copy.deepcopy(node.args[0])],
+                                  keywords=[],
+                                  starargs=None,
+                                  kwargs=None)
+
                     return ast.copy_location(op, node)
 
         # No need to modify it
@@ -1133,9 +1137,7 @@ class TestCalculator(unittest.TestCase):
         subscript_accesses_info = {"mat": [access1, access2]}
 
         # Call calculator lexmin/max
-        oa, subs2glob_min, subs2glob_max, subs2mins, subs2maxs = Calculator.compute_lex_bounds(
-            loops_info,
-            subscript_accesses_info)
+        subs2glob_min, subs2glob_max = Calculator.compute_lex_bounds(loops_info, subscript_accesses_info)
 
         # Check global results
         self.assertEqual(str(ast.dump(subs2glob_min["mat"][0])), str(ast.dump(ast.Num(n=-5))))
@@ -1176,31 +1178,6 @@ class TestCalculator(unittest.TestCase):
 
         self.assertEqual(str(ast.dump(subs2glob_max["mat"][0])), str(ast.dump(a1)))
         self.assertEqual(str(ast.dump(subs2glob_max["mat"][1])), str(ast.dump(a2)))
-
-        # Check access results
-        self.assertEqual(str(ast.dump(subs2mins["mat"][0][0])), str(ast.dump(ast.Num(n=1))))
-        self.assertEqual(str(ast.dump(subs2mins["mat"][0][1])), str(ast.dump(ast.Num(n=-1))))
-        self.assertEqual(str(ast.dump(subs2mins["mat"][1][0])), str(ast.dump(ast.Num(n=-5))))
-        self.assertEqual(str(ast.dump(subs2mins["mat"][1][1])), str(ast.dump(ast.Num(n=-5))))
-
-        self.assertEqual(str(ast.dump(subs2maxs["mat"][0][0])), str(
-            ast.dump(ast.BinOp(left=ast.Num(n=1),
-                               op=ast.Add(),
-                               right=ast.BinOp(left=ast.Num(n=2),
-                                               op=ast.Mult(),
-                                               right=ast.Name(id='N', ctx=ast.Load()))))))
-        self.assertEqual(str(ast.dump(subs2maxs["mat"][0][1])), str(
-            ast.dump(ast.BinOp(left=ast.Num(n=-1),
-                               op=ast.Add(),
-                               right=ast.Name(id='M', ctx=ast.Load())))))
-        self.assertEqual(str(ast.dump(subs2maxs["mat"][1][0])), str(
-            ast.dump(ast.BinOp(left=ast.Num(n=-5),
-                               op=ast.Add(),
-                               right=ast.Name(id='M', ctx=ast.Load())))))
-        self.assertEqual(str(ast.dump(subs2maxs["mat"][1][1])), str(
-            ast.dump(ast.BinOp(left=ast.Num(n=-5),
-                               op=ast.Add(),
-                               right=ast.Name(id='N', ctx=ast.Load())))))
 
 
 #
