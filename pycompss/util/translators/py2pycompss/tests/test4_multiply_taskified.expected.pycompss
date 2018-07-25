@@ -7,15 +7,16 @@ from pycompss.api.parameter import *
 from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
 
 
-@task(lbv=IN, ubv=IN, returns="LT4_args_size")
-def LT4(lbv, ubv, *args):
+@task(t1=IN, a=IN, t2=IN, b=IN, ubv=IN, lbv=IN, c=INOUT, d=INOUT, returns="LT4_args_size")
+def LT4(t1, t2, ubv, lbv, *args):
     global LT4_args_size
-    var2, var3, var4, var1 = ArgUtils.rebuild_args(args)
-    for t3 in range(0, ubv + 1 - lbv):
-        var1[t3] = S1_no_task(var1[t3], var2[t3], var3[t3])
-        S2_no_task(var1[t3], var2[t3], var3[t3])
-        var1[t3], var4[t3] = S3_no_task(var1[t3], var2[t3], var3[t3])
-    return ArgUtils.flatten_args(var4, var1)
+    a, b, c, d = ArgUtils.rebuild_args(args)
+    for t3 in range(lbv, ubv + 1):
+        c[t3 - lbv][t1 - t1] = S1_no_task(c[t3 - lbv][t1 - t1], a[t3 - lbv][t2 - t2], b[t2 - t2][t1 - t1])
+        S2_no_task(c[t3 - lbv][t1 - t1], a[t3 - lbv][t2 - t2], b[t2 - t2][t1 - t1])
+        c[t3 - lbv][t1 - t1], d[t3 - lbv][t1 - t1] = S3_no_task(c[t3 - lbv][t1 - t1], a[t3 - lbv][t2 - t2], b[t2 -
+            t2][t1 - t1])
+    return ArgUtils.flatten_args(c, d)
 
 
 @task(var2=IN, var3=IN, var4=IN, returns=1)
@@ -66,21 +67,28 @@ def matmul(m_size, n_size, k_size, b_size, debug):
             for t2 in range(0, n_size - 1 + 1):
                 lbv = 0
                 ubv = m_size - 1
-                LT4_aux_0 = [a[t3][t2] for t3 in range(lbv, ubv + 1)]
-                LT4_aux_1 = [b[t2][t1] for t3 in range(lbv, ubv + 1)]
-                LT4_aux_2 = [d[t3][t1] for t3 in range(lbv, ubv + 1)]
-                LT4_aux_3 = [c[t3][t1] for t3 in range(lbv, ubv + 1)]
+                LT4_aux_0 = [[a[gv0][gv1] for gv1 in range(t2, t2 + 1, 1)] for gv0 in range(lbv, 1 + ubv, 1)]
+                LT4_aux_1 = [[b[gv0][gv1] for gv1 in range(t1, t1 + 1, 1)] for gv0 in range(t2, t2 + 1, 1)]
+                LT4_aux_2 = [[c[gv0][gv1] for gv1 in range(t1, t1 + 1, 1)] for gv0 in range(lbv, 1 + ubv, 1)]
+                LT4_aux_3 = [[d[gv0][gv1] for gv1 in range(t1, t1 + 1, 1)] for gv0 in range(lbv, 1 + ubv, 1)]
                 LT4_argutils = ArgUtils()
                 global LT4_args_size
                 LT4_flat_args, LT4_args_size = LT4_argutils.flatten(4, LT4_aux_0, LT4_aux_1, LT4_aux_2, LT4_aux_3,
                     LT4_aux_2, LT4_aux_3)
-                LT4_new_args = LT4(lbv, ubv, *LT4_flat_args)
+                LT4_new_args = LT4(t1, t2, ubv, lbv, *LT4_flat_args)
                 LT4_aux_2, LT4_aux_3 = LT4_argutils.rebuild(LT4_new_args)
-                LT4_index = 0
-                for t3 in range(lbv, ubv + 1):
-                    d[t3][t1] = LT4_aux_2[LT4_index]
-                    c[t3][t1] = LT4_aux_3[LT4_index]
-                    LT4_index = LT4_index + 1
+                for gv0 in range(lbv, 1 + ubv, 1):
+                    for gv1 in range(t2, t2 + 1, 1):
+                        a[gv0][gv1] = LT4_aux_0[gv0 - lbv][gv1 - t2]
+                for gv0 in range(t2, t2 + 1, 1):
+                    for gv1 in range(t1, t1 + 1, 1):
+                        b[gv0][gv1] = LT4_aux_1[gv0 - t2][gv1 - t1]
+                for gv0 in range(lbv, 1 + ubv, 1):
+                    for gv1 in range(t1, t1 + 1, 1):
+                        c[gv0][gv1] = LT4_aux_2[gv0 - lbv][gv1 - t1]
+                for gv0 in range(lbv, 1 + ubv, 1):
+                    for gv1 in range(t1, t1 + 1, 1):
+                        d[gv0][gv1] = LT4_aux_3[gv0 - lbv][gv1 - t1]
     compss_barrier()
     if debug:
         print 'Matrix C:'

@@ -7,13 +7,14 @@ from pycompss.api.parameter import *
 from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
 
 
-@task(lbv=IN, ubv=IN, returns="LT2_args_size")
-def LT2(lbv, ubv, *args):
+@task(a=IN, t2=IN, b=IN, t1=IN, ubv=IN, lbv=IN, c=INOUT, returns="LT2_args_size")
+def LT2(t2, t1, ubv, lbv, *args):
     global LT2_args_size
-    var1, var2, var3 = ArgUtils.rebuild_args(args)
-    for t3 in range(0, ubv + 1 - lbv):
-        S1_no_task(var1[t3], var2[t3], var3[t3])
-    return ArgUtils.flatten_args(var3)
+    a, b, c = ArgUtils.rebuild_args(args)
+    for t3 in range(lbv, ubv + 1):
+        S1_no_task(a[t3 - 1 - (-1 + lbv)][t2 - 1 - (-1 + t2)], b[t2 - 1 - (-1 + t2)][t1 - 1 - (-1 + t1)], c[t3 - lbv
+            ][t1 - t1])
+    return ArgUtils.flatten_args(c)
 
 
 @task(var2=IN, var3=IN, var1=INOUT)
@@ -45,18 +46,23 @@ def matmul(m_size, n_size, k_size, b_size, debug):
             for t2 in range(1, n_size - 1 + 1):
                 lbv = 1
                 ubv = m_size - 1 + 1
-                LT2_aux_0 = [a[t3 - 1][t2 - 1] for t3 in range(lbv, ubv + 1)]
-                LT2_aux_1 = [b[t2 - 1][t1 - 1] for t3 in range(lbv, ubv + 1)]
-                LT2_aux_2 = [c[t3][t1] for t3 in range(lbv, ubv + 1)]
+                LT2_aux_0 = [[a[gv0][gv1] for gv1 in range(-1 + t2, -1 + t2, 1)] for gv0 in range(-1 + lbv, ubv, 1)]
+                LT2_aux_1 = [[b[gv0][gv1] for gv1 in range(-1 + t1, -1 + t1, 1)] for gv0 in range(-1 + t2, -1 + t2, 1)]
+                LT2_aux_2 = [[c[gv0][gv1] for gv1 in range(t1, t1 + 1, 1)] for gv0 in range(lbv, 1 + ubv, 1)]
                 LT2_argutils = ArgUtils()
                 global LT2_args_size
                 LT2_flat_args, LT2_args_size = LT2_argutils.flatten(3, LT2_aux_0, LT2_aux_1, LT2_aux_2, LT2_aux_2)
-                LT2_new_args = LT2(lbv, ubv, *LT2_flat_args)
+                LT2_new_args = LT2(t2, t1, ubv, lbv, *LT2_flat_args)
                 LT2_aux_2, = LT2_argutils.rebuild(LT2_new_args)
-                LT2_index = 0
-                for t3 in range(lbv, ubv + 1):
-                    c[t3][t1] = LT2_aux_2[LT2_index]
-                    LT2_index = LT2_index + 1
+                for gv0 in range(-1 + lbv, ubv, 1):
+                    for gv1 in range(-1 + t2, -1 + t2, 1):
+                        a[gv0][gv1] = LT2_aux_0[gv0 - (-1 + lbv)][gv1 - (-1 + t2)]
+                for gv0 in range(-1 + t2, -1 + t2, 1):
+                    for gv1 in range(-1 + t1, -1 + t1, 1):
+                        b[gv0][gv1] = LT2_aux_1[gv0 - (-1 + t2)][gv1 - (-1 + t1)]
+                for gv0 in range(lbv, 1 + ubv, 1):
+                    for gv1 in range(t1, t1 + 1, 1):
+                        c[gv0][gv1] = LT2_aux_2[gv0 - lbv][gv1 - t1]
     compss_barrier()
     if debug:
         print 'Matrix C:'
