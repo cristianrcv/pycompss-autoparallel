@@ -276,7 +276,7 @@ class Calculator(object):
         :return: Two maps of the form Map<String, List<List<AST>> containing the global lexmin and lexmax expressions
         for all the dimensions of each subscript
         """
-        #
+
         # if __debug__:
         #     import astor
         #     logger.debug("Global Lexmin/Lexmax from:")
@@ -387,21 +387,30 @@ class Calculator(object):
         processed_conditions = []
         str_exprs = str_line.split(";")
         for str_expr in str_exprs:
-            # Split expression into assignment and condition
-            fields = str_expr.split(":")
-            str_assign = fields[0].strip()
-            str_condition = fields[1].strip() if len(fields) > 1 else None
-            # Remove the '[(' and ')]' from the assignment
-            str_assign = str_assign[2:-2]
-            # Insert multiplication marks in assign
-            str_assign = re.sub(r'(\d)(\w)', r'\1*\2', str_assign)
-            # Insert multiplication marks and double = in condition
-            if str_condition is not None:
-                str_condition = re.sub(r'(\d)(\w)', r'\1*\2', str_condition)
-                str_condition = re.sub(r' = ', r' == ', str_condition)
-            # Store expression
-            processed_assigns.append(str_assign)
-            processed_conditions.append(str_condition)
+            if "exists" not in str_expr:
+                # Split expression into assignment and condition
+                fields = str_expr.split(":")
+                str_assign = fields[0].strip()
+                str_condition = fields[1].strip() if len(fields) > 1 else None
+
+                # Remove the '[(' and ')]' from the assignment
+                str_assign = str_assign[2:-2]
+                # Insert multiplication marks in assign
+                str_assign = re.sub(r'(\d+)(\w)', r'\1*\2', str_assign)
+                # Insert multiplication marks and double = in condition
+                if str_condition is not None:
+                    str_condition = re.sub(r'(\d+)(\w)', r'\1*\2', str_condition)
+                    str_condition = re.sub(r' = ', r' == ', str_condition)
+                    str_condition = re.sub(r' mod ', r' % ', str_condition)
+                # Store expression
+                processed_assigns.append(str_assign)
+                processed_conditions.append(str_condition)
+            else:
+                # TODO: Treat exists expressions
+                # Expressions are of the form [val] : exists (e0: cond1 and 2e0 >= LB and 6e0 <= UB)
+                # Could be treated by removing the exists clause, the e0 variable and checking that LB <= UB
+                # For now, we skip this case
+                pass
 
         # Join all expressions
         full_str = processed_assigns[0]
@@ -418,16 +427,70 @@ class Calculator(object):
     def _build_ast(str_expr):
         """
         Builds an AST node representing the given expression
+
         :param str_expr: String expression
         :return: AST node representing the given expression
         """
 
+        # Add int cast and math module to floor/ceil operations
+        str_expr = str_expr.replace("floor", "int(math.floor")
+        str_expr = str_expr.replace("ceil", "int(math.ceil")
+
+        # Add an extra closing braket for the int cast on floor cases
+        str_expr = Calculator._add_closing_braket(str_expr, "floor")
+        str_expr = Calculator._add_closing_braket(str_expr, "ceil")
+
+        # Parse expression to AST
         ast_translation = ast.parse(str_expr)
 
         # Remove AST module and expression (get only expression value)
         ast_expr = ast_translation.body[0].value
 
         return ast_expr
+
+    @staticmethod
+    def _add_closing_braket(str_expr, keyword):
+        """
+        Adds an extra closing braket after each occurrence of the keyword in the str_expr
+
+        :param str_expr: String representing the all expression
+        :param keyword:  String representing the keyword
+        :return: Modified string containing an extra closing braket after each keyword occurrence
+        """
+
+        begin_index = str_expr.find(keyword)
+        while begin_index != -1:
+            # Move index to the start of the internal expression
+            begin_index = begin_index + len(keyword)
+            # Calculate the ending of the internal expression
+            end_index = Calculator._find_closing_braket(str_expr, begin_index)
+            # Add the braket
+            str_expr = str_expr[:end_index] + ")" + str_expr[end_index:]
+            # Iterate to find next floor call
+            begin_index = str_expr.find(keyword, begin_index)
+
+        return str_expr
+
+    @staticmethod
+    def _find_closing_braket(expr_str, index_start):
+        """
+        Finds the closing braket of the expression starting on index_start
+
+        :param expr_str: String representing the all expression
+        :param index_start: Starting index
+        :return: Index of the closing braket
+        """
+
+        index_end = index_start + 1
+        parentesis_counter = 1
+        while parentesis_counter > 0 and index_end < len(expr_str):
+            if expr_str[index_end] == "(":
+                parentesis_counter += 1
+            elif expr_str[index_end] == ")":
+                parentesis_counter -= 1
+            index_end += 1
+
+        return index_end
 
 
 #
@@ -760,6 +823,7 @@ class _RemovePythonCasts(ast.NodeTransformer):
                 op = copy.deepcopy(node.args[0])
                 return ast.copy_location(op, node)
 
+        # Check if it is a floor/ceil function call
         if isinstance(call_func, ast.Attribute):
             attr_val = call_func.value
             if isinstance(attr_val, ast.Name):
@@ -1143,41 +1207,76 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(str(ast.dump(subs2glob_min["mat"][0])), str(ast.dump(ast.Num(n=-5))))
         self.assertEqual(str(ast.dump(subs2glob_min["mat"][1])), str(ast.dump(ast.Num(n=-5))))
 
-        a1 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
+        a11 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
             ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
                         ops=[ast.GtE()],
                         comparators=[ast.Num(n=0)]),
-            ast.Compare(left=ast.Num(n=0),
-                        ops=[ast.LtE(), ast.LtE()],
-                        comparators=[ast.Name(id='M', ctx=ast.Load()),
-                                     ast.BinOp(left=ast.Num(n=6),
+            ast.Compare(left=ast.BinOp(left=ast.Num(n=2), op=ast.Mult(), right=ast.Name(id='N', ctx=ast.Load())),
+                        ops=[ast.LtE()],
+                        comparators=[ast.BinOp(left=ast.Num(n=-7),
                                                op=ast.Add(),
-                                               right=ast.BinOp(left=ast.Num(n=2),
-                                                               op=ast.Mult(),
-                                                               right=ast.Name(id='N', ctx=ast.Load())))])]),
-                       body=ast.BinOp(left=ast.Num(n=1),
-                                      op=ast.Add(),
-                                      right=ast.BinOp(left=ast.Num(n=2),
-                                                      op=ast.Mult(),
-                                                      right=ast.Name(id='N', ctx=ast.Load()))),
-                       orelse=ast.BinOp(left=ast.Num(n=-5), op=ast.Add(), right=ast.Name(id='M', ctx=ast.Load())))
-        a2 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
-            ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
-                        ops=[ast.GtE()],
-                        comparators=[ast.Num(n=0)]),
-            ast.Compare(left=ast.Num(n=0),
-                        ops=[ast.LtE(), ast.LtE()],
-                        comparators=[ast.Name(id='M', ctx=ast.Load()),
-                                     ast.BinOp(left=ast.Num(n=6),
-                                               op=ast.Add(),
-                                               right=ast.BinOp(left=ast.Num(n=2),
-                                                               op=ast.Mult(),
-                                                               right=ast.Name(id='N', ctx=ast.Load())))])]),
-                       body=ast.BinOp(left=ast.Num(n=-1), op=ast.Add(), right=ast.Name(id='M', ctx=ast.Load())),
-                       orelse=ast.BinOp(left=ast.Num(n=-5), op=ast.Add(), right=ast.Name(id='N', ctx=ast.Load())))
+                                               right=ast.Name(id='M', ctx=ast.Load()))])]),
+                        body=ast.BinOp(left=ast.Num(n=-5),
+                                       op=ast.Add(),
+                                       right=ast.Name(id='M', ctx=ast.Load())),
+                        orelse=ast.BinOp(left=ast.Num(n=1),
+                                         op=ast.Add(),
+                                         right=ast.BinOp(left=ast.Num(n=2),
+                                                         op=ast.Mult(),
+                                                         right=ast.Name(id='N', ctx=ast.Load()))))
 
-        self.assertEqual(str(ast.dump(subs2glob_max["mat"][0])), str(ast.dump(a1)))
-        self.assertEqual(str(ast.dump(subs2glob_max["mat"][1])), str(ast.dump(a2)))
+        a12 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
+            ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
+                        ops=[ast.GtE()],
+                        comparators=[ast.Num(n=0)]),
+            ast.Compare(left=ast.Num(n=0),
+                        ops=[ast.LtE(), ast.LtE()],
+                        comparators=[ast.Name(id='M', ctx=ast.Load()),
+                                     ast.BinOp(left=ast.Num(n=6),
+                                               op=ast.Add(),
+                                               right=ast.BinOp(left=ast.Num(n=2),
+                                                               op=ast.Mult(),
+                                                               right=ast.Name(id='N', ctx=ast.Load())))])]),
+                        body=ast.BinOp(left=ast.Num(n=1),
+                                       op=ast.Add(),
+                                       right=ast.BinOp(left=ast.Num(n=2),
+                                                       op=ast.Mult(),
+                                                       right=ast.Name(id='N', ctx=ast.Load()))),
+                        orelse=ast.BinOp(left=ast.Num(n=-5), op=ast.Add(), right=ast.Name(id='M', ctx=ast.Load())))
+
+        a21 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
+            ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
+                        ops=[ast.GtE()],
+                        comparators=[ast.Num(n=0)]),
+            ast.Compare(left=ast.BinOp(left=ast.Num(n=2), op=ast.Mult(), right=ast.Name(id='N', ctx=ast.Load())),
+                        ops=[ast.LtE()],
+                        comparators=[ast.BinOp(left=ast.Num(n=-7),
+                                               op=ast.Add(),
+                                               right=ast.Name(id='M', ctx=ast.Load()))])]),
+                        body=ast.BinOp(left=ast.Num(n=-5),
+                                       op=ast.Add(),
+                                       right=ast.Name(id='N', ctx=ast.Load())),
+                        orelse=ast.BinOp(left=ast.Num(n=-1),
+                                         op=ast.Add(),
+                                         right=ast.Name(id='M', ctx=ast.Load())))
+
+        a22 = ast.IfExp(test=ast.BoolOp(op=ast.And(), values=[
+            ast.Compare(left=ast.Name(id='N', ctx=ast.Load()),
+                        ops=[ast.GtE()],
+                        comparators=[ast.Num(n=0)]),
+            ast.Compare(left=ast.Num(n=0),
+                        ops=[ast.LtE(), ast.LtE()],
+                        comparators=[ast.Name(id='M', ctx=ast.Load()),
+                                     ast.BinOp(left=ast.Num(n=6),
+                                               op=ast.Add(),
+                                               right=ast.BinOp(left=ast.Num(n=2),
+                                                               op=ast.Mult(),
+                                                               right=ast.Name(id='N', ctx=ast.Load())))])]),
+                        body=ast.BinOp(left=ast.Num(n=-1), op=ast.Add(), right=ast.Name(id='M', ctx=ast.Load())),
+                        orelse=ast.BinOp(left=ast.Num(n=-5), op=ast.Add(), right=ast.Name(id='N', ctx=ast.Load())))
+
+        self.assertIn(str(ast.dump(subs2glob_max["mat"][0])), [str(ast.dump(a11)), str(ast.dump(a12))])
+        self.assertIn(str(ast.dump(subs2glob_max["mat"][1])), [str(ast.dump(a21)), str(ast.dump(a22))])
 
 
 #
