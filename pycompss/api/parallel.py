@@ -46,6 +46,9 @@ class parallel(object):
         self.taskify_loop_level = None
         if "taskify_loop_level" in self.kwargs.keys():
             self.taskify_loop_level = self.kwargs["taskify_loop_level"]
+        self.force_autogen = True
+        if "force_autogen" in self.kwargs.keys():
+            self.force_autogen = self.kwargs["force_autogen"]
 
         # Add a place to store internal translator structures
         self.translator_py2scop = None
@@ -69,8 +72,15 @@ class parallel(object):
         if __debug__:
             logger.debug("[decorator] Start decorator for function: " + str(func))
 
-        # Parallelize code
-        new_func = self._translate(func, keep_generated_files=__debug__)
+        # Try to reuse a generated version or translate it
+        from pycompss.util.translators.core_reuser.code_reuser import CodeReuser
+        self.code_reuser = CodeReuser(func, self.force_autogen)
+        if self.code_reuser.can_reuse():
+            # We are not forced to autogenerate files and an existing autogen file exists, reuse generated code
+            new_func = self.code_reuser.reuse()
+        else:
+            # Parallelize given function
+            new_func = self._translate(func, keep_generated_files=__debug__)
 
         # Add decorator wrapper
         @wraps(new_func)
@@ -109,11 +119,13 @@ class parallel(object):
                     for k, v in saved.items():
                         setattr(slf, k, v)
 
-                # Restore user code (according to code_replacer)
+                # Restore user code (according to code_replacer or code_reuser)
                 if __debug__:
                     logger.debug("[parallel_f] Restoring user code")
                 if self.code_replacer is not None:
                     self.code_replacer.restore()
+                elif self.code_reuser is not None:
+                    self.code_reuser.restore()
 
             # Return method value
             return ret
