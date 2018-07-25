@@ -35,11 +35,10 @@ class CodeReplacer(object):
         """
         Creates a code replacer for the given function
 
-        Arguments:
-                - func : function to be replaced
-        Raise:
-                - CodeReplacerException
+        :param func: function to be replaced
+        :raise CodeReplacerException:
         """
+
         self.func = func
 
         # Retrieve original file
@@ -61,12 +60,10 @@ class CodeReplacer(object):
         Replaces the func code by the content of new_code and cleans all the files if an
         internal error is raised
 
-        Arguments:
-                - new_code : File path containing the new code
-        Return:
-                - new_func : pointer to the new function
-        Raise:
-                - CodeReplacerException
+        :param new_code: File path containing the new code
+        :param keep_generated_files: Flag to keep intermediate files
+        :return: Pointer to the new function
+        :raise CodeReplacerException:
         """
 
         if __debug__:
@@ -89,14 +86,12 @@ class CodeReplacer(object):
 
     def _replace(self, new_code):
         """
-        Replaces the func code by the content of new_code
+        Replaces the func code by the content of new_code and cleans all the files if an
+        internal error is raised
 
-        Arguments:
-                - new_code : File path containing the new code
-        Return:
-                - new_func : pointer to the new function
-        Raise:
-                - CodeReplacerException
+        :param new_code: File path containing the new code
+        :return: Pointer to the new function
+        :raise CodeReplacerException:
         """
 
         # Retrieve original content
@@ -170,11 +165,7 @@ class CodeReplacer(object):
 
     def restore(self):
         """
-        Erases intermediate files
-
-        Arguments:
-        Return:
-        Raise:
+        Restores the user files
         """
 
         if __debug__:
@@ -191,11 +182,7 @@ class CodeReplacer(object):
 
     def clean(self):
         """
-        Erases all the generated files
-
-        Arguments:
-        Return:
-        Raise:
+        Erases all the generated intermediate files
         """
 
         # Restore user code
