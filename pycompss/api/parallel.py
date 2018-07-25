@@ -73,7 +73,7 @@ class parallel(object):
             logger.debug("[decorator] Start decorator for function: " + str(func))
 
         # Try to reuse a generated version or translate it
-        from pycompss.util.translators.core_reuser.code_reuser import CodeReuser
+        from pycompss.util.translators.code_reuser.code_reuser import CodeReuser
         self.code_reuser = CodeReuser(func, self.force_autogen)
         if self.code_reuser.can_reuse():
             # We are not forced to autogenerate files and an existing autogen file exists, reuse generated code
