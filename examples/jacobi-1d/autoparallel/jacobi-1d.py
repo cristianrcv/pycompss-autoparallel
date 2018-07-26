@@ -45,8 +45,8 @@ def create_entry(index, n_size, offset):
 # MAIN FUNCTION
 ############################################
 
-# @parallel()
-@parallel(pluto_extra_flags=["--tile"], taskify_loop_level=2)
+# @parallel(pluto_extra_flags=["--tile"], taskify_loop_level=2)
+@parallel()
 def jacobi_1d(a, b, n_size, t_size, coef):
     # Debug
     if __debug__:
