@@ -56,13 +56,39 @@ from pycompss.api.parameter import *
 from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
 
 
-@task(t1=IN, n_size=IN, returns="LT2_args_size")
-def LT2(t1, n_size, *args):
+@task(t1=IN, t2=IN, n_size=IN, a=INOUT, returns="LT2_args_size")
+def LT2(t1, t2, n_size, *args):
     global LT2_args_size
-    var2, var3, var4, var5, var6, var7, var8, var9, var1 = ArgUtils.rebuild_args(args)
-    for t3 in range(0, t1 + n_size - 2 + 1 - (t1 + 1)):
-        var1[t3] = S1_no_task(var2[t3], var3[t3], var4[t3], var5[t3], var1[t3], var6[t3], var7[t3], var8[t3], var9[t3])
-    return ArgUtils.flatten_args(var1)
+    a, = ArgUtils.rebuild_args(args)
+    for t3 in range(max(int(math.ceil(float(t1 + t2) / float(2))), t1 - t2 + 1), int(math.floor(float(t1 + t2 +
+        n_size - 1) / float(2))) + 1):
+        lbp = max(max(2 * t2, t1 - t2 + 1), -t1 + t2 + 2 * t3 - n_size + 2)
+        ubp = min(min(2 * t2 + 1, -t1 + t2 + 2 * t3), t1 - t2 + n_size - 2)
+        for t5 in range(max(max(2 * t2, t1 - t2 + 1), -t1 + t2 + 2 * t3 - n_size + 2), min(min(2 * t2 + 1, -t1 + t2 +
+            2 * t3), t1 - t2 + n_size - 2) + 1):
+            lbp = max(2 * t3, t1 - t2 + t5 + 1)
+            ubp = min(2 * t3 + 1, t1 - t2 + t5 + n_size - 2)
+            for t6 in range(max(2 * t3, t1 - t2 + t5 + 1), min(2 * t3 + 1, t1 - t2 + t5 + n_size - 2) + 1):
+                a[-t1 + t2 + t5 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 -
+                    t5 + t6 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)] = S1_no_task(a[-t1 + t2 + t5 -
+                    1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 -
+                    1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - 1 - (0 if 3 *
+                    t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - (0 if 3 * t2 <=
+                    t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - 1 - (0 if 3 * t2 <= t1 <= 1 + 3 *
+                    t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 *
+                    t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
+                    -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - 1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
+                    0)], a[-t1 + t2 + t5 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][
+                    -t1 + t2 - t5 + t6 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 -
+                    (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 + 1 -
+                    (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 - (0 if 3 * t2 <=
+                    t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - 1 - (0 if 3 * t2 <=
+                    t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 *
+                    t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and
+                    n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
+                    -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
+                    0)])
+    return ArgUtils.flatten_args(a)
 
 
 @task(var2=IN, var3=IN, var4=IN, var5=IN, var6=IN, var7=IN, var8=IN, var9=IN, var10=IN, returns=1)
@@ -84,33 +110,29 @@ def seidel(a, n_size, t_size):
         a_seq = copy.deepcopy(a)
         a_expected = seq_seidel(a_seq, n_size, t_size)
     if n_size >= 3 and t_size >= 1:
-        lbp = 1
-        ubp = n_size + 2 * t_size - 4
-        for t1 in range(1, n_size + 2 * t_size - 4 + 1):
-            lbp = max(int(math.ceil(float(t1 + 1) / float(2))), t1 - t_size + 1)
-            ubp = min(int(math.floor(float(t1 + n_size - 2) / float(2))), t1)
+        lbp = 0
+        ubp = int(math.floor(float(n_size + 3 * t_size - 5) / float(2)))
+        for t1 in range(0, int(math.floor(float(n_size + 3 * t_size - 5) / float(2))) + 1):
+            lbp = max(int(math.ceil(float(t1) / float(3))), t1 - t_size + 1)
+            ubp = min(int(math.floor(float(t1 + n_size - 2) / float(3))), t1)
             for t2 in range(lbp, ubp + 1):
-                lbp = t1 + 1
-                ubp = t1 + n_size - 2
-                LT2_aux_0 = [a[-t1 + 2 * t2 - 1][-t1 + t3 - 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_1 = [a[-t1 + 2 * t2 - 1][-t1 + t3] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_2 = [a[-t1 + 2 * t2 - 1][-t1 + t3 + 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_3 = [a[-t1 + 2 * t2][-t1 + t3 - 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_4 = [a[-t1 + 2 * t2][-t1 + t3 + 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_5 = [a[-t1 + 2 * t2 + 1][-t1 + t3 - 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_6 = [a[-t1 + 2 * t2 + 1][-t1 + t3] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_7 = [a[-t1 + 2 * t2 + 1][-t1 + t3 + 1] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
-                LT2_aux_8 = [a[-t1 + 2 * t2][-t1 + t3] for t3 in range(t1 + 1, t1 + n_size - 2 + 1)]
+                lbp = max(int(math.ceil(float(t1 + t2) / float(2))), t1 - t2 + 1)
+                ubp = int(math.floor(float(t1 + t2 + n_size - 1) / float(2)))
+                LT2_aux_0 = [[a[gv0][gv1] for gv1 in range(0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0, 
+                    n_size if t1 <= 1 + 3 * t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1)] for gv0 in range(0 if 
+                    3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1, 3 + 3 * t2 - t1 if t1 <= 1 + 3 *
+                    t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1)]
                 LT2_argutils = ArgUtils()
                 global LT2_args_size
-                LT2_flat_args, LT2_args_size = LT2_argutils.flatten(9, LT2_aux_0, LT2_aux_1, LT2_aux_2, LT2_aux_3,
-                    LT2_aux_4, LT2_aux_5, LT2_aux_6, LT2_aux_7, LT2_aux_8, LT2_aux_8)
-                LT2_new_args = LT2(t1, n_size, *LT2_flat_args)
-                LT2_aux_8, = LT2_argutils.rebuild(LT2_new_args)
-                LT2_index = 0
-                for t3 in range(t1 + 1, t1 + n_size - 2 + 1):
-                    a[-t1 + 2 * t2][-t1 + t3] = LT2_aux_8[LT2_index]
-                    LT2_index = LT2_index + 1
+                LT2_flat_args, LT2_args_size = LT2_argutils.flatten(1, LT2_aux_0, LT2_aux_0)
+                LT2_new_args = LT2(t1, t2, n_size, *LT2_flat_args)
+                LT2_aux_0, = LT2_argutils.rebuild(LT2_new_args)
+                for gv0 in range(0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1, 3 + 3 * t2 -
+                    t1 if t1 <= 1 + 3 * t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1):
+                    for gv1 in range(0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0, n_size if t1 <= 1 + 3 *
+                        t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1):
+                        a[gv0][gv1] = LT2_aux_0[gv0 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 *
+                            t2 - t1)][gv1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)]
     compss_barrier()
     if __debug__:
         a = compss_wait_on(a)

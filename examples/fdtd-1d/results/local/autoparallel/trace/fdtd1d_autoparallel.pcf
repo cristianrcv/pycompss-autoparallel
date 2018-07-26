@@ -127,16 +127,6 @@ EVENT_TYPE
 6    40000038    fork() depth
 
 
-EVENT_TYPE
-7  42000050 PAPI_TOT_INS [Instr completed]
-7  42000059 PAPI_TOT_CYC [Total cycles]
-7  42000053 PAPI_LD_INS [Loads]
-7  42000054 PAPI_SR_INS [Stores]
-7  42000002 PAPI_L2_DCM [L2D cache misses]
-7  42000000 PAPI_L1_DCM [L1D cache misses]
-7  41999999 Active hardware counter set
-
-
 GRADIENT_COLOR
 0    {0,255,2}
 1    {0,244,13}
@@ -233,8 +223,9 @@ EVENT_TYPE
 VALUES
 0      End
 1      create_entry
-2      S1
-3      S2
+2      LT3
+3      S1
+4      S2
 
 
 EVENT_TYPE

@@ -55,13 +55,13 @@ from pycompss.api.parameter import *
 from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
 
 
-@task(lbv=IN, ubv=IN, coef1=IN, coef2=IN, returns="LT2_args_size")
-def LT2(lbv, ubv, coef1, coef2, *args):
+@task(t1=IN, coef1=IN, coef2=IN, ubv=IN, lbv=IN, mat=INOUT, returns="LT2_args_size")
+def LT2(t1, coef1, coef2, ubv, lbv, *args):
     global LT2_args_size
-    var1, = ArgUtils.rebuild_args(args)
-    for t2 in range(0, ubv + 1 - lbv):
-        var1[t2] = S1_no_task(var1[t2], coef1, coef2)
-    return ArgUtils.flatten_args(var1)
+    mat, = ArgUtils.rebuild_args(args)
+    for t2 in range(lbv, ubv + 1):
+        mat[t2 - lbv][t1 - t1] = S1_no_task(mat[t2 - lbv][t1 - t1], coef1, coef2)
+    return ArgUtils.flatten_args(mat)
 
 
 @task(var2=IN, coef1=IN, coef2=IN, returns=1)
@@ -88,16 +88,15 @@ def ep(mat, n_size, m_size, coef1, coef2):
         for t1 in range(lbp, ubp + 1):
             lbv = 0
             ubv = n_size - 1
-            LT2_aux_0 = [mat[t2][t1] for t2 in range(lbv, ubv + 1)]
+            LT2_aux_0 = [[mat[gv0][gv1] for gv1 in range(t1, t1 + 1, 1)] for gv0 in range(lbv, 1 + ubv, 1)]
             LT2_argutils = ArgUtils()
             global LT2_args_size
             LT2_flat_args, LT2_args_size = LT2_argutils.flatten(1, LT2_aux_0, LT2_aux_0)
-            LT2_new_args = LT2(lbv, ubv, coef1, coef2, *LT2_flat_args)
+            LT2_new_args = LT2(t1, coef1, coef2, ubv, lbv, *LT2_flat_args)
             LT2_aux_0, = LT2_argutils.rebuild(LT2_new_args)
-            LT2_index = 0
-            for t2 in range(lbv, ubv + 1):
-                mat[t2][t1] = LT2_aux_0[LT2_index]
-                LT2_index = LT2_index + 1
+            for gv0 in range(lbv, 1 + ubv, 1):
+                for gv1 in range(t1, t1 + 1, 1):
+                    mat[gv0][gv1] = LT2_aux_0[gv0 - lbv][gv1 - t1]
     compss_barrier()
     if __debug__:
         mat = compss_wait_on(mat)
