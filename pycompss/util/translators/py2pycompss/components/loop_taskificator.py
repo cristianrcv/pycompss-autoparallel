@@ -26,7 +26,7 @@ class LoopTaskificator(ast.NodeTransformer):
     Node Transformer class to visit all the FOR loops and taskify them if required
 
     Attributes:
-        - cloog_vars :
+        - cloog_vars : List of cloog variables
         - taskify_loop_level : Depth level of for loop to taskify
         - task_counter_id : Task counter
         - task2headers : Map containing the task name and its header
@@ -879,9 +879,11 @@ class _SubscriptInformation(object):
         #     for k, v in loops_info.items():
         #         # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
         #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
+
         rcv = _RewriteCloogVars(node)
         fixed_loops_info = {}
-        for depth_index, loop_ind_var in enumerate(sorted(loops_info.keys())):
+        for depth_index, loop_ind_var in enumerate(
+                sorted(loops_info.keys(), key=_SubscriptInformation.sort_loop_indexes)):
             loop_bounds = loops_info[loop_ind_var]
             fixed_loop_bounds = rcv.set_level(depth_index).visit(loop_bounds)
             fixed_loops_info[loop_ind_var] = fixed_loop_bounds
@@ -1056,6 +1058,11 @@ class _SubscriptInformation(object):
                                orelse=[])
 
         return loop
+
+    @staticmethod
+    def sort_loop_indexes(loop_index_ast):
+        import astor
+        return astor.to_source(loop_index_ast)
 
     @staticmethod
     def _equal_accesses(plain_access_list, index_access_list):
