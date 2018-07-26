@@ -154,7 +154,7 @@ class ArgUtils(object):
 
         if sublist_dim is not None:
             list_object = []
-            for elem_id in range(sublist_dim):
+            for _ in range(sublist_dim):
                 elem, index = ArgUtils._rebuild_list(args, index, original_args=original_args)
                 list_object.append(elem)
             return list_object, index

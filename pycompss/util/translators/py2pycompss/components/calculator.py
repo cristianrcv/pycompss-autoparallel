@@ -695,8 +695,6 @@ class _IslSetBuilder:
         :return: List of space variable names (String)
         """
 
-        import ast
-
         # Base case
         if isinstance(node_ast, ast.Name):
             varname = node_ast.id
@@ -748,7 +746,6 @@ class _IslSetBuilder:
             expr_permutations = [[1 if x & (1 << i) else 0 for i in range(num_minmax)] for x in range(1 << num_minmax)]
             for expr_perm in expr_permutations:
                 # Create a new copy from the original expression
-                import copy
                 new_node_ast = copy.deepcopy(node_clean)
                 # Remove the min max expressions according to the given permutation
                 rmm = _RemoveMinMax(expr_perm)
