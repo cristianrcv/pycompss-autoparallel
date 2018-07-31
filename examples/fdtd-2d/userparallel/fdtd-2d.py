@@ -96,7 +96,7 @@ def fdtd_2d(ex, ey, hz, nx_size, ny_size, t_size, coef1, coef2):
 ############################################
 # MATHEMATICAL FUNCTIONS
 ############################################
-@constraint(ComputingUnits="${ComputingUnits}")
+
 @task(returns=1)
 def compute_e(e, coef1, h2, h1):
     # import time
@@ -109,7 +109,6 @@ def compute_e(e, coef1, h2, h1):
     # print "TIME: " + str(tm*1000) + " ms"
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def compute_h(h, coef2, ex2, ex1, ey2, ey1):
     # import time

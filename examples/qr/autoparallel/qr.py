@@ -54,6 +54,8 @@ def create_block(b_size, block_type='random'):
     elif block_type == 'identity':
         block = np.matrix(np.identity(b_size), dtype=np.float64, copy=False)
     else:
+        import os
+        np.random.seed(ord(os.urandom(1)))
         block = np.matrix(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     return block
 
@@ -190,7 +192,7 @@ def multiply_single_block(a, b, c, transpose_b=False):
         b = np.transpose(b)
 
     # Numpy operation
-    return c + a * b
+    return c + np.dot(a, b)
 
 
 ############################################
@@ -240,7 +242,7 @@ def join_matrix(a):
 
 
 def check_result(q_res, r_res, input_a):
-    is_ok = np.allclose(q_res * r_res, input_a)
+    is_ok = np.allclose(np.dot(q_res, r_res), input_a)
     print("Result check status: " + str(is_ok))
 
     if not is_ok:

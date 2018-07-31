@@ -87,13 +87,11 @@ def jacobi_1d(a, b, n_size, t_size, coef):
 # MATHEMATICAL FUNCTIONS
 ############################################
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def compute_a(coef, b_left, b_center, b_right):
     return compute(coef, b_left, b_center, b_right)
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def compute_b(coef, a_left, a_center, a_right):
     return compute(coef, a_left, a_center, a_right)

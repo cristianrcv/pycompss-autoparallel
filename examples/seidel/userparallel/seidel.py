@@ -81,7 +81,7 @@ def seidel(a, n_size, t_size):
 ############################################
 # MATHEMATICAL FUNCTIONS
 ############################################
-@constraint(ComputingUnits="${ComputingUnits}")
+
 @task(returns=1)
 def compute_distance(a_tl, a_tc, a_tr, a_cl, a_cc, a_cr, a_bl, a_bc, a_br):
     # import time

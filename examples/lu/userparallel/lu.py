@@ -31,6 +31,8 @@ def generate_matrix(m_size, b_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size):
+    import os
+    np.random.seed(ord(os.urandom(1)))
     block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     mb = np.matrix(block, dtype=np.float64, copy=False)
     return mb
@@ -113,7 +115,6 @@ def lu_blocked(a, m_size, b_size):
 # MATHEMATICAL FUNCTIONS
 ############################################
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def invert_triangular(mat, lower=False):
     from scipy.linalg import solve_triangular
@@ -125,7 +126,6 @@ def invert_triangular(mat, lower=False):
     return solve_triangular(mat, iden, lower=lower)
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def multiply(inv_list, *args):
     assert len(args) > 0
@@ -145,14 +145,12 @@ def multiply(inv_list, *args):
     return result
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def dgemm(alpha, a, b, c):
     mat = a + (alpha * np.dot(b, c))
     return mat
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=3)
 def custom_lu(mat):
     from scipy.linalg import lu

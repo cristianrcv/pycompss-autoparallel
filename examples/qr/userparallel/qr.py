@@ -8,7 +8,6 @@ from __future__ import print_function
 # Imports
 from pycompss.api.constraint import constraint
 from pycompss.api.task import task
-from pycompss.api.parameter import *
 from pycompss.api.api import compss_barrier, compss_wait_on
 
 import numpy as np
@@ -50,6 +49,8 @@ def create_block(b_size, block_type='random'):
     elif block_type == 'identity':
         block = np.matrix(np.identity(b_size), dtype=np.float64, copy=False)
     else:
+        import os
+        np.random.seed(ord(os.urandom(1)))
         block = np.matrix(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     return block
 
@@ -139,7 +140,6 @@ def qr_blocked(a, m_size, b_size):
 # MATHEMATICAL FUNCTIONS
 ############################################
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=(list, list))
 def qr(a, mode='reduced', transpose=False):
     # Numpy call
@@ -153,7 +153,6 @@ def qr(a, mode='reduced', transpose=False):
     return q, r
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def dot(a, b, transpose_result=False, transpose_b=False):
     if transpose_b:
@@ -165,7 +164,6 @@ def dot(a, b, transpose_result=False, transpose_b=False):
         return np.dot(a, b)
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=(list, list, list, list, list, list), priority=True)
 def little_qr(a, b, b_size, transpose=False):
     # Numpy call
@@ -185,7 +183,6 @@ def little_qr(a, b, b_size, transpose=False):
         return sub_q[0][0], sub_q[0][1], sub_q[1][0], sub_q[1][1], new_a, new_b
 
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def multiply_single_block(a, b, c, transpose_b=False):
     # Transpose if requested
@@ -193,7 +190,7 @@ def multiply_single_block(a, b, c, transpose_b=False):
         b = np.transpose(b)
 
     # Numpy operation
-    return c + a * b
+    return c + np.dot(a, b)
 
 
 ############################################
@@ -239,7 +236,7 @@ def join_matrix(a):
 
 
 def check_result(q_res, r_res, input_a):
-    is_ok = np.allclose(q_res * r_res, input_a)
+    is_ok = np.allclose(np.dot(q_res, r_res), input_a)
     print("Result check status: " + str(is_ok))
 
     if not is_ok:

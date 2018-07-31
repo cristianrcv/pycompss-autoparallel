@@ -6,11 +6,11 @@
 from __future__ import print_function
 
 # Imports
+from pycompss.api.parallel import parallel
 from pycompss.api.constraint import constraint
 from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
-from pycompss.api.parameter import *
 
 import numpy as np
 
@@ -19,36 +19,42 @@ import numpy as np
 # MATRIX GENERATION
 ############################################
 
-def initialize_variables(m_size):
-    a = create_matrix(m_size)
-    b = create_matrix(m_size)
-    c = create_matrix(m_size)
+def initialize_variables(m_size, b_size):
+    a = create_matrix(m_size, b_size, True)
+    b = create_matrix(m_size, b_size, True)
+    c = create_matrix(m_size, b_size, True)
 
     return a, b, c
 
 
-def create_matrix(m_size):
+def create_matrix(m_size, b_size, is_random):
     mat = []
     for i in range(m_size):
         mat.append([])
         for _ in range(m_size):
-            mb = create_entry()
+            mb = create_block(b_size, is_random)
             mat[i].append(mb)
     return mat
 
 
 @constraint(ComputingUnits="${ComputingUnits}")
-@task(returns=1)
-def create_entry():
-    import random
-    return np.float64(100 * random.random())
+@task(returns=list)
+def create_block(b_size, is_random):
+    if is_random:
+        import os
+        np.random.seed(ord(os.urandom(1)))
+        block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
+    else:
+        block = np.array(np.zeros((b_size, b_size)), dtype=np.float64, copy=False)
+    mb = np.matrix(block, dtype=np.float64, copy=False)
+    return mb
 
 
 ############################################
 # MAIN FUNCTION
 ############################################
 
-def matmul(a, b, c, m_size, alpha, beta):
+def gemm(a, b, c, alpha, beta, m_size):
     # Debug
     if __debug__:
         a = compss_wait_on(a)
@@ -64,23 +70,24 @@ def matmul(a, b, c, m_size, alpha, beta):
 
     # Compute expected result
     if __debug__:
-        import copy
-        input_a = copy.deepcopy(a)
-        input_b = copy.deepcopy(b)
-        input_c = copy.deepcopy(c)
-        res_expected = seq_multiply(input_a, input_b, input_c, m_size, alpha, beta)
+        input_a = join_matrix(a)
+        input_b = join_matrix(b)
+        input_c = join_matrix(c)
+        res_expected = input_c * beta + alpha * np.dot(input_a, input_b)
 
     # Matrix multiplication
     for i in range(m_size):
         for j in range(m_size):
+            # c[i][j] *= beta
             c[i][j] = scale(c[i][j], beta)
         for k in range(m_size):
             for j in range(m_size):
+                # c[i][j] += alpha * a[i][k] * b[k][j]
                 c[i][j] = multiply(c[i][j], alpha, a[i][k], b[k][j])
 
     # Debug result
     if __debug__:
-        c = compss_wait_on(c)
+        c = join_matrix(compss_wait_on(c))
 
         print("New Matrix C:")
         print(c)
@@ -90,49 +97,32 @@ def matmul(a, b, c, m_size, alpha, beta):
         check_result(c, res_expected)
 
 
-############################################
-# MATHEMATICAL FUNCTIONS
-############################################
-
-@constraint(ComputingUnits="${ComputingUnits}")
-@task(returns=1)
-def scale(c, beta):
-    # import time
-    # start = time.time()
-
-    return c * beta
-
-    # end = time.time()
-    # tm = end - start
-    # print "TIME: " + str(tm*1000) + " ms"
-
-
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def multiply(c, alpha, a, b):
-    # import time
-    # start = time.time()
+    return c + alpha * np.dot(a, b)
 
-    return c + alpha * a * b
 
-    # end = time.time()
-    # tm = end - start
-    # print "TIME: " + str(tm*1000) + " ms"
+@task(returns=1)
+def scale(c, beta):
+    return c * beta
 
 
 ############################################
-# RESULT CHECK FUNCTIONS
+# BLOCK HANDLING FUNCTIONS
 ############################################
 
-def seq_multiply(a, b, c, m_size, alpha, beta):
-    for i in range(m_size):
-        for j in range(m_size):
-            c[i][j] *= beta
-        for k in range(m_size):
-            for j in range(m_size):
-                c[i][j] += alpha * a[i][k] * b[k][j]
+def join_matrix(a):
+    joint_matrix = np.matrix([[]])
+    for i in range(0, len(a)):
+        current_row = a[i][0]
+        for j in range(1, len(a[i])):
+            current_row = np.bmat([[current_row, a[i][j]]])
+        if i == 0:
+            joint_matrix = current_row
+        else:
+            joint_matrix = np.bmat([[joint_matrix], [current_row]])
 
-    return c
+    return np.matrix(joint_matrix)
 
 
 def check_result(result, result_expected):
@@ -156,26 +146,28 @@ if __name__ == "__main__":
 
     args = sys.argv[1:]
     MSIZE = int(args[0])
-    ALPHA = np.float64(1.5)
-    BETA = np.float64(1.2)
+    BSIZE = int(args[1])
+    ALPHA = 0.7
+    BETA = 0.4
 
     # Log arguments if required
     if __debug__:
         print("Running GEMM blocked application with:")
         print(" - MSIZE = " + str(MSIZE))
+        print(" - BSIZE = " + str(BSIZE))
 
     # Initialize matrices
     if __debug__:
         print("Initializing matrices")
     start_time = time.time()
-    A, B, C = initialize_variables(MSIZE)
+    A, B, C = initialize_variables(MSIZE, BSIZE)
     compss_barrier()
 
     # Begin computation
     if __debug__:
         print("Performing computation")
     mult_start_time = time.time()
-    matmul(A, B, C, MSIZE, ALPHA, BETA)
+    gemm(A, B, C, ALPHA, BETA, MSIZE)
     compss_barrier(True)
     end_time = time.time()
 
@@ -189,6 +181,7 @@ if __name__ == "__main__":
     print("RESULTS -----------------")
     print("VERSION USERPARALLEL")
     print("MSIZE " + str(MSIZE))
+    print("BSIZE " + str(BSIZE))
     print("DEBUG " + str(__debug__))
     print("TOTAL_TIME " + str(total_time))
     print("INIT_TIME " + str(init_time))

@@ -40,9 +40,9 @@ def create_matrix(m_size, b_size, is_random):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, is_random):
-    import numpy as np
-
     if is_random:
+        import os
+        np.random.seed(ord(os.urandom(1)))
         block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     else:
         block = np.array(np.zeros((b_size, b_size)), dtype=np.float64, copy=False)
@@ -75,7 +75,7 @@ def gemm(a, b, c, alpha, beta, m_size):
         input_a = join_matrix(a)
         input_b = join_matrix(b)
         input_c = join_matrix(c)
-        res_expected = input_c * beta + alpha * input_a * input_b
+        res_expected = input_c * beta + alpha * np.dot(input_a, input_b)
 
     # Matrix multiplication
     for i in range(m_size):
@@ -100,7 +100,7 @@ def gemm(a, b, c, alpha, beta, m_size):
 
 
 def multiply(c, alpha, a, b):
-    return c + alpha * a * b
+    return c + alpha * np.dot(a, b)
 
 
 def scale(c, beta):

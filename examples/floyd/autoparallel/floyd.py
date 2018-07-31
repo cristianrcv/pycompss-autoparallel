@@ -42,8 +42,9 @@ def create_entry(n_size, is_zero):
     if is_zero:
         return np.float64(0)
     else:
-        import random
-        return np.float64(n_size * random.random())
+        import os
+        np.random.seed(ord(os.urandom(1)))
+        return np.float64(n_size * np.random.random())
 
 
 ############################################

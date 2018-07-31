@@ -11,7 +11,6 @@ from pycompss.api.constraint import constraint
 from pycompss.api.task import task
 from pycompss.api.api import compss_barrier
 from pycompss.api.api import compss_wait_on
-from pycompss.api.parameter import *
 
 import numpy as np
 
@@ -41,8 +40,9 @@ def create_matrix(m_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def create_entry():
-    import random
-    return np.float64(100 * random.random())
+    import os
+    np.random.seed(ord(os.urandom(1)))
+    return np.float64(100 * np.random.random())
 
 
 ############################################
@@ -114,7 +114,7 @@ def multiply(c, alpha, a, b):
     # import time
     # start = time.time()
 
-    return c + alpha * a * b
+    return c + alpha * np.dot(a, b)
 
     # end = time.time()
     # tm = end - start
@@ -131,7 +131,7 @@ def seq_multiply(a, b, c, m_size, alpha, beta):
             c[i][j] *= beta
         for k in range(m_size):
             for j in range(m_size):
-                c[i][j] += alpha * a[i][k] * b[k][j]
+                c[i][j] += alpha * np.dot(a[i][k], b[k][j])
 
     return c
 

@@ -40,9 +40,9 @@ def create_matrix(m_size, b_size, is_random):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, is_random):
-    import numpy as np
-
     if is_random:
+        import os
+        np.random.seed(ord(os.urandom(1)))
         block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     else:
         block = np.array(np.zeros((b_size, b_size)), dtype=np.float64, copy=False)
@@ -72,7 +72,7 @@ def matmul(a, b, c, m_size):
     if __debug__:
         input_a = join_matrix(a)
         input_b = join_matrix(b)
-        res_expected = input_a * input_b
+        res_expected = np.dot(input_a, input_b)
 
     # Matrix multiplication
     for i in range(m_size):
@@ -96,13 +96,12 @@ def matmul(a, b, c, m_size):
 # MATHEMATICAL FUNCTIONS
 ############################################
 
-@constraint(ComputingUnits="${ComputingUnits}")
 @task(c=INOUT)
 def multiply(a, b, c):
     # import time
     # start = time.time()
 
-    c += a * b
+    c += np.dot(a, b)
 
     # end = time.time()
     # tm = end - start
