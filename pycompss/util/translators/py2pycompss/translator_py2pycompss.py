@@ -228,6 +228,15 @@ class Py2PyCOMPSs(object):
         # Process direction of parameters
         from pycompss.util.translators.py2pycompss.components.parameters_processor import ParametersProcessor
         in_vars, out_vars, inout_vars, return_vars = ParametersProcessor.process_parameters(new_func.body[0])
+        # if __debug__:
+        #     logger.debug("IN variables:")
+        #     logger.debug(in_vars)
+        #     logger.debug("OUT variables:")
+        #     logger.debug(out_vars)
+        #     logger.debug("INOUT variables:")
+        #     logger.debug(inout_vars)
+        #     logger.debug("RETURN variables:")
+        #     logger.debug(return_vars)
 
         # Add non subscript variables to var2subscript
         for var in in_vars + out_vars + inout_vars + return_vars:

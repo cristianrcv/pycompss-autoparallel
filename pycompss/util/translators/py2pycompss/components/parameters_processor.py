@@ -43,7 +43,7 @@ class ParametersProcessor(object):
         return_vars = []
 
         target_vars = ParametersProcessor._get_target_vars(statement)
-        if isinstance(statement.value, ast.Call):
+        if isinstance(statement, ast.Assign) and isinstance(statement.value, ast.Call):
             # Target vars are the return of a function
             return_vars = target_vars
         else:
