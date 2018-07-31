@@ -73,8 +73,10 @@ int main()
     IF_TIME(fprintf(stderr, "%0.6lfs\n", t_end - t_start));
 
     print_array();
-    if (fopen(".test", "r")) {
+    FILE *fp = fopen ("file.txt", "w+");
+    if (fp != NULL) {
         print_array();
+        fclose(fp);
     }
 
     return 0;

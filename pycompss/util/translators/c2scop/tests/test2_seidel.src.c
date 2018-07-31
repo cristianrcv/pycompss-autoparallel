@@ -90,7 +90,7 @@ int main()
 
     print_array();
 
-    free(a)
+    free(a);
 
     return 0;
 }
