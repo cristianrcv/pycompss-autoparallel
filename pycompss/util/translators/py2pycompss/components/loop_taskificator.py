@@ -1071,8 +1071,8 @@ class _SubscriptInformation(object):
             return False
 
         # Check each dimension
-        for i in range(len(plain_access_list)):
-            if str(ast.dump(plain_access_list[i])) != str(ast.dump(index_access_list[i].value)):
+        for i, plain_access in enumerate(plain_access_list):
+            if str(ast.dump(plain_access)) != str(ast.dump(index_access_list[i].value)):
                 return False
 
         # All dimensions match
