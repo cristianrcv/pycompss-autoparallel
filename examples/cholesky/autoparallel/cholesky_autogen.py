@@ -44,7 +44,10 @@ def generate_matrix(m_size, b_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, is_diag):
+    import os
+    np.random.seed(ord(os.urandom(1)))
     block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
+
     mb = np.matrix(block, dtype=np.float64, copy=False)
     mb = mb + np.transpose(mb)
     if is_diag:

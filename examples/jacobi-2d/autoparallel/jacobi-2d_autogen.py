@@ -259,10 +259,10 @@ def seq_jacobi_2d(a, b, n_size, t_size, coef):
     for _ in range(t_size):
         for i in range(1, n_size - 1):
             for j in range(1, n_size - 1):
-                b[i][j] = 0.2 * (a[i][j] + a[i][j - 1] + a[i][1 + j] + a[1 + i][j] + a[i - 1][j])
+                b[i][j] = coef * (a[i][j] + a[i][j - 1] + a[i][1 + j] + a[1 + i][j] + a[i - 1][j])
         for i in range(1, n_size - 1):
             for j in range(1, n_size - 1):
-                a[i][j] = 0.2 * (b[i][j] + b[i][j - 1] + b[i][1 + j] + b[1 + i][j] + b[i - 1][j])
+                a[i][j] = coef * (b[i][j] + b[i][j - 1] + b[i][1 + j] + b[1 + i][j] + b[i - 1][j])
 
     return a, b
 

@@ -38,6 +38,8 @@ def create_matrix(n_size, b_size):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def create_block(b_size):
+    import os
+    np.random.seed(ord(os.urandom(1)))
     block = np.array(np.random.random(b_size), dtype=np.float64, copy=False)
     return block
 

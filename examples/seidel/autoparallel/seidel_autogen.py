@@ -69,25 +69,24 @@ def LT2(t1, t2, n_size, *args):
             lbp = max(2 * t3, t1 - t2 + t5 + 1)
             ubp = min(2 * t3 + 1, t1 - t2 + t5 + n_size - 2)
             for t6 in range(max(2 * t3, t1 - t2 + t5 + 1), min(2 * t3 + 1, t1 - t2 + t5 + n_size - 2) + 1):
-                a[-t1 + t2 + t5 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 -
-                    t5 + t6 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)] = S1_no_task(a[-t1 + t2 + t5 -
-                    1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 -
-                    1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - 1 - (0 if 3 *
-                    t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - (0 if 3 * t2 <=
-                    t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - 1 - (0 if 3 * t2 <= t1 <= 1 + 3 *
-                    t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 *
-                    t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
-                    -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - 1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
-                    0)], a[-t1 + t2 + t5 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][
-                    -t1 + t2 - t5 + t6 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 -
-                    (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 + 1 -
-                    (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 - (0 if 3 * t2 <=
-                    t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - 1 - (0 if 3 * t2 <=
-                    t1 <= 1 + 3 * t2 and n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 *
-                    t2 and n_size >= 3 else -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and
-                    n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
-                    -1 + 3 * t2 - t1)][-t1 + t2 - t5 + t6 + 1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else
-                    0)])
+                a[-t1 + t2 + t5 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2)][-t1 + t2 -
+                    t5 + t6 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0)] = S1_no_task(a[-t1 + t2 + t5 - 
+                    1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2)][-t1 + t2 - t5 + t6 - 1 -
+                    (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - 1 - (0 if -1 + t1 <= 3 *
+                    t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2)][-t1 + t2 - t5 + t6 - (0 if -1 + t1 <= 3 * t2 <=
+                    t1 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - 1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3
+                     else -1 - t1 + 3 * t2)][-t1 + t2 - t5 + t6 + 1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else
+                    0)], a[-t1 + t2 + t5 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2)][-t1 +
+                    t2 - t5 + t6 - 1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - (0 if
+                    -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2)][-t1 + t2 - t5 + t6 - (0 if -1 +
+                    t1 <= 3 * t2 <= t1 and n_size >= 3 else 0)], a[-t1 + t2 + t5 - (0 if -1 + t1 <= 3 * t2 <= t1 and
+                    n_size >= 3 else -1 - t1 + 3 * t2)][-t1 + t2 - t5 + t6 + 1 - (0 if -1 + t1 <= 3 * t2 <= t1 and 
+                    n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 
+                    -1 - t1 + 3 * t2)][-t1 + t2 - t5 + t6 - 1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0
+                    )], a[-t1 + t2 + t5 + 1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2)][
+                    -t1 + t2 - t5 + t6 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0)], a[-t1 + t2 + t5 + 1 -
+                    (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2)][-t1 + t2 - t5 + t6 + 1 - (
+                    0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0)])
     return ArgUtils.flatten_args(a)
 
 
@@ -118,21 +117,21 @@ def seidel(a, n_size, t_size):
             for t2 in range(lbp, ubp + 1):
                 lbp = max(int(math.ceil(float(t1 + t2) / float(2))), t1 - t2 + 1)
                 ubp = int(math.floor(float(t1 + t2 + n_size - 1) / float(2)))
-                LT2_aux_0 = [[a[gv0][gv1] for gv1 in range(0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0, 
-                    n_size if t1 <= 1 + 3 * t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1)] for gv0 in range(0 if 
-                    3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1, 3 + 3 * t2 - t1 if t1 <= 1 + 3 *
-                    t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1)]
+                LT2_aux_0 = [[a[gv0][gv1] for gv1 in range(0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0, 
+                    n_size if 3 * t2 >= -1 + t1 and n_size >= 3 and n_size >= 3 - t1 + 3 * t2 else n_size, 1)] for
+                    gv0 in range(0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2, 3 - t1 + 3 * t2 if
+                    3 * t2 >= -1 + t1 and n_size >= 3 and n_size >= 3 - t1 + 3 * t2 else n_size, 1)]
                 LT2_argutils = ArgUtils()
                 global LT2_args_size
                 LT2_flat_args, LT2_args_size = LT2_argutils.flatten(1, LT2_aux_0, LT2_aux_0)
                 LT2_new_args = LT2(t1, t2, n_size, *LT2_flat_args)
                 LT2_aux_0, = LT2_argutils.rebuild(LT2_new_args)
-                for gv0 in range(0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 * t2 - t1, 3 + 3 * t2 -
-                    t1 if t1 <= 1 + 3 * t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1):
-                    for gv1 in range(0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0, n_size if t1 <= 1 + 3 *
-                        t2 and n_size >= 4 + 3 * t2 - t1 else n_size, 1):
-                        a[gv0][gv1] = LT2_aux_0[gv0 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else -1 + 3 *
-                            t2 - t1)][gv1 - (0 if 3 * t2 <= t1 <= 1 + 3 * t2 and n_size >= 3 else 0)]
+                for gv0 in range(0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 * t2, 3 - t1 + 3 * t2 if
+                    3 * t2 >= -1 + t1 and n_size >= 3 and n_size >= 3 - t1 + 3 * t2 else n_size, 1):
+                    for gv1 in range(0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0, n_size if 3 * t2 >= -1 +
+                        t1 and n_size >= 3 and n_size >= 3 - t1 + 3 * t2 else n_size, 1):
+                        a[gv0][gv1] = LT2_aux_0[gv0 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else -1 - t1 + 3 *
+                            t2)][gv1 - (0 if -1 + t1 <= 3 * t2 <= t1 and n_size >= 3 else 0)]
     compss_barrier()
     if __debug__:
         a = compss_wait_on(a)

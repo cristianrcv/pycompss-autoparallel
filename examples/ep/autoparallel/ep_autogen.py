@@ -36,6 +36,7 @@ def create_matrix(n_size, m_size):
     return mat
 
 
+@constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=1)
 def create_entry(index, n_size):
     return np.float64(np.float64(index) / np.float64(n_size))

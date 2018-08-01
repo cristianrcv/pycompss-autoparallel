@@ -40,9 +40,9 @@ def create_matrix(m_size, b_size, is_random):
 @constraint(ComputingUnits="${ComputingUnits}")
 @task(returns=list)
 def create_block(b_size, is_random):
-    import numpy as np
-
     if is_random:
+        import os
+        np.random.seed(ord(os.urandom(1)))
         block = np.array(np.random.random((b_size, b_size)), dtype=np.float64, copy=False)
     else:
         block = np.array(np.zeros((b_size, b_size)), dtype=np.float64, copy=False)
@@ -64,7 +64,7 @@ from pycompss.api.parameter import *
 
 @task(var2=IN, var3=IN, var1=INOUT)
 def S1(var2, var3, var1):
-    var1 += var2 * var3
+    var1 += np.dot(var2, var3)
 
 
 def matmul(a, b, c, m_size):
@@ -81,7 +81,7 @@ def matmul(a, b, c, m_size):
     if __debug__:
         input_a = join_matrix(a)
         input_b = join_matrix(b)
-        res_expected = input_a * input_b
+        res_expected = np.dot(input_a, input_b)
     if m_size >= 1:
         lbp = 0
         ubp = m_size - 1
