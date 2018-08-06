@@ -29,6 +29,10 @@
   if [ ! -d "${WORK_DIR}" ]; then
     mkdir -p "${WORK_DIR}"
   fi
+  tile_file=${SCRIPT_DIR}/${app_version}/tile.sizes
+  if [ -f "${tile_file}" ]; then
+    cp "${tile_file}" "${WORK_DIR}"
+  fi
 
   export ComputingUnits=1
 
