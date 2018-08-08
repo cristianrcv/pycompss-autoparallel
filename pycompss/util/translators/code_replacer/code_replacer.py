@@ -28,6 +28,7 @@ class CodeReplacer(object):
             - func : Python function object to replace
             - original_file : File containing the original function code
             - bkp_file : Backup of the original file
+            - compiled_file : Compiled file name of the original function code
             - new_file : File containing the new parallel function code
     """
 
@@ -48,11 +49,11 @@ class CodeReplacer(object):
         except Exception as e:
             raise CodeReplacerException("[ERROR] Cannot find original file", e)
 
-        # Set backup file
+        # Set backup, compiled, and autogen files
         import os
         file_name = os.path.splitext(self.original_file)[0]
         self.bkp_file = file_name + "_bkp.py"
-        # Set new file
+        self.compiled_file = file_name + ".pyc"
         self.new_file = file_name + "_autogen.py"
 
     def replace(self, new_code, keep_generated_files=False):
@@ -146,9 +147,18 @@ class CodeReplacer(object):
         except Exception as e:
             raise CodeReplacerException("[ERROR] Cannot replace original file", e)
 
+        # Clean original compiled file (to avoid problems with inspect and force new compilation)
+        import os
+        if os.path.isfile(self.compiled_file):
+            if __debug__:
+                logger.debug("[code_replacer] Erase original pyc file: " + str(self.compiled_file))
+            try:
+                os.remove(self.compiled_file)
+            except Exception as e:
+                raise CodeReplacerException("[ERROR] Cannot erase original pyc file: " + str(self.compiled_file), e)
+
         # Load new function from new file
         # Similar to: from new_module import func.__name__ as new_func
-        import os
         new_module = os.path.splitext(os.path.basename(self.original_file))[0]
         if __debug__:
             logger.debug("[code_replacer] Import module " + str(self.func.__name__) + " from " + str(new_module))
