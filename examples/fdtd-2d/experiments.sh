@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-
   #
   # HELPER FUNCTIONS
   #

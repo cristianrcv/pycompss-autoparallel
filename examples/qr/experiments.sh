@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-
   #
   # HELPER FUNCTIONS
   #
@@ -40,10 +39,10 @@
   log_level=off
 
   #         REFERENCE
-  MSIZES=(     8    16)
-  BSIZES=(     2048 2048)
-  NUM_NODES=(  2    2)
-  EXEC_TIMES=( 120  120)
+  MSIZES=(     16   16   16)
+  BSIZES=(     2048 2048 2048)
+  NUM_NODES=(  2    3    5)
+  EXEC_TIMES=( 180  150  120)
 
   cpus_per_node=48
 

@@ -1,5 +1,5 @@
-#!/bin/bash -e                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                               
+#!/bin/bash -e
+
   # Script arguments
   if [ $# -ne 0 ] && [ $# -ne 10 ]; then
     echo "ERROR: Incorrect number of parameters"
