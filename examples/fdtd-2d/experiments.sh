@@ -59,7 +59,7 @@
 
     for app_path in "${SCRIPT_DIR}"/*/; do
       app_version=$(basename "${app_path}")
-      if [ "${app_version}" != "results" ]; then
+      if [ "${app_version}" == "autoparallel" ] || [ "${app_version}" == "userparallel" ]; then
         echo "--- Enqueueing ${app_version}"
         # With tracing
         tracing=true
