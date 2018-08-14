@@ -56,12 +56,15 @@ from pycompss.api.parameter import *
 from pycompss.util.translators.arg_utils.arg_utils import ArgUtils
 
 
-@task(t1=IN, coef1=IN, coef2=IN, ubv=IN, lbv=IN, mat=INOUT, returns="LT2_args_size")
-def LT2(t1, coef1, coef2, ubv, lbv, *args):
+@task(t2=IN, m_size=IN, t1=IN, n_size=IN, coef1=IN, coef2=IN, mat=INOUT, returns="LT2_args_size")
+def LT2(t2, m_size, t1, n_size, coef1, coef2, *args):
     global LT2_args_size
     mat, = ArgUtils.rebuild_args(args)
-    for t2 in range(lbv, ubv + 1):
-        mat[t2 - lbv][t1 - t1] = S1_no_task(mat[t2 - lbv][t1 - t1], coef1, coef2)
+    for t3 in range(32 * t2, min(m_size - 1, 32 * t2 + 31) + 1):
+        lbv = 2 * t1
+        ubv = min(n_size - 1, 2 * t1 + 1)
+        for t4 in range(2 * t1, min(n_size - 1, 2 * t1 + 1) + 1):
+            mat[t4 - 2 * t1][t3 - 32 * t2] = S1_no_task(mat[t4 - 2 * t1][t3 - 32 * t2], coef1, coef2)
     return ArgUtils.flatten_args(mat)
 
 
@@ -85,19 +88,31 @@ def ep(mat, n_size, m_size, coef1, coef2):
         mat_expected = seq_ep(mat_seq, n_size, m_size, coef1, coef2)
     if m_size >= 1 and n_size >= 1:
         lbp = 0
-        ubp = m_size - 1
+        ubp = int(math.floor(float(n_size - 1) / float(2)))
         for t1 in range(lbp, ubp + 1):
-            lbv = 0
-            ubv = n_size - 1
-            LT2_aux_0 = [[mat[gv0][gv1] for gv1 in range(t1, t1 + 1, 1)] for gv0 in range(lbv, 1 + ubv, 1)]
-            LT2_argutils = ArgUtils()
-            global LT2_args_size
-            LT2_flat_args, LT2_args_size = LT2_argutils.flatten(1, LT2_aux_0, LT2_aux_0)
-            LT2_new_args = LT2(t1, coef1, coef2, ubv, lbv, *LT2_flat_args)
-            LT2_aux_0, = LT2_argutils.rebuild(LT2_new_args)
-            for gv0 in range(lbv, 1 + ubv, 1):
-                for gv1 in range(t1, t1 + 1, 1):
-                    mat[gv0][gv1] = LT2_aux_0[gv0 - lbv][gv1 - t1]
+            lbp = 0
+            ubp = int(math.floor(float(m_size - 1) / float(32)))
+            for t2 in range(0, int(math.floor(float(m_size - 1) / float(32))) + 1):
+                lbp = 32 * t2
+                ubp = min(m_size - 1, 32 * t2 + 31)
+                LT2_aux_0 = [[mat[gv0][gv1] for gv1 in range(32 * t2, 3 * 2 + 32 * t2 if m_size >= 3 * 3 + 32 * t2 and
+                    n_size >= 3 + 2 * t1 else m_size if 32 * t2 <= m_size <= 3 * 2 + 32 * t2 and n_size >= 3 + 2 *
+                    t1 else 3 * 2 + 32 * t2 if m_size >= 3 * 3 + 32 * t2 and 2 * t1 <= n_size <= 2 + 2 * t1 else
+                    m_size, 1)] for gv0 in range(2 * t1, 2 + 2 * t1 if m_size >= 3 * 3 + 32 * t2 and n_size >= 3 + 2 *
+                    t1 else 2 + 2 * t1 if 32 * t2 <= m_size <= 3 * 2 + 32 * t2 and n_size >= 3 + 2 * t1 else n_size if
+                    m_size >= 3 * 3 + 32 * t2 and 2 * t1 <= n_size <= 2 + 2 * t1 else n_size, 1)]
+                LT2_argutils = ArgUtils()
+                global LT2_args_size
+                LT2_flat_args, LT2_args_size = LT2_argutils.flatten(1, LT2_aux_0, LT2_aux_0)
+                LT2_new_args = LT2(t2, m_size, t1, n_size, coef1, coef2, *LT2_flat_args)
+                LT2_aux_0, = LT2_argutils.rebuild(LT2_new_args)
+                for gv0 in range(2 * t1, 2 + 2 * t1 if m_size >= 3 * 3 + 32 * t2 and n_size >= 3 + 2 * t1 else 2 + 2 *
+                    t1 if 32 * t2 <= m_size <= 3 * 2 + 32 * t2 and n_size >= 3 + 2 * t1 else n_size if m_size >= 3 *
+                    3 + 32 * t2 and 2 * t1 <= n_size <= 2 + 2 * t1 else n_size, 1):
+                    for gv1 in range(32 * t2, 3 * 2 + 32 * t2 if m_size >= 3 * 3 + 32 * t2 and n_size >= 3 + 2 * t1 else
+                        m_size if 32 * t2 <= m_size <= 3 * 2 + 32 * t2 and n_size >= 3 + 2 * t1 else 3 * 2 + 32 * t2 if
+                        m_size >= 3 * 3 + 32 * t2 and 2 * t1 <= n_size <= 2 + 2 * t1 else m_size, 1):
+                        mat[gv0][gv1] = LT2_aux_0[gv0 - 2 * t1][gv1 - 32 * t2]
     compss_barrier()
     if __debug__:
         mat = compss_wait_on(mat)
