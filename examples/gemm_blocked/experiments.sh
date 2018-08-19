@@ -38,11 +38,11 @@
   graph=false
   log_level=off
 
-  #        REFERENCE   MAX_PAR
-  MSIZES=(     32)
-  BSIZES=(     2048)
-  NUM_NODES=(  2)
-  EXEC_TIMES=( 20)
+  #            REF
+  MSIZES=(     8 )
+  BSIZES=(     8 )
+  NUM_NODES=(  2  )
+  EXEC_TIMES=( 10 )
 
   cpus_per_node=48
 

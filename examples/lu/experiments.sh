@@ -38,11 +38,11 @@
   graph=false
   log_level=off
 
-  #       REFERENCE  BLOCK SCALING    MATRIX SCALING   MATRIX SCALING
-  MSIZES=(    16   16   16) #16   16   16     6    8    32     6    8    32)      # 32   32)
-  BSIZES=(    2048 2048 2048) #512  1024 4096   2048 2048 2048   4096 4096 4096)    # 2048 2048)
-  NUM_NODES=( 2    3    5) #2    2    2      2    2    2      2    2    2)       # 3    5)
-  EXEC_TIMES=(100  80   60) #5    10   90     10   10   90     40   40   180)     # 50   30)
+  #           REF  SCALING
+  MSIZES=(    24   24   24)
+  BSIZES=(    2048 2048 2048)
+  NUM_NODES=( 2    3    5)
+  EXEC_TIMES=(150  100  90)
 
   cpus_per_node=48
 

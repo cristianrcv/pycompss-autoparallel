@@ -38,7 +38,7 @@
   graph=false
   log_level=off
 
-  #         REFERENCE
+  #            REF  SCALING
   MSIZES=(     16   16   16)
   BSIZES=(     2048 2048 2048)
   NUM_NODES=(  2    3    5)
