@@ -121,4 +121,6 @@ examples/**/results/local/trace/python/
 mn_b?/
 /results/*
 !/results/experiments.ods
+!/results/00-code_analysis
+!/results/00-plots_generation
 
