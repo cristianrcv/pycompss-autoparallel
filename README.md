@@ -235,7 +235,7 @@ submit a pull request or contact the author if necessary.
 
 ## Author
 
-Cristián Ramón-Cortés Vilarrodona <cristian.ramoncortes(at)bsc.es> ([Personal WebPage][cristian])
+Cristián Ramón-Cortés Vilarrodona <cristian.ramoncortes(at)bsc.es> ([Personal Website][cristian])
 
 This work is supervised by:
 - Rosa M. Badia ([BSC][bsc])
