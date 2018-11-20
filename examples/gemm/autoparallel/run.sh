@@ -42,7 +42,7 @@
   # Copy results
   if [ -f "${LOG_DIR}/monitor/complete_graph.dot" ]; then
     cp "${LOG_DIR}"/monitor/complete_graph.dot "${RESULTS_DIR}"
-    gengraph "${RESULTS_DIR}"/complete_graph.dot
+    compss_gengraph "${RESULTS_DIR}"/complete_graph.dot
     dot -Tpng -Gnewrank=true "${RESULTS_DIR}"/complete_graph.dot > "${RESULTS_DIR}"/complete_graph.png
   fi
   if [ -d "${LOG_DIR}/trace/" ]; then
