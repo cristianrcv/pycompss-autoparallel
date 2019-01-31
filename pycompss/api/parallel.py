@@ -14,7 +14,7 @@ from functools import wraps
 # Logger definition
 #
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pycompss.api.autoparallel")
 
 
 #
