@@ -21,12 +21,4 @@ with the project.
  developers, or if you do not have permission to do that, you may request the
  second reviewer to merge it for you.
 
-
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
-available at [http://contributor-covenant.org/version/1/4][version]
-
 [sem_version]: http://semver.org/
-[homepage]: http://contributor-covenant.org
-[version]: http://contributor-covenant.org/version/1/4/
