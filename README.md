@@ -84,8 +84,8 @@ on affine loop nests. Pluto transforms C programs from source to source for
 coarse-grained parallelism and data locality simultaneously. The core transformation
 framework mainly works by finding affine transformations for efficient tiling. OpenMP
 parallel code for multicores can be automatically generated from sequential C program
-sections. Outer (communication-free), inner, or pipelined parallelization is achieved
-purely with OpenMP parallel for pragrams.
+sections. The outer (communication-free), inner, or pipelined parallelization is achieved
+purely with OpenMP parallel for pragmas.
 
 
 ### Included Dependencies inside PyCOMPSs
@@ -102,7 +102,7 @@ part that can be represented in the polyhedral model. The goal of OpenScop is to
 provide a common interface to various polyhedral compilation tools in order to 
 simplify their interaction. The OpenScop aim is to provide a stable, unified format
 that offers a durable guarantee that a tool can use an output or provide an input 
-to another tool without breaking a tool chain because of some internal changes in one
+to another tool without breaking a toolchain because of some internal changes in one
 element of the chain. The other promise of OpenScop is the ability to assemble or
 replace the basic blocks of a polyhedral compilation framework at no, or at least
 low engineering cost.
@@ -111,10 +111,10 @@ low engineering cost.
 Z-polyhedra. That is, it finds a code (e.g. in C, FORTRAN...) that reaches each
 integral point of one or more parameterized polyhedra. CLooG has been originally
 written to solve the code generation problem for optimizing compilers based on the
-polytope model. Nevertheless it is used now in various area e.g. to build control
+polytope model. Nevertheless, it is used now in different areas e.g. to build control
 automata for high-level synthesis or to find the best polynomial approximation of
 a function. CLooG may help in any situation where scanning polyhedra matters. While
-the user has full control on generated code quality, CLooG is designed to avoid
+the user has full control of generated code quality, CLooG is designed to avoid
 control overhead and to produce a very effective code.
 
 
@@ -152,7 +152,7 @@ the `run.sh` script of each version of the application).
 - A folder per version of the application (for instance, `userparallel`
  or `autoparallel`).
  
-Each version of a example application contains:
+Each version of an example application contains:
 - `results`: Folder containing the execution results
 - `run.sh`: Script to launch the application locally using 4 cores
 - `*.py`: Python source files of the application
