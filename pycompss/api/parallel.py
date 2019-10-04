@@ -384,7 +384,7 @@ class TestParallelDecorator(unittest.TestCase):
         # Base variables
         import os
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        tests_path = dir_path + "/tests"
+        tests_path = dir_path + "/tests_parallel"
 
         # Insert function file into pythonpath
         import sys
@@ -393,7 +393,7 @@ class TestParallelDecorator(unittest.TestCase):
         # Import function to replace
         import importlib
         func_name = "matmul"
-        test_module = importlib.import_module("pycompss.api.tests.test1_matmul")
+        test_module = importlib.import_module("pycompss.api.tests_parallel.test1_matmul")
         func = getattr(test_module, func_name)
 
         # Generate parallel code
