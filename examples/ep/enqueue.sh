@@ -44,7 +44,6 @@
     --cpus_per_node="${cpus_per_node}" \
     --worker_in_master_cpus=0 \
     --node_memory=50000 \
-    --scheduler=es.bsc.compss.scheduler.fifoDataScheduler.FIFODataScheduler \
     \
     --tracing="${tracing}" \
     --graph="${graph}" \
@@ -52,7 +51,7 @@
     --log_level="${log_level}" \
     \
     --master_working_dir="${WORK_DIR}" \
-    --worker_working_dir=/gpfs/projects/bsc19/COMPSs_SandBox \
+    --worker_working_dir=/gpfs/scratch/bsc19/bsc19533 \
     --base_log_dir="${WORK_DIR}" \
     --pythonpath="${LOCAL_PYTHONPATH}" \
     --lang=python \
