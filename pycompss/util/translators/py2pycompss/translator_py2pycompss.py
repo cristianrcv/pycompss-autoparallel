@@ -24,16 +24,20 @@ logger = logging.getLogger("pycompss.api.autoparallel")
 class Py2PyCOMPSs(object):
 
     @staticmethod
-    def translate(func, par_py_files, output, taskify_loop_level=None):
+    def translate(func, par_py_files, output, tile=False):
         """
         Substitutes the given parallel python files into the original
         function code and adds the required PyCOMPSs annotations. The
         result is stored in the given output file
 
         :param func: Python original function
+            + type: func
         :param par_py_files: List of files containing the Python parallelization of each for block in the func_source
+            + type: list
         :param output: PyCOMPSs file path
-        :param taskify_loop_level: Loop depth to perform taskification (default None)
+            + type: str
+        :param tile: Whether tile mode is enabled or not (default False)
+            + type: bool
         :raise Py2PyCOMPSsException:
         """
 
@@ -96,10 +100,16 @@ class Py2PyCOMPSs(object):
                     rc = _RewriteCallees(task2new_name, task2original_args, task2new_args, task2ret_args,
                                          task2vars2subscripts)
                     new_statement = rc.visit(statement)
+                    # if __debug__:
+                    #     import astor
+                    #     from pycompss.util.translators.astor_source_gen.pycompss_source_gen import PyCOMPSsSourceGen
+                    #     logger.debug("New statement received:")
+                    #     logger.debug(astor.to_source(new_statement, pretty_source=PyCOMPSsSourceGen.long_line_ps))
+
                     # Loop tasking
-                    if taskify_loop_level is not None and taskify_loop_level > 0:
+                    if tile:
                         from pycompss.util.translators.py2pycompss.components.loop_taskificator import LoopTaskificator
-                        lt = LoopTaskificator(taskify_loop_level, task_counter_id, task2headers, task2func_code)
+                        lt = LoopTaskificator(task_counter_id, task2headers, task2func_code, new_statement)
                         lt_new_statement = lt.visit(new_statement)
                         task_counter_id = lt.get_final_task_counter_id()
                         task2headers = lt.get_final_task2headers()
@@ -169,8 +179,6 @@ class Py2PyCOMPSs(object):
             print("from pycompss.api.api import compss_barrier, compss_wait_on, compss_open", file=f)
             print("from pycompss.api.task import task", file=f)
             print("from pycompss.api.parameter import *", file=f)
-            if taskify_loop_level is not None and taskify_loop_level > 0:
-                print("from pycompss.util.translators.arg_utils.arg_utils import ArgUtils", file=f)
             print("", file=f)
             print("", file=f)
             # Write tasks
@@ -259,7 +267,7 @@ class Py2PyCOMPSs(object):
 
         # Construct task header
         from pycompss.util.translators.py2pycompss.components.header_builder import HeaderBuilder
-        task_header = HeaderBuilder.build_task_header(in_vars, out_vars, inout_vars, return_vars, [], None)
+        task_header = HeaderBuilder.build_task_header(in_vars, {}, out_vars, {}, inout_vars, {}, return_vars)
 
         # Return task header and new function
         if __debug__:
@@ -572,46 +580,6 @@ class TestPy2PyCOMPSs(unittest.TestCase):
             # Erase file
             os.remove(out_file)
 
-    def test_matmul_taskified(self):
-        # Base variables
-        import os
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        tests_path = dir_path + "/tests"
-
-        # Insert function file into pythonpath
-        import sys
-        sys.path.insert(0, tests_path)
-
-        # Import function to replace
-        import importlib
-        func_name = "matmul"
-        test_module = importlib.import_module("pycompss.util.translators.py2pycompss.tests.test2_matmul_taskified_func")
-        func = getattr(test_module, func_name)
-
-        # Create list of parallel py codes
-        src_file0 = tests_path + "/test2_matmul_taskified.src.python"
-        par_py_files = [src_file0]
-
-        # Output file
-        out_file = tests_path + "/test2_matmul_taskified.out.pycompss"
-
-        # Translate
-        Py2PyCOMPSs.translate(func, par_py_files, out_file, taskify_loop_level=1)
-
-        # Check file content
-        expected_file = tests_path + "/test2_matmul_taskified.expected.pycompss"
-        try:
-            with open(expected_file, 'r') as f:
-                expected_content = f.read()
-            with open(out_file, 'r') as f:
-                out_content = f.read()
-            self.assertEqual(out_content, expected_content)
-        except Exception:
-            raise
-        finally:
-            # Erase file
-            os.remove(out_file)
-
     def test_multiply(self):
         # Base variables
         import os
@@ -629,17 +597,17 @@ class TestPy2PyCOMPSs(unittest.TestCase):
         func = getattr(test_module, func_name)
 
         # Create list of parallel py codes
-        src_file0 = tests_path + "/test3_multiply.src.python"
+        src_file0 = tests_path + "/test2_multiply.src.python"
         par_py_files = [src_file0]
 
         # Output file
-        out_file = tests_path + "/test3_multiply.out.pycompss"
+        out_file = tests_path + "/test2_multiply.out.pycompss"
 
         # Translate
         Py2PyCOMPSs.translate(func, par_py_files, out_file)
 
         # Check file content
-        expected_file = tests_path + "/test3_multiply.expected.pycompss"
+        expected_file = tests_path + "/test2_multiply.expected.pycompss"
         try:
             with open(expected_file, 'r') as f:
                 expected_content = f.read()
@@ -670,17 +638,17 @@ class TestPy2PyCOMPSs(unittest.TestCase):
         func = getattr(test_module, func_name)
 
         # Create list of parallel py codes
-        src_file0 = tests_path + "/test4_multiply_taskified.src.python"
+        src_file0 = tests_path + "/test3_multiply_taskified.src.python"
         par_py_files = [src_file0]
 
         # Output file
-        out_file = tests_path + "/test4_multiply_taskified.out.pycompss"
+        out_file = tests_path + "/test3_multiply_taskified.out.pycompss"
 
         # Translate
-        Py2PyCOMPSs.translate(func, par_py_files, out_file, taskify_loop_level=1)
+        Py2PyCOMPSs.translate(func, par_py_files, out_file, tile=True)
 
         # Check file content
-        expected_file = tests_path + "/test4_multiply_taskified.expected.pycompss"
+        expected_file = tests_path + "/test3_multiply_taskified.expected.pycompss"
         try:
             with open(expected_file, 'r') as f:
                 expected_content = f.read()
