@@ -593,7 +593,7 @@ class TestPy2PyCOMPSs(unittest.TestCase):
         # Import function to replace
         import importlib
         func_name = "matmul"
-        test_module = importlib.import_module("pycompss.util.translators.py2pycompss.tests.test3_multiply_func")
+        test_module = importlib.import_module("pycompss.util.translators.py2pycompss.tests.test2_multiply_func")
         func = getattr(test_module, func_name)
 
         # Create list of parallel py codes
@@ -634,7 +634,7 @@ class TestPy2PyCOMPSs(unittest.TestCase):
         import importlib
         func_name = "matmul"
         test_module = importlib.import_module(
-            "pycompss.util.translators.py2pycompss.tests.test4_multiply_taskified_func")
+            "pycompss.util.translators.py2pycompss.tests.test3_multiply_taskified_func")
         func = getattr(test_module, func_name)
 
         # Create list of parallel py codes
