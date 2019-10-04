@@ -46,8 +46,7 @@ def create_entry(index, n_size):
 # MAIN FUNCTION
 ############################################
 
-# @parallel()
-@parallel(pluto_extra_flags=["--tile"], taskify_loop_level=2)
+@parallel(tile=True)
 def ep(mat, n_size, m_size, coef1, coef2):
     # Debug
     if __debug__:
