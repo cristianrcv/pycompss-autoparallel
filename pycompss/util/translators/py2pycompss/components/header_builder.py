@@ -23,17 +23,27 @@ logger = logging.getLogger("pycompss.api.autoparallel")
 class HeaderBuilder(object):
 
     @staticmethod
-    def build_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args, len_var):
+    def build_task_header(in_vars, in_collection_vars, out_vars, out_collection_vars, inout_vars,
+                          inout_collection_vars, return_vars):
         """
         Constructs the task header corresponding to the given IN, OUT, and INOUT variables
 
         :param in_vars: List of names of IN variables
+            + type: List<str>
+        :param in_collection_vars: Dictionary of IN collection variables and its dimension
+            + type: Dict<str, int>
         :param out_vars: List of names of OUT variables
+            + type: List<str>
+        :param out_collection_vars: Dictionary of OUT collection variables and its dimension
+            + type: Dict<str, int>
         :param inout_vars: List of names of INOUT variables
+            + type: List<str>
+        :param inout_collection_vars: Dictionary of INOUT collection variables and its dimension
+            + type: Dict<str, int>
         :param return_vars: List of names of RETURN variables
-        :param task_star_args: List of variables that will be passed as star arguments
-        :param len_var: Variable containing the name of the global variable used for star_args length
+            + type: List<str>
         :return task_header: String representing the PyCOMPSs task header
+            + type: str
         """
 
         # Construct task header
@@ -42,33 +52,46 @@ class HeaderBuilder(object):
         # Add parameters information
         first = True
         for iv in in_vars:
-            if iv not in task_star_args:
-                if not first:
-                    task_header += ", "
-                else:
-                    first = False
-                task_header += iv + "=IN"
-        for ov in out_vars:
-            if ov not in task_star_args:
-                if not first:
-                    task_header += ", "
-                else:
-                    first = False
-                task_header += ov + "=OUT"
-        for iov in inout_vars:
-            if iov not in task_star_args:
-                if not first:
-                    task_header += ", "
-                else:
-                    first = False
-                task_header += iov + "=INOUT"
-
-        # Add return information
-        if len(task_star_args) > 0:
             if not first:
                 task_header += ", "
-            task_header += "returns=\"" + len_var + "\""
-        elif len(return_vars) > 0:
+            else:
+                first = False
+            task_header += iv + "=IN"
+        for icv, dim in in_collection_vars.items():
+            if not first:
+                task_header += ", "
+            else:
+                first = False
+            task_header += icv + "={Type: COLLECTION_IN, Depth: " + str(dim) + "}"
+
+        for ov in out_vars:
+            if not first:
+                task_header += ", "
+            else:
+                first = False
+            task_header += ov + "=OUT"
+        for ocv, dim in out_collection_vars.items():
+            if not first:
+                task_header += ", "
+            else:
+                first = False
+            task_header += ocv + "={Type: COLLECTION_OUT, Depth: " + str(dim) + "}"
+
+        for iov in inout_vars:
+            if not first:
+                task_header += ", "
+            else:
+                first = False
+            task_header += iov + "=INOUT"
+        for iocv, dim in inout_collection_vars.items():
+            if not first:
+                task_header += ", "
+            else:
+                first = False
+            task_header += iocv + "={Type: COLLECTION_INOUT, Depth: " + str(dim) + "}"
+
+        # Add return information
+        if len(return_vars) > 0:
             if not first:
                 task_header += ", "
             task_header += "returns=" + str(len(return_vars))
@@ -107,28 +130,32 @@ class TestHeaderBuilder(unittest.TestCase):
 
     def test_regular_header(self):
         in_vars = ["in1", "in2"]
+        in_collection_vars = {}
         out_vars = ["out1", "out2"]
+        out_collection_vars = {}
         inout_vars = ["inout1", "inout2"]
+        inout_collection_vars = {}
         return_vars = ["r1", "r2", "r3"]
-        task_star_args = []
-        len_var = None
 
-        header_got = HeaderBuilder.build_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args,
-                                                     len_var)
+        header_got = HeaderBuilder.build_task_header(in_vars, in_collection_vars, out_vars, out_collection_vars,
+                                                     inout_vars, inout_collection_vars, return_vars)
         header_expected = "@task(in1=IN, in2=IN, out1=OUT, out2=OUT, inout1=INOUT, inout2=INOUT, returns=3)"
         self.assertEqual(header_got, header_expected)
 
-    def test_starargs_header(self):
-        in_vars = ["in1", "in2", "var1"]
+    def test_collections_header(self):
+        in_vars = ["in1", "in2"]
+        in_collection_vars = {"var1": 1}
         out_vars = []
-        inout_vars = ["inout1", "inout2", "var2"]
+        out_collection_vars = {}
+        inout_vars = ["inout1", "inout2"]
+        inout_collection_vars = {"var2": 2}
         return_vars = []
-        task_star_args = ["var1", "var2", "var3"]
-        len_var = "task_len_var"
 
-        header_got = HeaderBuilder.build_task_header(in_vars, out_vars, inout_vars, return_vars, task_star_args,
-                                                     len_var)
-        header_expected = "@task(in1=IN, in2=IN, inout1=INOUT, inout2=INOUT, returns=\"task_len_var\")"
+        header_got = HeaderBuilder.build_task_header(in_vars, in_collection_vars, out_vars, out_collection_vars,
+                                                     inout_vars, inout_collection_vars, return_vars)
+
+        header_expected = "@task(in1=IN, in2=IN, var1={Type: COLLECTION_IN, Depth: 1}, inout1=INOUT, inout2=INOUT, " \
+                          "var2={Type: COLLECTION_INOUT, Depth: 2})"
         self.assertEqual(header_got, header_expected)
 
 

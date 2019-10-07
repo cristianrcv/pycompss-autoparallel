@@ -18,7 +18,7 @@
   move_traces=${3:-true}
 
   # Initialize results log file
-  echo -e "JOB_ID\tVERSION\t\tNSIZE\tTSIZE\tTRACING\tNUM_WORKERS\tTOTAL_TIME\tINIT_TIME\tCOMP_TIME\tNUM_TASKS" > "${job_results_file}"
+  echo -e "JOB_ID\\tVERSION\\t\\tNSIZE\\tTSIZE\\tTRACING\\tNUM_WORKERS\\tTOTAL_TIME\\tINIT_TIME\\tCOMP_TIME\\tNUM_TASKS" > "${job_results_file}"
 
   first=0
   while read -r line; do
@@ -44,7 +44,7 @@
     num_tasks=$(grep "Total executed tasks:" "${job_output}" | awk '{ print $NF }' | cat)
 
     # Print results
-    echo -e "${job_id}\t${version}\t${nsize}\t${tsize}\t${tracing}\t${num_workers}\t\t${total_time}\t${init_time}\t${comp_time}\t${num_tasks}" >> "${job_results_file}"
+    echo -e "${job_id}\\t${version}\\t${nsize}\\t${tsize}\\t${tracing}\\t${num_workers}\\t\\t${total_time}\\t${init_time}\\t${comp_time}\\t${num_tasks}" >> "${job_results_file}"
 
     # Move traces to its location
     if [ "${move_traces}" == "true" ] && [ "$tracing" == "true" ]; then

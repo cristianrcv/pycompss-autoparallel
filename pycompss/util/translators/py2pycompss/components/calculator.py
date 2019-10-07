@@ -64,17 +64,17 @@ class Calculator(object):
         subscript
         """
 
-        if __debug__:
-            import astor
-            logger.debug("- Loop information:")
-            for k, v in loops_info.items():
-                # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
-                logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
-            logger.debug("- Subscripts Accesses:")
-            for var_name, values in subscript_accesses_info.items():
-                for a in values:
-                    # logger.debug(str(var_name) + ": " + str([str(astor.dump_tree(dim)) for dim in a]))
-                    logger.debug(str(var_name) + ": " + str([str(astor.to_source(dim)) for dim in a]))
+        # if __debug__:
+        #     import astor
+        #     logger.debug("- Loop information:")
+        #     for k, v in loops_info.items():
+        #         # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
+        #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
+        #     logger.debug("- Subscripts Accesses:")
+        #     for var_name, values in subscript_accesses_info.items():
+        #         for a in values:
+        #             # logger.debug(str(var_name) + ": " + str([str(astor.dump_tree(dim)) for dim in a]))
+        #             logger.debug(str(var_name) + ": " + str([str(astor.to_source(dim)) for dim in a]))
 
         # Global loop information (defining the three spaces)
         global_min_isl_builder = _IslSetBuilder()
@@ -243,24 +243,24 @@ class Calculator(object):
             subscript2original_access[subscript_name] = original_accesses
 
         # Return lists of minimums and maximums of each dimension of each access per each subscript variable
-        if __debug__:
-            import astor
-            # logger.debug("ORIG ACCESS:")
-            # for subscript_name, original_accesses in subscript2original_access.items():
-            #     logger.debug("- Subscript: " + subscript_name)
-            #     for a in original_accesses:
-            #         # logger.debug(str([str(astor.dump_tree(dim)) for dim in a]))
-            #         logger.debug(str([str(astor.to_source(dim)) for dim in a]))
-            logger.debug("LEXMIN:")
-            for subscript_name, lbs in subscript2access_lexmin.items():
-                logger.debug("- Subscript: " + subscript_name)
-                for access_lb in lbs:
-                    logger.debug(str([str(astor.to_source(minimum_of_dim)) for minimum_of_dim in access_lb]))
-            logger.debug("LEXMAX:")
-            for subscript_name, ubs in subscript2access_lexmax.items():
-                logger.debug("- Subscript: " + subscript_name)
-                for access_ub in ubs:
-                    logger.debug(str([str(astor.to_source(minimum_of_dim)) for minimum_of_dim in access_ub]))
+        # if __debug__:
+        #     import astor
+        #     logger.debug("ORIG ACCESS:")
+        #     for subscript_name, original_accesses in subscript2original_access.items():
+        #         logger.debug("- Subscript: " + subscript_name)
+        #         for a in original_accesses:
+        #             # logger.debug(str([str(astor.dump_tree(dim)) for dim in a]))
+        #             logger.debug(str([str(astor.to_source(dim)) for dim in a]))
+        #     logger.debug("LEXMIN:")
+        #     for subscript_name, lbs in subscript2access_lexmin.items():
+        #         logger.debug("- Subscript: " + subscript_name)
+        #         for access_lb in lbs:
+        #             logger.debug(str([str(astor.to_source(minimum_of_dim)) for minimum_of_dim in access_lb]))
+        #     logger.debug("LEXMAX:")
+        #     for subscript_name, ubs in subscript2access_lexmax.items():
+        #         logger.debug("- Subscript: " + subscript_name)
+        #         for access_ub in ubs:
+        #             logger.debug(str([str(astor.to_source(minimum_of_dim)) for minimum_of_dim in access_ub]))
 
         return subscript2access_lexmin, subscript2access_lexmax, subscript2original_access
 
@@ -352,16 +352,16 @@ class Calculator(object):
             subscript2global_lexmax[subscript_name] = global_max_ast
 
         # Return lists of global minimums and maximums per each subscript variable
-        if __debug__:
-            import astor
-            logger.debug("Registered Global LBS:")
-            for subscript_name, lbs in subscript2global_lexmin.items():
-                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
-                    [str(astor.to_source(dim_expr)) for dim_expr in lbs]))
-            logger.debug("Registered Global UBS:")
-            for subscript_name, ubs in subscript2global_lexmax.items():
-                logger.debug("Subscript " + str(subscript_name) + " -> " + str(
-                    [str(astor.to_source(dim_expr)) for dim_expr in ubs]))
+        # if __debug__:
+        #     import astor
+        #     logger.debug("Registered Global LBS:")
+        #     for subscript_name, lbs in subscript2global_lexmin.items():
+        #         logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+        #             [str(astor.to_source(dim_expr)) for dim_expr in lbs]))
+        #     logger.debug("Registered Global UBS:")
+        #     for subscript_name, ubs in subscript2global_lexmax.items():
+        #         logger.debug("Subscript " + str(subscript_name) + " -> " + str(
+        #             [str(astor.to_source(dim_expr)) for dim_expr in ubs]))
 
         return subscript2global_lexmin, subscript2global_lexmax
 

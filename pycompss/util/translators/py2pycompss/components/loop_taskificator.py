@@ -23,38 +23,134 @@ logger = logging.getLogger("pycompss.api.autoparallel")
 
 class LoopTaskificator(ast.NodeTransformer):
     """
-    Node Transformer class to visit all the FOR loops and taskify them if required
+    Node transformer class. Finds all the main loops and taskifies the internal loops of depth max_depth/2.
 
     Attributes:
-        - cloog_vars : List of cloog variables
-        - taskify_loop_level : Depth level of for loop to taskify
-        - task_counter_id : Task counter
-        - task2headers : Map containing the task name and its header
-        - task2func_code : Map containing the task name and its AST code representation
+        - _cloog_vars: Static list of cloog variables
+            + type: list
+        - task_counter_id: Task counter id
+            + type: int
+        - task2headers: Map containing the task name and its header
+            + type: dict
+        - task2func_code: Map containing the task name and its AST code representation
+            + type: dict
+        - loops2taskify: List of loops to taskify from the original statement
+            + type: list
     """
 
     # Static attribute List of control flow CLooG variables
     _cloog_vars = ["lbp", "ubp", "lbv", "ubv"]
 
-    def __init__(self, taskify_loop_level, task_counter_id, task2headers, task2func_code):
+    def __init__(self, task_counter_id, task2headers, task2func_code, original_statement):
         """
         Initializes the _LoopTasking internal structures
-        :param taskify_loop_level: Depth level of for loop to taskify
-        :param task_counter_id: Task counter
+
+        :param task_counter_id: Task counter id
+            + type: int
         :param task2headers: Map containing the task names and their headers
+            + type: dict
         :param task2func_code: Map containing the task names and their AST code representations
+            + type: dict
+        :param original_statement: Original statement to loop-taskify
+            + type: node AST
         """
 
-        self.taskify_loop_level = taskify_loop_level
         self.task_counter_id = task_counter_id
         self.task2headers = task2headers
         self.task2func_code = task2func_code
+
+        self.loops2taskify = []
+        main_fors = LoopTaskificator._extract_main_loops(original_statement)
+        for f in main_fors:
+            _, _, loop2taskify = LoopTaskificator._extract_middle_loop(f, 0)
+            self.loops2taskify.append(loop2taskify)
+
+        # if __debug__:
+        #     logger.debug("Tiled loops to taskify inside the given statement:")
+        #     for l2t in self.loops2taskify:
+        #         import astor
+        #         from pycompss.util.translators.astor_source_gen.pycompss_source_gen import PyCOMPSsSourceGen
+        #         logger.debug("- Loop to taskify:")
+        #         logger.debug(astor.to_source(l2t, pretty_source=PyCOMPSsSourceGen.long_line_ps))
+
+    @staticmethod
+    def _extract_main_loops(node):
+        """
+        Extracts the main loops from the given statement.
+
+        :param node: Reference statement
+            + type: AST node
+        :return: A list containing the main loops
+            + type: List<AST.Node>
+        """
+        import ast
+
+        # If the current node is a for, we have found the first main for
+        if isinstance(node, ast.For):
+            return [node]
+
+        # Child recursion
+        for_blocks = []
+        for _, value in ast.iter_fields(node):
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, ast.AST):
+                        child_for_blocks = LoopTaskificator._extract_main_loops(item)
+                        for_blocks.extend(child_for_blocks)
+            elif isinstance(value, ast.AST):
+                child_for_blocks = LoopTaskificator._extract_main_loops(value)
+                for_blocks.extend(child_for_blocks)
+        return for_blocks
+
+    @staticmethod
+    def _extract_middle_loop(node, max_depth):
+        """
+        Extracts the middle loop from the given nested-loop expression
+
+        :param node: Node pointing to the main loop.
+            + type: AST.Node
+        :param max_depth: Initial max depth (usually 0)
+            + type: int
+        :return: A tuple containing the current depth, the max depth, and the middle for loop
+            + type: Tuple(int, int, AST.Node)
+        """
+        import ast
+
+        # Update max depth
+        if isinstance(node, ast.For):
+            max_depth = max_depth + 1
+
+        # Child recursion
+        current_depth = 0
+        loop2taskify = None
+        for _, value in ast.iter_fields(node):
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, ast.AST):
+                        child_depth, max_depth, child_loop2taskify = LoopTaskificator._extract_middle_loop(item,
+                                                                                                           max_depth)
+                        current_depth = max(child_depth, current_depth)
+                        loop2taskify = child_loop2taskify if child_loop2taskify is not None else None
+            elif isinstance(value, ast.AST):
+                child_depth, max_depth, child_loop2taskify = LoopTaskificator._extract_middle_loop(value, max_depth)
+                current_depth = max(child_depth, current_depth)
+                loop2taskify = child_loop2taskify if child_loop2taskify is not None else None
+
+        # If the current node is a for, we increase the depth
+        if isinstance(node, ast.For):
+            current_depth = current_depth + 1
+
+        # If the current node is a for of right depth, we store it
+        if loop2taskify is None and isinstance(node, ast.For) and current_depth == max_depth / 2:
+            loop2taskify = node
+
+        return current_depth, max_depth, loop2taskify
 
     def get_final_task_counter_id(self):
         """
         Returns the task counter
 
-        :return task_counter_id: task counter
+        :return task_counter_id: Task counter
         """
 
         return self.task_counter_id
@@ -83,14 +179,12 @@ class LoopTaskificator(ast.NodeTransformer):
         corresponding taskification task, and modifies the current node with a call to a it
 
         :param node: For AST node representation
-        :return new_node: If the node is valid for taskification, a AST Call node. Otherwise the same node
+        :return new_node: If the node is valid for taskification, a list of transformations and calls nodes. Otherwise,
+         the same original node
         """
 
-        # Compute for level
-        for_level = LoopTaskificator._get_for_level(node)
-
-        # Taskify for loop if it has the right depth-level
-        if for_level == self.taskify_loop_level:
+        # Taskify the loop if needed
+        if node in self.loops2taskify:
             if __debug__:
                 import astor
                 from pycompss.util.translators.astor_source_gen.pycompss_source_gen import PyCOMPSsSourceGen
@@ -118,41 +212,12 @@ class LoopTaskificator(ast.NodeTransformer):
         # Return modified node
         return new_node
 
-    @staticmethod
-    def _get_for_level(node):
-        """
-        Returns the number of nested for loops inside the current node
-
-        :param node: Node to evaluate
-        :return current_for_level: Number of nested for loops
-        """
-
-        # Child recursion
-        current_for_level = 0
-        for _, value in ast.iter_fields(node):
-            if isinstance(value, list):
-                for item in value:
-                    if isinstance(item, ast.AST):
-                        children_for_level = LoopTaskificator._get_for_level(item)
-                        if children_for_level > current_for_level:
-                            current_for_level = children_for_level
-            elif isinstance(value, ast.AST):
-                children_for_level = LoopTaskificator._get_for_level(value)
-                if children_for_level > current_for_level:
-                    current_for_level = children_for_level
-
-        # Process current node
-        if isinstance(node, ast.For):
-            current_for_level = current_for_level + 1
-
-        # Return all the outermost loops
-        return current_for_level
-
     def _taskify_loop(self, node):
         """
         Taskifies the loop represented by the given node
 
         :param node: Node representing the head of the loop
+            + type: AST.Node
         :return: New taskified node (or list of nodes)
         """
 
@@ -163,7 +228,7 @@ class LoopTaskificator(ast.NodeTransformer):
         #     import astor
         #     logger.debug("- Loop information:")
         #     for k, v in loops_info.items():
-        #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
+        #         # logger.debug(str(astor.to_source(k)) + " -> " + str(astor.dump_tree(v)))
         #         logger.debug(str(astor.to_source(k)) + " -> " + str(astor.to_source(v)))
 
         # Get information about subscript accesses on task code
@@ -174,22 +239,10 @@ class LoopTaskificator(ast.NodeTransformer):
         #     logger.debug("- Subscripts Accesses:")
         #     for var_name, values in subscripts_accesses.items():
         #         for a in values:
-        #             logger.debug(str(var_name) + ": " + str([str(astor.dump_tree(dim)) for dim in a]))
+        #             # logger.debug(str(var_name) + ": " + str([str(astor.dump_tree(dim)) for dim in a]))
         #             logger.debug(str(var_name) + ": " + str([str(astor.to_source(dim)) for dim in a]))
 
         subscripts_info = _SubscriptInformation(loops_info, subscripts_accesses, node)
-        # if __debug__:
-        #     logger.debug("- Subscripts information:")
-        #     logger.debug(subscripts_info)
-        #     logger.debug(" -> LBS:")
-        #     for k, v in subscripts_info.lbs.items():
-        #         logger.debug(str(k) + ": " + str([str(astor.to_source(dim)) for dim in v]))
-        #     logger.debug(" -> UBS:")
-        #     for k, v in subscripts_info.ubs.items():
-        #         logger.debug(str(k) + ": " + str([str(astor.to_source(dim)) for dim in v]))
-        #     logger.debug(" -> STEPS:")
-        #     for k, v in subscripts_info.steps.items():
-        #         logger.debug(str(k) + ": " + str([str(astor.to_source(dim)) for dim in v]))
 
         # Rebuild loop body with temporary variables
         import copy
@@ -205,7 +258,6 @@ class LoopTaskificator(ast.NodeTransformer):
         # Get accessed variables
         in_vars, inout_vars = self._get_accesed_variables(func_node, loops_info)
         # if __debug__:
-        #     import astor
         #     logger.debug("- Detected IN variables:")
         #     logger.debug(in_vars)
         #     logger.debug("- Detected INOUT variables:")
@@ -214,29 +266,49 @@ class LoopTaskificator(ast.NodeTransformer):
         #     for k, v in registered_vars.items():
         #         logger.debug(str(k) + " -> " + str(v))
 
+        # Split collection parameters (subscripts) and regular parameters
+        task_in_vars = []
+        task_collection_in_vars = {}
+        for v in in_vars:
+            if v in registered_vars.keys():
+                task_collection_in_vars[v] = subscripts_info.get_access_dim(v)
+            else:
+                task_in_vars.append(v)
+        task_inout_vars = []
+        task_collection_inout_vars = {}
+        for v in inout_vars:
+            if v in registered_vars.keys():
+                task_collection_inout_vars[v] = subscripts_info.get_access_dim(v)
+            else:
+                task_inout_vars.append(v)
+        # if __debug__:
+        #     logger.debug("- Final task detected IN variables:")
+        #     logger.debug(task_in_vars)
+        #     logger.debug("- Final task detected COLLECTION_IN variables:")
+        #     logger.debug(task_collection_in_vars.items())
+        #     logger.debug("- Final task detected INOUT variables:")
+        #     logger.debug(task_inout_vars)
+        #     logger.debug("- Final task detected COLLECTION_INOUT variables:")
+        #     logger.debug(task_collection_inout_vars.items())
+
         # Build task general information
-        self.task_counter_id += 1
-        task_name = "LT" + str(self.task_counter_id)
-        len_var = task_name + "_args_size"
-        task_args, in_task_star_args, inout_task_star_args = LoopTaskificator._build_task_args(in_vars,
-                                                                                               inout_vars,
-                                                                                               registered_vars)
+        tciv_names = task_collection_in_vars.keys()
+        tciov_names = task_collection_inout_vars.keys()
+        task_args = LoopTaskificator._build_task_args(task_in_vars, tciv_names, task_inout_vars, tciov_names)
         # if __debug__:
         #     import astor
-        #     logger.debug("- Task Args:")
-        #     logger.debug(str([str(astor.to_source(ta)) for ta in task_args]))
-        #     logger.debug("- IN Star Args:")
-        #     logger.debug(str([str(astor.to_source(itsa)) for itsa in in_task_star_args]))
-        #     logger.debug("- INOUT Star Args:")
-        #     logger.debug(str([str(astor.to_source(iotsa)) for iotsa in inout_task_star_args]))
+        #     logger.debug("- Task args (AST mode):")
+        #     for ta in task_args:
+        #         logger.debug(astor.to_source(ta))
 
-        # Build task code
-        self._build_task_code(task_name, in_vars, inout_vars, task_args, in_task_star_args, inout_task_star_args,
-                              len_var, func_node)
+        # Build task header
+        self.task_counter_id += 1
+        task_name = "LT" + str(self.task_counter_id)
+        self._build_task_code(task_name, task_in_vars, task_collection_in_vars, task_inout_vars,
+                              task_collection_inout_vars, task_args, func_node)
 
         # Build callee
-        callee = LoopTaskificator._build_task_callee(task_name, task_args, in_task_star_args, inout_task_star_args,
-                                                     len_var, subscripts_info)
+        callee = LoopTaskificator._build_task_callee(task_name, task_args, tciv_names, tciov_names, subscripts_info)
 
         return callee
 
@@ -593,69 +665,69 @@ class LoopTaskificator(ast.NodeTransformer):
                 "[ERROR] Unrecognised type " + str(type(node)) + " on task argument")
 
     @staticmethod
-    def _build_task_args(in_vars, inout_vars, registered_vars):
+    def _build_task_args(in_vars, in_collection_vars, inout_vars, inout_collection_vars):
         """
         Builds the task arguments
 
-        :param in_vars: List of IN variables (List<String>)
-        :param inout_vars: List of INOUT variables (List<String>)
-        :param registered_vars: Map of registered subscript variables
-        :return: <List,List,List> 3 Lists of task arguments, IN star arguments, and INOUT star arguments
+        :param in_vars: List of IN variables
+            + type: List<str>
+        :param in_collection_vars: List of COLLECTION_IN variables
+            + type: List<str>
+        :param inout_vars: List of INOUT variables
+            + type: List<str>
+        :param inout_collection_vars: List of COLLECTION_INOUT variables
+            + type: List<str>
+        :return: List of task arguments
+            + List<AST.Node>
         """
-        task_args = []
-        in_task_star_args = []
-        inout_task_star_args = []
-        for var in in_vars + inout_vars:
-            var_ast = ast.Name(id=var)
-            # Add plain variables to task header
-            if var not in registered_vars.keys():
-                # Do not repeat variables
-                if var not in task_args:
-                    task_args.append(var_ast)
-            else:
-                # Add subscript variables to star_args (as task input or task output)
-                if var in in_vars:
-                    if var not in in_task_star_args:
-                        in_task_star_args.append(var_ast)
-                elif var in inout_vars:
-                    if var not in inout_task_star_args:
-                        inout_task_star_args.append(var_ast)
+        task_args_names = []
+        task_args_ast = []
+        for var in in_vars + in_collection_vars + inout_vars + inout_collection_vars:
+            if var not in task_args_names:
+                task_args_names.append(var)
 
-        return task_args, in_task_star_args, inout_task_star_args
+                var_ast = ast.Name(id=var)
+                task_args_ast.append(var_ast)
 
-    def _build_task_code(self, task_name, in_vars, inout_vars, task_args, in_task_star_args, inout_task_star_args,
-                         len_var, func_node):
+        return task_args_ast
+
+    def _build_task_code(self, task_name, in_vars, in_collection_vars, inout_vars, inout_collection_vars, task_args,
+                         func_node):
         """
         Rebuilds the code to be performed on the task and its header and stores it into the internal structures
 
         :param task_name: New name for the task
-        :param in_vars: List of IN variables (List<String>)
-        :param inout_vars: List of INOUT variables (List<String>)
-        :param task_args: List of task arguments (List<AST>)
-        :param in_task_star_args: List of task star arguments (List<AST>)
-        :param inout_task_star_args: List of INOUT task star arguments (List<AST>)
-        :param len_var: Name of the length var for star arguments
+            + type: str
+        :param in_vars: List of IN variables
+            + type: List<str>
+        :param in_collection_vars: Dictionary of IN collection variables and its dimension
+            + type: Dict<str, int>
+        :param inout_vars: List of INOUT variables
+            + type: List<str>
+        :param inout_collection_vars: Dictionary of INOUT collection variables and its dimension
+            + type: Dict<str, int>
+        :param task_args: List of task arguments in AST mode
+            + type: List<AST.Node>
         :param func_node: Previous function code
+            + type: AST.Node
         """
         # Build task header
         from pycompss.util.translators.py2pycompss.components.header_builder import HeaderBuilder
         task_header = HeaderBuilder.build_task_header(in_vars,
+                                                      in_collection_vars,
                                                       [],
+                                                      {},
                                                       inout_vars,
-                                                      [],
-                                                      in_task_star_args + inout_task_star_args,
-                                                      len_var)
+                                                      inout_collection_vars,
+                                                      [])
 
         # Build task body
         func_node = _UntaskCallees(self.task2headers, self.task2func_code).visit(func_node)
-        task_body = LoopTaskificator._create_task_body_with_argutils(func_node, in_task_star_args, inout_task_star_args,
-                                                                     len_var)
 
         # Build task complete node
-        task_vararg = "args" if len(in_task_star_args + inout_task_star_args) > 0 else None
         new_task = ast.FunctionDef(name=task_name,
-                                   args=ast.arguments(args=task_args, vararg=task_vararg, kwarg=None, defaults=[]),
-                                   body=task_body,
+                                   args=ast.arguments(args=task_args, vararg=None, kwarg=None, defaults=[]),
+                                   body=[func_node],
                                    decorator_list=[])
 
         # Add information to internal structures
@@ -670,68 +742,29 @@ class LoopTaskificator(ast.NodeTransformer):
             logger.debug(astor.to_source(new_task, pretty_source=PyCOMPSsSourceGen.long_line_ps))
 
     @staticmethod
-    def _create_task_body_with_argutils(func_node, in_var_list, inout_var_list, len_var):
-        """
-        Creates the body of a LoopTasking function by adding the rebuild and flatten calls before and after the loop
-        execution
-
-        :param func_node: Node containing the loop execution
-        :param in_var_list: List of IN stared variables (List<String>)
-        :param inout_var_list: List of INOUT stared variables (List<String>)
-        :param len_var: Name of the global length variable
-        :return: <List<ast.Node>> Containing the task body representation
-        """
-
-        # Construct an ast var list
-        in_ast_var_list = []
-        for var_name in in_var_list + inout_var_list:
-            in_ast_var_list.append(ast.Name(id=var_name))
-        out_ast_var_list = []
-        for var_name in inout_var_list:
-            out_ast_var_list.append(ast.Name(id=var_name))
-
-        # Construct the global length  node
-        global_node = ast.Global(names=[len_var])
-
-        # Construct the rebuild arguments node
-        rebuild_args_call = ast.Call(func=ast.Attribute(value=ast.Name(id="ArgUtils"), attr="rebuild_args"),
-                                     args=[ast.Name(id="args")],
-                                     keywords=[],
-                                     starargs=None,
-                                     kwargs=None)
-        rebuild_node = ast.Assign(targets=[ast.Tuple(elts=in_ast_var_list)], value=rebuild_args_call)
-
-        # Construct the flatten variables for return node
-        flatten_args_call = ast.Call(func=ast.Attribute(value=ast.Name(id="ArgUtils"), attr="flatten_args"),
-                                     args=out_ast_var_list,
-                                     keywords=[],
-                                     starargs=None,
-                                     kwargs=None)
-        flatten_node = ast.Return(value=flatten_args_call)
-
-        # Construct the task body
-        task_body = [global_node, rebuild_node, func_node, flatten_node]
-        return task_body
-
-    @staticmethod
-    def _build_task_callee(task_name, task_args, in_task_star_args, inout_task_star_args, len_var, subscripts_info):
+    def _build_task_callee(task_name, task_args, in_collection_args, inout_collection_args, subscripts_info):
         """
         Constructs the complete task callee: chunks subscripts, flats arguments, calls the task, rebuilds arguments,
         and un-chunks subscripts
 
         :param task_name: Name of the task to be called
-        :param task_args: List of task arguments (List<AST>)
-        :param in_task_star_args: List of task IN star arguments (List<AST>)
-        :param inout_task_star_args: List of task INOUT star arguments (List<AST>)
-        :param len_var: Name of the variable used to length the star arguments
+            + type: str
+        :param task_args: List of task arguments
+            + type: List<AST.Node>
+        :param in_collection_args: List of task IN arguments
+            + type: List<str>
+        :param inout_collection_args: List of task INOUT arguments
+            + type: List<str>
         :param subscripts_info: Information about subscript accesses and bounds
-        :return: List of nodes representing the full task callee (List<AST>)
+            + type: _SubscriptsInfo
+        :return: List of nodes representing the full task callee
+            + type: List<AST.Node>
         """
 
         # Replace the current node by a task callee
 
         # If there are no star_args, plain expression
-        if len(in_task_star_args) == 0 and len(inout_task_star_args) == 0:
+        if len(in_collection_args) == 0 and len(inout_collection_args) == 0:
             # Regular callee expression
             new_node = ast.Expr(value=ast.Call(func=ast.Name(id=task_name),
                                                args=task_args,
@@ -740,29 +773,24 @@ class LoopTaskificator(ast.NodeTransformer):
                                                kwargs=None))
             return new_node
 
-        # ELSE: Build the chunks, plain with ArgUtils, call task, rebuild with ArgUtils, and rebuild the chunks
+        # ELSE: Build the collection chunks and call the task
 
         new_nodes = []
 
         # Create nodes for chunk assign and unassign
-        chunked_in_task_star_args = []
-        chunked_out_task_star_args = []
-        unassign_nodes = []
-        star_arg_ind = 0
-        for var_ast in in_task_star_args + inout_task_star_args:
-            orig_subscript_name = var_ast.id
+        collection_chuncked_vars = {}
+        chunk_var_index = 0
+        for orig_var_name in in_collection_args + inout_collection_args:
             # New chunk var
-            star_arg_name = task_name + "_aux_" + str(star_arg_ind)
-            star_arg_ind = star_arg_ind + 1
-            star_arg = ast.Name(id=star_arg_name)
+            chunk_var_name = task_name + "_aux_" + str(chunk_var_index)
+            chunk_var_index = chunk_var_index + 1
+            chunk_var = ast.Name(id=chunk_var_name)
             # Store star_arg name
-            chunked_in_task_star_args.append(star_arg)
-            if var_ast in inout_task_star_args:
-                chunked_out_task_star_args.append(star_arg)
+            collection_chuncked_vars[orig_var_name] = chunk_var_name
 
             # Build chunk assignation
-            list_comp = subscripts_info.get_as_list_comp(orig_subscript_name)
-            assign_node = ast.Assign(targets=[star_arg],
+            list_comp = subscripts_info.get_as_list_comp(orig_var_name)
+            assign_node = ast.Assign(targets=[chunk_var],
                                      value=list_comp)
             # if __debug__:
             #     import astor
@@ -771,79 +799,26 @@ class LoopTaskificator(ast.NodeTransformer):
             #     logger.debug(astor.to_source(assign_node))
             new_nodes.append(assign_node)
 
-            # Build chunk un-assignation
-            unassign_for = subscripts_info.get_as_loop(orig_subscript_name, star_arg_name)
-            # if __debug__:
-            #     import astor
-            #     logger.debug("- Add un-chunk statement:")
-            #     logger.debug(astor.to_source(unassign_for))
-            unassign_nodes.append(unassign_for)
-        # if __debug__:
-        #     logger.debug("Chunked IN Star args:")
-        #     logger.debug(str([str(astor.to_source(citsa)) for citsa in chunked_in_task_star_args]))
-        #     logger.debug("Chunked INOUT Star args:")
-        #     logger.debug(str([str(astor.to_source(cotsa)) for cotsa in chunked_in_task_star_args]))
-
-        # Insert ArgUtils instantiation
-        argutils_var = ast.Name(id=task_name + "_argutils")
-        argutils_node = ast.Assign(targets=[argutils_var],
-                                   value=ast.Call(func=ast.Name(id="ArgUtils"),
-                                                  args=[],
-                                                  keywords=[],
-                                                  starargs=None,
-                                                  kwargs=None))
-        new_nodes.append(argutils_node)
-        # logger.debug("ArgUtils Node:")
-        # logger.debug(astor.to_source(argutils_node))
-
-        # Insert Global node for length
-        global_node = ast.Global(names=[len_var])
-        new_nodes.append(global_node)
-        # logger.debug("Global Node:")
-        # logger.debug(astor.to_source(global_node))
-
-        # Flatten args
-        flat_args_var = ast.Name(id=task_name + "_flat_args")
-        args_for_call_flat_args = [ast.Num(n=len(chunked_in_task_star_args))]
-        args_for_call_flat_args.extend(chunked_in_task_star_args)
-        args_for_call_flat_args.extend(chunked_out_task_star_args)
-        flat_args_node = ast.Assign(targets=[ast.Tuple(elts=[flat_args_var, ast.Name(id=len_var)])],
-                                    value=ast.Call(func=ast.Attribute(value=argutils_var, attr="flatten"),
-                                                   args=args_for_call_flat_args,
-                                                   keywords=[],
-                                                   starargs=None,
-                                                   kwargs=None))
-
-        new_nodes.append(flat_args_node)
-        # logger.debug("Flat Args Node:")
-        # logger.debug(astor.to_source(flat_args_node))
+        # Rename task args with chunks
+        import copy
+        call_task_args = []
+        rtca = _RewriteTaskCallArguments(collection_chuncked_vars)
+        for ta in task_args:
+            cta = copy.deepcopy(ta)
+            cta = rtca.visit(cta)
+            call_task_args.append(cta)
 
         # Insert task call
-        new_args_var = ast.Name(id=task_name + "_new_args")
-        task_call_node = ast.Assign(targets=[new_args_var],
-                                    value=ast.Call(func=ast.Name(id=task_name),
-                                                   args=task_args,
-                                                   keywords=[],
-                                                   starargs=flat_args_var,
-                                                   kwargs=None))
+        task_call_node = ast.Expr(value=ast.Call(func=ast.Name(id=task_name),
+                                                 args=call_task_args,
+                                                 keywords=[],
+                                                 starargs=None,
+                                                 kwargs=None))
+        # if __debug__:
+        #     import astor
+        #     logger.debug("Task Call Node:")
+        #     logger.debug(astor.to_source(task_call_node))
         new_nodes.append(task_call_node)
-        # logger.debug("Task Call Node:")
-        # logger.debug(astor.to_source(task_call_node))
-
-        # Rebuild chunks from flat new arguments
-        if len(chunked_out_task_star_args) > 0:
-            rebuild_node = ast.Assign(targets=[ast.Tuple(elts=chunked_out_task_star_args)],
-                                      value=ast.Call(func=ast.Attribute(value=argutils_var, attr="rebuild"),
-                                                     args=[new_args_var],
-                                                     keywords=[],
-                                                     starargs=None,
-                                                     kwargs=None))
-            new_nodes.append(rebuild_node)
-            # logger.debug("Rebuild Node:")
-            # logger.debug(astor.to_source(rebuild_node))
-
-        # Undo chunks to user subscripts
-        new_nodes.extend(unassign_nodes)
 
         # Assign to function return
         return new_nodes
@@ -920,6 +895,20 @@ class _SubscriptInformation(object):
         #     for subscript_name, ubs in self.subs2glob_ubs.items():
         #         logger.debug("Subscript " + str(subscript_name) + " -> " + str(
         #             [str(astor.to_source(dim_expr)) for dim_expr in ubs]))
+
+    def get_access_dim(self, var_name):
+        """
+        Returns the dimension of the given variable.
+
+        :param var_name: Variable name
+            + type: str
+        :return: The dimension of the given variable
+            + type: int
+        """
+        if var_name in self.subs2glob_lbs.keys():
+            return len(self.subs2glob_lbs[var_name])
+        else:
+            return 0
 
     def get_chunk_access(self, var_name, current_access_subscript):
         """
@@ -1332,6 +1321,42 @@ class _UntaskCallees(ast.NodeTransformer):
                 node.func = ast.Name(id=func_name)
 
         # Return the current node (might have been modified)
+        return node
+
+
+#
+# Class Node transformer to change the task arguments with chunks
+#
+class _RewriteTaskCallArguments(ast.NodeTransformer):
+    """
+    Node Transformer class to change the task arguments with chunks
+
+    Attributes:
+        - vars2chunks: Map of original variable names to chunk names
+            + type: Dict<str,str>
+    """
+
+    def __init__(self, vars2chunks):
+        """
+        Initializes the structures to change the task arguments with chunks
+
+        :param vars2chunks: Map of original variable names to chunk names
+            + type: Dict<str,str>
+        """
+
+        self.vars2chunks = vars2chunks
+
+    def visit_Name(self, node):
+        """
+        When found a usage of a task argument, replace by its chunk if available. The node remains intact otherwise.
+
+        :param node: Node containing the task argument
+        :return:
+        """
+
+        if node.id in self.vars2chunks.keys():
+            node.id = self.vars2chunks[node.id]
+
         return node
 
 

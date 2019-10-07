@@ -43,8 +43,7 @@ def create_entry(i, size):
 # MAIN FUNCTION
 ############################################
 
-# @parallel()
-@parallel(taskify_loop_level=1)
+@parallel(tile=True)
 def test_main(mat, n_size):
     # Debug
     if __debug__:

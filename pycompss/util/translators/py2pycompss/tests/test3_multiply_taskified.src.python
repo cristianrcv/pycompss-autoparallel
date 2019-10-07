@@ -1,0 +1,45 @@
+import math
+def S1(zT2,zT3,i,j):
+    c[i][j] = scale(c[i][j], beta)
+def S2(zT3,zT4,zT5,i,k,j):
+    c[i][j] = multiply(c[i][j], alpha, a[i][k], b[k][j])
+
+# Start of CLooG code
+if (m_size >= 1):
+    lbp=0
+    ubp=int(math.floor(float(m_size-1)/float(2)))
+    # parallel for PRIVATE(lbv,ubv,t3,t4,t5,t6,t7) REDUCTION()
+    for t2 in range(lbp, ubp + 1):
+        lbp=0
+        ubp=int(math.floor(float(m_size-1)/float(2)))
+        for t3 in range(0, int(math.floor(float(m_size-1)/float(2))) + 1):
+            lbp=2*t3
+            ubp=min(m_size-1,2*t3+1)
+            for t4 in range(2*t3, min(m_size-1,2*t3+1) + 1):
+                lbv=2*t2
+                ubv=min(m_size-1,2*t2+1)
+                # parallel for PRIVATE() REDUCTION()
+                for t5 in range(lbv, ubv + 1):
+                    S1(t2,t3,t5,t4)
+    lbp=0
+    ubp=int(math.floor(float(m_size-1)/float(2)))
+    # parallel for PRIVATE(lbv,ubv,t3,t4,t5,t6,t7) REDUCTION()
+    for t2 in range(lbp, ubp + 1):
+        lbp=0
+        ubp=int(math.floor(float(m_size-1)/float(2)))
+        for t3 in range(0, int(math.floor(float(m_size-1)/float(2))) + 1):
+            lbp=0
+            ubp=int(math.floor(float(m_size-1)/float(2)))
+            for t4 in range(0, int(math.floor(float(m_size-1)/float(2))) + 1):
+                lbp=2*t3
+                ubp=min(m_size-1,2*t3+1)
+                for t5 in range(2*t3, min(m_size-1,2*t3+1) + 1):
+                    lbp=2*t4
+                    ubp=min(m_size-1,2*t4+1)
+                    for t6 in range(2*t4, min(m_size-1,2*t4+1) + 1):
+                        lbv=2*t2
+                        ubv=min(m_size-1,2*t2+1)
+                        # parallel for PRIVATE() REDUCTION()
+                        for t7 in range(lbv, ubv + 1):
+                            S2(t2,t3,t4,t7,t6,t5)
+# End of CLooG code
