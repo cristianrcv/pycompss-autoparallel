@@ -81,59 +81,58 @@ def matmul(a, b, c, m_size, alpha, beta, debug):
                 for t4 in range(0, int(math.floor(float(m_size - 1) / float(2))) + 1):
                     lbp = 2 * t3
                     ubp = min(m_size - 1, 2 * t3 + 1)
-                    LT4_aux_0 = [[a[gv0][gv1] for gv1 in range(2 * t4, m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and 
-                        2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 * t4 <= m_size <=
-                        2 + 2 * t4 and 2 * t3 <= -2 + m_size and 2 * t2 <= -2 + m_size else m_size if 2 * t4 <=
-                        m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and -1 + m_size <= 2 * t2 <= m_size
-                         else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and 2 *
-                        t2 <= -2 + m_size else 2 + 2 * t4 if m_size >= 3 + 2 * t4 and 2 * t3 <= -2 + m_size and -1 +
-                        m_size <= 2 * t2 <= m_size else 2 + 2 * t4 if m_size >= 3 + 2 * t4 and 2 * t3 <= -2 + m_size and
-                        2 * t2 <= -2 + m_size else 2 + 2 * t4 if m_size >= 3 + 2 * t4 and -1 + m_size <= 2 * t3 <=
-                        m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t4, 1)] for gv0 in range(2 * t2, 
-                        m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and 2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <=
-                        m_size else 2 + 2 * t2 if 2 * t4 <= m_size <= 2 + 2 * t4 and 2 * t3 <= -2 + m_size and 2 *
-                        t2 <= -2 + m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <=
-                        m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t2 if 2 * t4 <= m_size <= 2 + 2 * t4 and
-                        -1 + m_size <= 2 * t3 <= m_size and 2 * t2 <= -2 + m_size else m_size if m_size >= 3 + 2 *
-                        t4 and 2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t2 if m_size >=
-                        3 + 2 * t4 and 2 * t3 <= -2 + m_size and 2 * t2 <= -2 + m_size else m_size if m_size >= 3 + 
-                        2 * t4 and -1 + m_size <= 2 * t3 <= m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 *
+                    LT4_aux_0 = [[a[gv0][gv1] for gv1 in range(2 * t4, 2 + 2 * t4 if 2 * t3 <= m_size <= 2 + 2 * t3 and
+                        2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t4 if 2 * t3 <=
+                        m_size <= 2 + 2 * t3 and 2 * t4 <= -2 + m_size and 2 * t2 <= -2 + m_size else m_size if 2 *
+                        t3 <= m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <= m_size and -1 + m_size <= 2 * t2 <=
+                        m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <= m_size and
+                        2 * t2 <= -2 + m_size else 2 + 2 * t4 if m_size >= 3 + 2 * t3 and 2 * t4 <= -2 + m_size and 
+                        -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t4 if m_size >= 3 + 2 * t3 and 2 * t4 <= -2 +
+                        m_size and 2 * t2 <= -2 + m_size else m_size if m_size >= 3 + 2 * t3 and -1 + m_size <= 2 *
+                        t4 <= m_size and -1 + m_size <= 2 * t2 <= m_size else m_size, 1)] for gv0 in range(2 * t2, 
+                        m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and 2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <=
+                        m_size else 2 + 2 * t2 if 2 * t3 <= m_size <= 2 + 2 * t3 and 2 * t4 <= -2 + m_size and 2 *
+                        t2 <= -2 + m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <=
+                        m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t2 if 2 * t3 <= m_size <= 2 + 2 * t3 and
+                        -1 + m_size <= 2 * t4 <= m_size and 2 * t2 <= -2 + m_size else m_size if m_size >= 3 + 2 *
+                        t3 and 2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t2 if m_size >=
+                        3 + 2 * t3 and 2 * t4 <= -2 + m_size and 2 * t2 <= -2 + m_size else m_size if m_size >= 3 + 
+                        2 * t3 and -1 + m_size <= 2 * t4 <= m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 *
                         t2, 1)]
-                    LT4_aux_1 = [[b[gv0][gv1] for gv1 in range(2 * t3, 2 + 2 * t3 if 2 * t4 <= m_size <= 2 + 2 * t4 and
-                        2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t3 if 2 * t4 <=
-                        m_size <= 2 + 2 * t4 and 2 * t3 <= -2 + m_size and 2 * t2 <= -2 + m_size else m_size if 2 *
-                        t4 <= m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and -1 + m_size <= 2 * t2 <=
-                        m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and
-                        2 * t2 <= -2 + m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t4 and 2 * t3 <= -2 + m_size and 
-                        -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t4 and 2 * t3 <= -2 +
-                        m_size and 2 * t2 <= -2 + m_size else m_size if m_size >= 3 + 2 * t4 and -1 + m_size <= 2 *
-                        t3 <= m_size and -1 + m_size <= 2 * t2 <= m_size else m_size, 1)] for gv0 in range(2 * t4, 
-                        m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and 2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <=
-                        m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and 2 * t3 <= -2 + m_size and 2 * t2 <=
-                        -2 + m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <=
-                        m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and
-                        -1 + m_size <= 2 * t3 <= m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t4 if m_size >= 3 + 2 *
-                        t4 and 2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t4 if m_size >=
-                        3 + 2 * t4 and 2 * t3 <= -2 + m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t4 if m_size >= 
-                        3 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 
-                        2 * t4, 1)]
-                    LT4_aux_2 = [[c[gv0][gv1] for gv1 in range(2 * t3, m_size if m_size >= 3 + 2 * t4 and -1 +
-                        m_size <= 2 * t3 <= m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 * t4 <=
-                        m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and -1 + m_size <= 2 * t2 <= m_size
-                         else 2 + 2 * t3 if m_size >= 3 + 2 * t4 and 2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <=
-                        m_size else 2 + 2 * t3 if 2 * t4 <= m_size <= 2 + 2 * t4 and 2 * t3 <= -2 + m_size and -1 +
-                        m_size <= 2 * t2 <= m_size else m_size if m_size >= 3 + 2 * t4 and -1 + m_size <= 2 * t3 <=
-                        m_size and 2 * t2 <= -2 + m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and -1 +
-                        m_size <= 2 * t3 <= m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t4 and
-                        2 * t3 <= -2 + m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t3, 1)] for gv0 in range(2 * t2,
-                        m_size if m_size >= 3 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and -1 + m_size <= 2 * t2 <=
-                        m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and
-                        -1 + m_size <= 2 * t2 <= m_size else m_size if m_size >= 3 + 2 * t4 and 2 * t3 <= -2 +
-                        m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 * t4 <= m_size <= 2 + 2 * t4 and
-                        2 * t3 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t2 if m_size >= 3 + 2 *
-                        t4 and -1 + m_size <= 2 * t3 <= m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t2 if 2 * t4 <=
-                        m_size <= 2 + 2 * t4 and -1 + m_size <= 2 * t3 <= m_size and 2 * t2 <= -2 + m_size else 2 + 
-                        2 * t2 if m_size >= 3 + 2 * t4 and 2 * t3 <= -2 + m_size and 2 * t2 <= -2 + m_size else 2 + 
+                    LT4_aux_1 = [[b[gv0][gv1] for gv1 in range(2 * t3, m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and 
+                        2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 * t3 <= m_size <=
+                        2 + 2 * t3 and 2 * t4 <= -2 + m_size and 2 * t2 <= -2 + m_size else m_size if 2 * t3 <=
+                        m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <= m_size and -1 + m_size <= 2 * t2 <= m_size
+                         else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <= m_size and 2 *
+                        t2 <= -2 + m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t3 and 2 * t4 <= -2 + m_size and -1 +
+                        m_size <= 2 * t2 <= m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t3 and 2 * t4 <= -2 + m_size and
+                        2 * t2 <= -2 + m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t3 and -1 + m_size <= 2 * t4 <=
+                        m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t3, 1)] for gv0 in range(2 * t4, 2 +
+                        2 * t4 if 2 * t3 <= m_size <= 2 + 2 * t3 and 2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <=
+                        m_size else 2 + 2 * t4 if 2 * t3 <= m_size <= 2 + 2 * t3 and 2 * t4 <= -2 + m_size and 2 *
+                        t2 <= -2 + m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <=
+                        m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and
+                        -1 + m_size <= 2 * t4 <= m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t4 if m_size >= 3 + 2 *
+                        t3 and 2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t4 if m_size >=
+                        3 + 2 * t3 and 2 * t4 <= -2 + m_size and 2 * t2 <= -2 + m_size else m_size if m_size >= 3 + 
+                        2 * t3 and -1 + m_size <= 2 * t4 <= m_size and -1 + m_size <= 2 * t2 <= m_size else m_size, 1)]
+                    LT4_aux_2 = [[c[gv0][gv1] for gv1 in range(2 * t3, 2 + 2 * t3 if m_size >= 3 + 2 * t3 and -1 +
+                        m_size <= 2 * t4 <= m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t3 if m_size >= 
+                        3 + 2 * t3 and 2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 *
+                        t3 <= m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <= m_size and -1 + m_size <= 2 * t2 <=
+                        m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and 2 * t4 <= -2 + m_size and -1 +
+                        m_size <= 2 * t2 <= m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t3 and -1 + m_size <= 2 * t4 <=
+                        m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t3 if m_size >= 3 + 2 * t3 and 2 * t4 <= -2 +
+                        m_size and 2 * t2 <= -2 + m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and -1 +
+                        m_size <= 2 * t4 <= m_size and 2 * t2 <= -2 + m_size else m_size, 1)] for gv0 in range(2 *
+                        t2, m_size if m_size >= 3 + 2 * t3 and -1 + m_size <= 2 * t4 <= m_size and -1 + m_size <= 2 *
+                        t2 <= m_size else m_size if m_size >= 3 + 2 * t3 and 2 * t4 <= -2 + m_size and -1 + m_size <=
+                        2 * t2 <= m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <=
+                        m_size and -1 + m_size <= 2 * t2 <= m_size else m_size if 2 * t3 <= m_size <= 2 + 2 * t3 and
+                        2 * t4 <= -2 + m_size and -1 + m_size <= 2 * t2 <= m_size else 2 + 2 * t2 if m_size >= 3 + 2 *
+                        t3 and -1 + m_size <= 2 * t4 <= m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t2 if m_size >=
+                        3 + 2 * t3 and 2 * t4 <= -2 + m_size and 2 * t2 <= -2 + m_size else 2 + 2 * t2 if 2 * t3 <=
+                        m_size <= 2 + 2 * t3 and -1 + m_size <= 2 * t4 <= m_size and 2 * t2 <= -2 + m_size else 2 + 
                         2 * t2, 1)]
                     LT4(t3, m_size, t4, t2, alpha, LT4_aux_0, LT4_aux_1, LT4_aux_2)
     compss_barrier()
