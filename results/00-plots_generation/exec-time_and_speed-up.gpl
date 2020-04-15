@@ -34,7 +34,6 @@ set tmargin 2
 set key outside top center horizontal noreverse noenhanced autotitle nobox
 
 # Set labels
-#set xlabel "#Workers (#cores)"
 unset xtics
 set ylabel "Execution Time (s)"
 
@@ -68,8 +67,8 @@ unset key
 #set key inside right top vertical noreverse noenhanced autotitle nobox
 
 # Set labels
-set xlabel "#Workers (#cores)"
 set xtics
+set xlabel "Number of Nodes (Number of Cores)"
 set ylabel "Speed-up (u)"
 
 # Style
