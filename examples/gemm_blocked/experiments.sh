@@ -39,10 +39,10 @@
   log_level=off
 
   #            REF
-  MSIZES=(     8 )
-  BSIZES=(     8 )
-  NUM_NODES=(  2  )
-  EXEC_TIMES=( 10 )
+  MSIZES=(32 32 32)
+  BSIZES=(2048 2048 2048)
+  NUM_NODES=(2 3 5)
+  EXEC_TIMES=(60 60 60)
 
   cpus_per_node=48
 
@@ -55,7 +55,7 @@
 
     for app_path in "${SCRIPT_DIR}"/*/; do
       app_version=$(basename "${app_path}")
-      if [ "${app_version}" == "autoparallel" ] || [ "${app_version}" == "userparallel" ]; then
+      if [ "${app_version}" == "autoparallel_tunned" ] || [ "${app_version}" == "userparallel" ]; then
         echo "--- Enqueueing ${app_version}"
         # With tracing
         tracing=true

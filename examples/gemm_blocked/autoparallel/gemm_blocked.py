@@ -54,8 +54,7 @@ def create_block(b_size, is_random):
 # MAIN FUNCTION
 ############################################
 
-# @parallel()
-@parallel(pluto_extra_flags=[""])
+@parallel()
 def gemm(a, b, c, alpha, beta, m_size):
     # Debug
     if __debug__:
