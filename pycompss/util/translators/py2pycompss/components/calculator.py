@@ -380,7 +380,7 @@ class Calculator(object):
 
         # Remove domain vars header
         import re
-        str_line = re.findall("{.*\}", str_line)[0][2:-2]
+        str_line = re.findall(r'{.*\}', str_line)[0][2:-2]
 
         # Separate the different expressions
         processed_assigns = []
@@ -985,35 +985,19 @@ class TestCalculator(unittest.TestCase):
 
     def test_extract_exprs_nested(self):
         # Create main AST node
-        node_ast = ast.BinOp(left=ast.Call(func=ast.Name(id='min', ctx=ast.Load()),
-                                           args=[ast.Call(func=ast.Name(id='min', ctx=ast.Load()),
-                                                          args=[ast.BinOp(left=ast.BinOp(left=ast.Num(n=4),
-                                                                                         op=ast.Mult(),
-                                                                                         right=ast.Name(id='t2',
-                                                                                                        ctx=ast.Load())),
-                                                                          op=ast.Add(),
-                                                                          right=ast.Num(n=2)),
-                                                                ast.BinOp(left=ast.Name(id='t_size', ctx=ast.Load()),
-                                                                          op=ast.Sub(),
-                                                                          right=ast.Num(n=1))],
-                                                          keywords=[],
-                                                          starargs=None,
-                                                          kwargs=None),
-                                                 ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Num(n=2),
-                                                                                         op=ast.Mult(),
-                                                                                         right=ast.Name(id='t1',
-                                                                                                        ctx=ast.Load())),
-                                                                          op=ast.Sub(),
-                                                                          right=ast.BinOp(left=ast.Num(n=2),
-                                                                                          op=ast.Mult(),
-                                                                                          right=ast.Name(id='t2',
-                                                                                                         ctx=ast.Load()))),
-                                                           op=ast.Add(), right=ast.Num(n=1))],
-                                           keywords=[],
-                                           starargs=None,
-                                           kwargs=None),
-                             op=ast.Add(),
-                             right=ast.Num(n=1))
+        node_ast = ast.BinOp(left=ast.Call(func=ast.Name(id='min', ctx=ast.Load()), args=[
+            ast.Call(func=ast.Name(id='min', ctx=ast.Load()), args=[
+                ast.BinOp(left=ast.BinOp(left=ast.Num(n=4), op=ast.Mult(), right=ast.Name(id='t2', ctx=ast.Load())),
+                          op=ast.Add(), right=ast.Num(n=2)),
+                ast.BinOp(left=ast.Name(id='t_size', ctx=ast.Load()), op=ast.Sub(), right=ast.Num(n=1))], keywords=[],
+                    starargs=None, kwargs=None), ast.BinOp(
+                left=ast.BinOp(left=ast.BinOp(left=ast.Num(n=2), op=ast.Mult(), right=ast.Name(id='t1',
+                                                                                               ctx=ast.Load())),
+                               op=ast.Sub(),
+                               right=ast.BinOp(left=ast.Num(n=2), op=ast.Mult(), right=ast.Name(id='t2',
+                                                                                                ctx=ast.Load()))),
+                op=ast.Add(), right=ast.Num(n=1))], keywords=[],
+                                           starargs=None, kwargs=None), op=ast.Add(), right=ast.Num(n=1))
 
         # Perform extraction
         exprs = _IslSetBuilder._extract_exprs_without_minmax(node_ast)
@@ -1137,8 +1121,10 @@ class TestCalculator(unittest.TestCase):
         expected_dims = 2
         a10 = "[M, N] -> { [d0, d1, t2, t1] : t2 = 1 + d1 and 2t1 = -1 + d0 and 0 < d0 <= 1 + 2N and -1 <= d1 < M }"
         a11 = "[N, M] -> { [d0, d1, t1, t2] : 2t1 = -1 + d0 and t2 = 1 + d1 and 0 < d0 <= 1 + 2N and -1 <= d1 < M }"
-        a20 = "[M, N] -> { [d0, d1, t2, t1] : t2 = 5 + d0 and t1 = 5 + d1 and -5 <= d0 <= -5 + M and -5 <= d1 <= -5 + N }"
-        a21 = "[N, M] -> { [d0, d1, t1, t2] : t1 = 5 + d1 and t2 = 5 + d0 and -5 <= d0 <= -5 + M and -5 <= d1 <= -5 + N }"
+        a20 = ("[M, N] -> { [d0, d1, t2, t1] : t2 = 5 + d0 and t1 = 5 + d1 and -5 <= d0 <= -5 + M and "
+               "-5 <= d1 <= -5 + N }")
+        a21 = ("[N, M] -> { [d0, d1, t1, t2] : t1 = 5 + d1 and t2 = 5 + d0 and -5 <= d0 <= -5 + M and "
+               "-5 <= d1 <= -5 + N }")
 
         # Check per access result
         self.assertEqual(subscript2isl_per_access["mat"][0], expected_dims)

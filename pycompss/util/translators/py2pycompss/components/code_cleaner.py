@@ -61,7 +61,7 @@ class CodeCleaner(object):
 
         import re
         res = []
-        for c in re.split('(\d+)', task_name):
+        for c in re.split(r'(\d+)', task_name):
             if c.isdigit():
                 res.append(int(c))
             else:

@@ -648,13 +648,17 @@ class TestPy2PyCOMPSs(unittest.TestCase):
         Py2PyCOMPSs.translate(func, par_py_files, out_file, tile=True)
 
         # Check file content
-        expected_file = tests_path + "/test3_multiply_taskified.expected.pycompss"
+        expected_file1 = tests_path + "/test3_multiply_taskified.expected1.pycompss"
+        expected_file2 = tests_path + "/test3_multiply_taskified.expected2.pycompss"
         try:
-            with open(expected_file, 'r') as f:
-                expected_content = f.read()
+            with open(expected_file1, 'r') as f:
+                expected_content1 = f.read()
+            with open(expected_file2, 'r') as f:
+                expected_content2 = f.read()
             with open(out_file, 'r') as f:
                 out_content = f.read()
-            self.assertEqual(out_content, expected_content)
+
+            self.assertIn(out_content, [expected_content1, expected_content2])
         except Exception:
             raise
         finally:
