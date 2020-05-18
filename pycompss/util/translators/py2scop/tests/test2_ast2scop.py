@@ -35,7 +35,7 @@ def loop_nests1(a, b, c):
 def loop_nests2(a, b, c):
     for i in range(0, N, 1):
         for j in range(i, M, 1):
-                c[i][j] = c[i][j] + a[i][j] * b[i][j]
+            c[i][j] = c[i][j] + a[i][j] * b[i][j]
 
 
 # Multiple statements
