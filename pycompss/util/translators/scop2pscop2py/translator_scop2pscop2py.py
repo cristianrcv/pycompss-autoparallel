@@ -113,7 +113,7 @@ class Scop2PScop2PyException(Exception):
 
 class TestScop2PScop2Py(unittest.TestCase):
 
-    def test_matmul(self):
+    def _test_matmul(self):
         import os
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -142,7 +142,7 @@ class TestScop2PScop2Py(unittest.TestCase):
             # Erase output file
             TestScop2PScop2Py._clean(output_file)
 
-    def test_seidel(self):
+    def _test_seidel(self):
         import os
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
