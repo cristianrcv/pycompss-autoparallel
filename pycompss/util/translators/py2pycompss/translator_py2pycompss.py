@@ -650,15 +650,18 @@ class TestPy2PyCOMPSs(unittest.TestCase):
         # Check file content
         expected_file1 = tests_path + "/test3_multiply_taskified.expected1.pycompss"
         expected_file2 = tests_path + "/test3_multiply_taskified.expected2.pycompss"
+        expected_file3 = tests_path + "/test3_multiply_taskified.expected3.pycompss"
         try:
             with open(expected_file1, 'r') as f:
                 expected_content1 = f.read()
             with open(expected_file2, 'r') as f:
                 expected_content2 = f.read()
+            with open(expected_file3, 'r') as f:
+                 expected_content3 = f.read()
             with open(out_file, 'r') as f:
                 out_content = f.read()
 
-            self.assertIn(out_content, [expected_content1, expected_content2])
+            self.assertIn(out_content, [expected_content1, expected_content2, expected_content3])
         except Exception:
             raise
         finally:
