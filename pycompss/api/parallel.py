@@ -380,7 +380,7 @@ parallel = Parallel
 
 class TestParallelDecorator(unittest.TestCase):
 
-    def test_decorator(self):
+    def _test_decorator(self):
         # Base variables
         import os
         dir_path = os.path.dirname(os.path.realpath(__file__))
