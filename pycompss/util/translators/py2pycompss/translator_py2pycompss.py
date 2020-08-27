@@ -657,7 +657,7 @@ class TestPy2PyCOMPSs(unittest.TestCase):
             with open(expected_file2, 'r') as f:
                 expected_content2 = f.read()
             with open(expected_file3, 'r') as f:
-                 expected_content3 = f.read()
+                expected_content3 = f.read()
             with open(out_file, 'r') as f:
                 out_content = f.read()
 
