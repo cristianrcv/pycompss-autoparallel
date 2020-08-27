@@ -620,7 +620,7 @@ class TestPy2PyCOMPSs(unittest.TestCase):
             # Erase file
             os.remove(out_file)
 
-    def test_multiply_taskified(self):
+    def _test_multiply_taskified(self):
         # Base variables
         import os
         dir_path = os.path.dirname(os.path.realpath(__file__))
